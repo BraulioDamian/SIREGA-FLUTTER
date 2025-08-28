@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
-import 'package:flutter/services.dart';
-import 'package:android_intent_plus/android_intent.dart';
 import 'package:sirega_app/nucleo/modelos/siniga_model.dart';
+import 'package:sirega_app/nucleo/servicios/nfc_service.dart'; // Importa tu nuevo servicio
 
 class ResponsiveNfcSection extends StatefulWidget {
   final Function(String?) onNfcIdChanged;
@@ -21,8 +19,48 @@ class ResponsiveNfcSection extends StatefulWidget {
 }
 
 class ResponsiveNfcSectionState extends State<ResponsiveNfcSection> {
+  final _nfcService = NfcService(); // Crea una instancia del servicio
   String? _nfcId;
   bool _isScanning = false;
+
+  /// Este método ahora solo gestiona el estado de la UI y llama al servicio.
+  Future<void> _readNfcReal() async {
+    if (_isScanning) return;
+    setState(() => _isScanning = true);
+
+    // Llama al servicio para hacer el trabajo pesado
+    final nfcId = await _nfcService.readNfcTag(context);
+
+    // Si el servicio devolvió un ID, actualiza el estado del widget
+    if (mounted && nfcId != null) {
+      setState(() => _nfcId = nfcId);
+      widget.onNfcIdChanged(nfcId);
+    }
+
+    if (mounted) {
+      setState(() => _isScanning = false);
+    }
+  }
+
+  /// Igual que el anterior, este método ahora solo llama al servicio.
+  Future<void> _simulateReadNfc() async {
+    if (_isScanning) return;
+    setState(() => _isScanning = true);
+
+    // Llama al servicio para la simulación
+    final nfcId = await _nfcService.simulateNfcTag(context);
+
+    if (mounted && nfcId != null) {
+      setState(() => _nfcId = nfcId);
+      widget.onNfcIdChanged(nfcId);
+    }
+
+    if (mounted) {
+      setState(() => _isScanning = false);
+    }
+  }
+  
+  // NINGÚN CÓDIGO DE UI CAMBIA. TODO LO SIGUIENTE QUEDA IGUAL.
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +126,8 @@ class ResponsiveNfcSectionState extends State<ResponsiveNfcSection> {
   }
 
   Widget _buildNfcButtons(bool isMobile) {
+    // Este método no cambia, ya que solo lee las variables _isScanning,
+    // y llama a los métodos _readNfcReal y _simulateReadNfc.
     if (isMobile) {
       return Column(
         children: [
@@ -220,275 +260,6 @@ class ResponsiveNfcSectionState extends State<ResponsiveNfcSection> {
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-
-  Future<void> _simulateReadNfc() async {
-    if (_isScanning) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lectura en curso. Espere...'))
-        );
-      }
-      return;
-    }
-
-    final nfcIdController = TextEditingController();
-
-    final id = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Simular lectura NFC', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nfcIdController,
-              decoration: const InputDecoration(
-                labelText: 'ID NFC',
-                hintText: 'Ingrese un ID único',
-                border: OutlineInputBorder(),
-              ),
-              autofocus: true,
-              onSubmitted: (v) => Navigator.of(ctx).pop(v.trim()),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Este ID se vinculará con el animal registrado',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(ctx).pop(nfcIdController.text.trim());
-            },
-            child: const Text('Aceptar'),
-          ),
-        ],
-      ),
-    );
-    nfcIdController.dispose();
-
-    if (id != null && id.isNotEmpty && mounted) {
-      setState(() => _nfcId = id);
-      widget.onNfcIdChanged(id);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('ID NFC asignado correctamente'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
-  }
-
-Future<void> _readNfcReal() async {
-    if (_isScanning) return;
-
-    if (!mounted) return;
-
-    setState(() => _isScanning = true);
-
-    var availability = await FlutterNfcKit.nfcAvailability;
-    if (!mounted) {
-      // Widget was disposed during the async call, no need to update state.
-      return;
-    }
-
-    if (availability == NFCAvailability.not_supported) {
-      await _showAlertDialog(
-        title: 'NFC no soportado',
-        message: 'Tu dispositivo no es compatible con la tecnología NFC.',
-        icon: Icons.error_outline,
-        iconColor: Colors.redAccent,
-      );
-      if (mounted) setState(() => _isScanning = false);
-      return;
-    }
-    
-    if (availability == NFCAvailability.disabled) {
-      await _showAlertDialog(
-        title: 'NFC desactivado',
-        message: 'Por favor, activa el NFC en la configuración de tu dispositivo para continuar.',
-        icon: Icons.nfc,
-        iconColor: Colors.orangeAccent,
-        actionText: 'Abrir Configuración',
-        action: () {
-          const intent = AndroidIntent(action: 'android.settings.NFC_SETTINGS');
-          intent.launch();
-        },
-      );
-      if (mounted) setState(() => _isScanning = false);
-      return;
-    }
-
-    try {
-      // IMPORTANTE: Usar el modo foregroundMode para tener prioridad
-      final result = await showDialog<dynamic>(
-        context: context,
-        barrierDismissible: true,
-        builder: (ctx) {
-          final navigator = Navigator.of(ctx);
-          
-          // Configurar opciones para evitar que se abran otras apps
-          FlutterNfcKit.poll(
-            timeout: const Duration(seconds: 15),
-            iosMultipleTagMessage: "Multiple tags found!",
-            iosAlertMessage: "Acerca el chip NFC al dispositivo",
-            // Añadir esta opción si está disponible en tu versión de flutter_nfc_kit
-            // readNdefOnly: false, // Lee cualquier tipo de tag
-          ).then((tag) {
-            if (navigator.canPop()) navigator.pop(tag);
-            // Terminar inmediatamente después de leer
-            FlutterNfcKit.finish(iosAlertMessage: "Lectura completada");
-          }).catchError((e) {
-            if (navigator.canPop()) navigator.pop(e);
-            // Asegurarse de terminar la sesión incluso si hay error
-            FlutterNfcKit.finish();
-          });
-
-          return WillPopScope(
-            onWillPop: () async {
-              // Si el usuario cancela, terminar la sesión NFC
-              await FlutterNfcKit.finish();
-              return true;
-            },
-            child: AlertDialog(
-              backgroundColor: Colors.grey[50],
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text('Escaneando NFC', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Acerca el lector al chip NFC...', style: TextStyle(fontSize: 15)),
-                  SizedBox(height: 8),
-                  Text('Mantén el dispositivo cerca del chip', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-                    await FlutterNfcKit.finish();
-                    Navigator.of(ctx).pop();
-                  },
-                  child: const Text('Cancelar'),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-
-      if (!mounted) return;
-
-      if (result is NFCTag) {
-        setState(() => _nfcId = result.id);
-        widget.onNfcIdChanged(result.id);
-        
-        // Vibración suave para confirmar lectura (opcional)
-        HapticFeedback.mediumImpact();
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Chip NFC leído correctamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else if (result != null && result is! NFCTag) {
-        await _showAlertDialog(
-          title: 'Error de Lectura',
-          message: 'No se pudo leer el chip. Verifica que el chip esté funcionando correctamente.',
-          icon: Icons.error_outline,
-          iconColor: Colors.redAccent,
-        );
-      }
-    } on PlatformException catch (e) {
-      if (mounted) {
-        await _showAlertDialog(
-          title: 'Error de Plataforma NFC',
-          message: 'Ocurrió un error al acceder al hardware NFC.\n\nError: ${e.message}',
-          icon: Icons.error_outline,
-          iconColor: Colors.redAccent,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        await _showAlertDialog(
-          title: 'Error Inesperado',
-          message: 'Ocurrió un error inesperado: ${e.toString()}',
-          icon: Icons.error,
-          iconColor: Colors.red,
-        );
-      }
-    } finally {
-      // Asegurarse de terminar la sesión NFC
-      await FlutterNfcKit.finish();
-      if (mounted) {
-        setState(() => _isScanning = false);
-      }
-    }
-  }
-
-  Future<void> _showAlertDialog({
-    required String title,
-    required String message,
-    required IconData icon,
-    required Color iconColor,
-    String? actionText,
-    VoidCallback? action,
-  }) async {
-    if (!mounted) return;
-    
-    await showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.grey[50],
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(icon, color: iconColor, size: 28),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title, 
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-        content: Text(message, style: const TextStyle(fontSize: 14)),
-        actions: [
-          if (actionText != null)
-            ElevatedButton(
-              onPressed: () {
-                if (action != null) action();
-                Navigator.of(ctx).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: iconColor,
-                foregroundColor: Colors.white,
-              ),
-              child: Text(actionText),
-            )
-          else
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Entendido'),
-            ),
         ],
       ),
     );

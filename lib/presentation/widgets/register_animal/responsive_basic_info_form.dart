@@ -1,8 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/presentation/mixins/dropdown_manager_mixin.dart';
+import 'package:sirega_app/presentation/widgets/shared/custom_typeahead_dropdown.dart';
+import 'package:sirega_app/presentation/widgets/shared/json_data_loader.dart';
 
 class RazaBovina {
   final String nombre;
@@ -59,25 +60,16 @@ class ResponsiveBasicInfoForm extends StatefulWidget {
   State<ResponsiveBasicInfoForm> createState() => ResponsiveBasicInfoFormState();
 }
 
-class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
+class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> 
+    with DropdownManagerMixin {
   // Controllers
   final _nombreController = TextEditingController();
   final _fechaController = TextEditingController();
   final _razaTypeAheadController = TextEditingController();
   final _sexoTypeAheadController = TextEditingController();
   
-  // FocusNodes - todos centralizados
-  final Map<String, FocusNode> _focusNodes = {
-    'nombre': FocusNode(),
-    'raza': FocusNode(),
-    'sexo': FocusNode(),
-  };
-  
-  // Estado de dropdowns - un solo mapa
-  final Map<String, bool> _dropdownStates = {
-    'raza': false,
-    'sexo': false,
-  };
+  // FocusNode adicional para nombre
+  final _nombreFocusNode = FocusNode();
   
   // Datos
   List<RazaBovina> _razas = [];
@@ -85,94 +77,47 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
   DateTime? _fechaNacimiento;
   Sexo _sexo = Sexo.hembra;
 
+  // Override del mixin para proporcionar el callback
+  @override
+  VoidCallback? get onCloseAllDropdowns => widget.onCloseAllDropdowns;
+
   @override
   void initState() {
     super.initState();
     _sexo = widget.initialSexo;
     _sexoTypeAheadController.text = _getSexoDisplayName(_sexo);
+    
+    // Inicializar dropdowns usando el mixin
+    initDropdown('raza');
+    initDropdown('sexo');
+    
     _cargarRazas();
-    _setupUnifiedListeners();
+    _setupListeners();
   }
 
-  // Sistema unificado de listeners
-  void _setupUnifiedListeners() {
+  void _setupListeners() {
     // Listener para nombre
     _nombreController.addListener(() {
       widget.onNombreChanged(_nombreController.text);
     });
     
-    // Configurar listeners para cada dropdown
-    _setupDropdownListener('raza');
-    _setupDropdownListener('sexo');
-    
-    // El campo nombre cierra todos los dropdowns al enfocarse
-    _focusNodes['nombre']!.addListener(() {
-      if (_focusNodes['nombre']!.hasFocus) {
-        _closeAllDropdowns();
+    // El campo nombre cierra todos los dropdowns al enfocarse con delay
+    _nombreFocusNode.addListener(() {
+      if (_nombreFocusNode.hasFocus) {
+        // Usar delay para evitar conflictos con clicks en dropdowns
+        closeAllDropdownsDelayed(delay: const Duration(milliseconds: 100));
       }
     });
-  }
-
-  // Método genérico para configurar listeners de dropdowns
-  void _setupDropdownListener(String key) {
-    _focusNodes[key]?.addListener(() {
-      if (mounted) {
-        setState(() {
-          _dropdownStates[key] = _focusNodes[key]?.hasFocus ?? false;
-        });
-      }
-    });
-  }
-
-  // Método unificado para cerrar todos los dropdowns
-  void _closeAllDropdowns() {
-    _focusNodes.forEach((key, node) {
-      if (key != 'nombre' && node.hasFocus) {
-        node.unfocus();
-      }
-    });
-  }
-
-  // Método público para cerrar dropdowns (llamado desde parent)
-  void closeDropdowns() {
-    _closeAllDropdowns();
-  }
-
-  // Método genérico y unificado para toggle de dropdowns
-  void _toggleDropdown(String key) {
-    final focusNode = _focusNodes[key];
-    if (focusNode == null) return;
-    
-    final isOpen = _dropdownStates[key] ?? false;
-    
-    // Notificar al parent para cerrar otros dropdowns
-    widget.onCloseAllDropdowns?.call();
-    
-    if (isOpen) {
-      // Si está abierto, cerrarlo
-      focusNode.unfocus();
-    } else {
-      // Cerrar teclado y cualquier otro dropdown
-      FocusScope.of(context).unfocus();
-      
-      // Delay mínimo para garantizar que el teclado se cierre
-      Future.delayed(const Duration(milliseconds: 50), () {
-        if (mounted && !focusNode.hasFocus) {
-          focusNode.requestFocus();
-        }
-      });
-    }
   }
 
   Future<void> _cargarRazas() async {
     try {
-      final String data = await rootBundle.loadString('assets/data/razas_bovinos.json');
-      final List<dynamic> razasJson = json.decode(data);
-      
+      _razas = await JsonDataLoader.loadFromAsset(
+        path: 'assets/data/razas_bovinos.json',
+        fromJson: RazaBovina.fromJson,
+      );
       if (mounted) {
-        setState(() {
-          _razas = razasJson.map((raza) => RazaBovina.fromJson(raza)).toList();
-        });
+        setState(() {});
       }
     } catch (e) {
       debugPrint('Error cargando razas: $e');
@@ -187,7 +132,7 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
     widget.onRazaChanged(raza);
     
     // Cerrar dropdown inmediatamente
-    _focusNodes['raza']?.unfocus();
+    getDropdownFocusNode('raza')?.unfocus();
   }
 
   void _onSexoSeleccionado(Sexo sexo) {
@@ -198,12 +143,12 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
     widget.onSexoChanged(sexo);
     
     // Cerrar dropdown inmediatamente
-    _focusNodes['sexo']?.unfocus();
+    getDropdownFocusNode('sexo')?.unfocus();
   }
 
   Future<void> _seleccionarFecha() async {
     // Cerrar todos los dropdowns antes de abrir date picker
-    _closeAllDropdowns();
+    closeAllDropdowns();
     widget.onCloseAllDropdowns?.call();
     
     final picked = await showDatePicker(
@@ -223,6 +168,11 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
       });
       widget.onFechaChanged(picked);
     }
+  }
+
+  // Método público para cerrar dropdowns (llamado desde parent)
+  void closeDropdowns() {
+    closeAllDropdowns();
   }
 
   @override
@@ -316,7 +266,7 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
   Widget _buildNombreField() {
     return TextFormField(
       controller: _nombreController,
-      focusNode: _focusNodes['nombre'],
+      focusNode: _nombreFocusNode,
       decoration: const InputDecoration(
         labelText: 'Nombre del Animal',
         border: OutlineInputBorder(),
@@ -337,188 +287,113 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
   }
 
   Widget _buildRazaTypeAhead() {
-    return GestureDetector(
-      onTap: () => _toggleDropdown('raza'),
-      child: AbsorbPointer(
-        child: TypeAheadField<RazaBovina>(
-          controller: _razaTypeAheadController,
-          focusNode: _focusNodes['raza'],
-          builder: (context, controller, focusNode) {
-            return TextFormField(
-              controller: controller,
-              focusNode: focusNode,
-              decoration: InputDecoration(
-                labelText: 'Raza',
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.category),
-                helperText: 'Toque para seleccionar',
-                suffixIcon: Icon(
-                  _dropdownStates['raza'] == true 
-                    ? Icons.arrow_drop_up 
-                    : Icons.arrow_drop_down,
+    return CustomTypeAheadDropdown<RazaBovina>(
+      controller: _razaTypeAheadController,
+      focusNode: getDropdownFocusNode('raza')!,
+      labelText: 'Raza',
+      prefixIcon: Icons.category,
+      helperText: 'Toque para seleccionar',
+      isOpen: isDropdownOpen('raza'),
+      onTap: () => toggleDropdown('raza'),
+      suggestionsCallback: (pattern) => _razas.take(50).toList(),
+      itemBuilder: (context, raza) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                raza.nombre,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
                 ),
               ),
-              readOnly: true,
-            );
-          },
-          suggestionsCallback: (pattern) => _razas.take(50).toList(),
-          itemBuilder: (context, raza) {
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 4),
+              Row(
                 children: [
-                  Text(
-                    raza.nombre,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: Text(
+                      raza.tipo,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.blue.shade700,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                        child: Text(
-                          raza.tipo,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue.shade700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        raza.origen,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 6),
+                  Text(
+                    raza.origen,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                 ],
               ),
-            );
-          },
-          onSelected: _onRazaSeleccionada,
-          decorationBuilder: (context, child) {
-            return Material(
-              type: MaterialType.card,
-              elevation: 8,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                constraints: const BoxConstraints(maxHeight: 250),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: child,
-              ),
-            );
-          },
-          offset: const Offset(0, 4),
-          hideOnEmpty: false,
-          hideOnError: false,
-          hideOnLoading: false,
-          hideOnSelect: true,
-          emptyBuilder: (context) => Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.search_off, color: Colors.grey.shade400, size: 32),
-                const SizedBox(height: 8),
-                Text(
-                  'No se encontraron razas',
-                  style: TextStyle(color: Colors.grey.shade600),
-                ),
-              ],
-            ),
+            ],
           ),
+        );
+      },
+      onSelected: _onRazaSeleccionada,
+      emptyBuilder: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.search_off, color: Colors.grey.shade400, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              'No se encontraron razas',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildSexoTypeAhead() {
-    return GestureDetector(
-      onTap: () => _toggleDropdown('sexo'),
-      child: AbsorbPointer(
-        child: TypeAheadField<Sexo>(
-          controller: _sexoTypeAheadController,
-          focusNode: _focusNodes['sexo'],
-          builder: (context, controller, focusNode) {
-            return TextFormField(
-              controller: controller,
-              focusNode: focusNode,
-              decoration: InputDecoration(
-                labelText: 'Sexo',
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.pets),
-                suffixIcon: Icon(
-                  _dropdownStates['sexo'] == true 
-                    ? Icons.arrow_drop_up 
-                    : Icons.arrow_drop_down,
+    return CustomTypeAheadDropdown<Sexo>(
+      controller: _sexoTypeAheadController,
+      focusNode: getDropdownFocusNode('sexo')!,
+      labelText: 'Sexo',
+      prefixIcon: Icons.pets,
+      isOpen: isDropdownOpen('sexo'),
+      onTap: () => toggleDropdown('sexo'),
+      suggestionsCallback: (pattern) => Sexo.values,
+      maxHeight: 150,
+      itemBuilder: (context, sexo) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(
+                sexo == Sexo.macho ? Icons.male :
+                sexo == Sexo.hembra ? Icons.female : Icons.content_cut,
+                color: sexo == Sexo.macho ? Colors.blue :
+                       sexo == Sexo.hembra ? Colors.pink : Colors.grey,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                _getSexoDisplayName(sexo),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
                 ),
               ),
-              readOnly: true,
-            );
-          },
-          suggestionsCallback: (pattern) => Sexo.values,
-          itemBuilder: (context, sexo) {
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  Icon(
-                    sexo == Sexo.macho ? Icons.male :
-                    sexo == Sexo.hembra ? Icons.female : Icons.content_cut,
-                    color: sexo == Sexo.macho ? Colors.blue :
-                           sexo == Sexo.hembra ? Colors.pink : Colors.grey,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    _getSexoDisplayName(sexo),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-          onSelected: _onSexoSeleccionado,
-          decorationBuilder: (context, child) {
-            return Material(
-              type: MaterialType.card,
-              elevation: 8,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                constraints: const BoxConstraints(maxHeight: 150),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: child,
-              ),
-            );
-          },
-          offset: const Offset(0, 4),
-          hideOnEmpty: true,
-          hideOnError: true,
-          hideOnLoading: false,
-          hideOnSelect: true,
-        ),
-      ),
+            ],
+          ),
+        );
+      },
+      onSelected: _onSexoSeleccionado,
     );
   }
 
@@ -563,12 +438,9 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
     _razaTypeAheadController.dispose();
     _sexoTypeAheadController.dispose();
     _fechaController.dispose();
+    _nombreFocusNode.dispose();
     
-    // Dispose de todos los FocusNodes
-    _focusNodes.forEach((key, node) {
-      node.dispose();
-    });
-    
+    // El mixin se encarga de dispose de los dropdownFocusNodes
     super.dispose();
   }
 }

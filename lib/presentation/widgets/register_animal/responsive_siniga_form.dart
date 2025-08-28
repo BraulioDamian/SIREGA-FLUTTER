@@ -1,8 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:sirega_app/nucleo/modelos/siniga_model.dart';
+import 'package:sirega_app/presentation/mixins/dropdown_manager_mixin.dart';
+import 'package:sirega_app/presentation/widgets/shared/custom_typeahead_dropdown.dart';
+import 'package:sirega_app/presentation/widgets/shared/json_data_loader.dart';
 
 class EstadoMexico {
   final String clave;
@@ -50,78 +51,73 @@ class ResponsiveSinigaForm extends StatefulWidget {
   State<ResponsiveSinigaForm> createState() => ResponsiveSinigaFormState();
 }
 
-class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
+class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> 
+    with DropdownManagerMixin {
+  // Controllers de texto
   final _especieController = TextEditingController(text: '00');
   final _estadoController = TextEditingController();
   final _numeroController = TextEditingController();
   final _estadoTypeAheadController = TextEditingController();
   
-  // FocusNodes para control de foco
+  // FocusNodes adicionales para campos de texto normales
   final _estadoFocusNode = FocusNode();
   final _numeroFocusNode = FocusNode();
-  final _estadoTypeAheadFocusNode = FocusNode();
   
+  // Datos
   List<EstadoMexico> _estados = [];
   EstadoMexico? _estadoSeleccionado;
   SinigaId? _sinigaId;
   String? _validationMessage;
   bool _isValid = false;
-  bool _isDropdownOpen = false;
   
   // Flag para evitar saltos automáticos innecesarios
   bool _autoNavigationEnabled = false;
 
+  // Override del mixin para proporcionar el callback
+  @override
+  VoidCallback? get onCloseAllDropdowns => widget.onCloseAllDropdowns;
+
   @override
   void initState() {
     super.initState();
+    
+    // Inicializar dropdown usando el mixin
+    initDropdown('estado');
+    
     _cargarEstados();
     _setupListeners();
   }
 
-  void _setupListeners() {
+void _setupListeners() {
     _especieController.addListener(_validarSiniga);
     _estadoController.addListener(_onEstadoChanged);
     _numeroController.addListener(_onNumeroChanged);
-    
-    // Sincroniza el estado del dropdown con el foco del TypeAhead
-    _estadoTypeAheadFocusNode.addListener(_onTypeAheadFocusChange);
 
     // Manejo mejorado del foco para el campo de estado
     _estadoFocusNode.addListener(() {
       if (_estadoFocusNode.hasFocus) {
-        _autoNavigationEnabled = true; // Habilitar navegación automática solo cuando se está escribiendo
-        _cerrarDropdowns();
+        _autoNavigationEnabled = true;
+        // Cerrar dropdowns con delay para evitar conflictos
+        closeAllDropdownsDelayed(delay: const Duration(milliseconds: 100));
       } else {
-        _autoNavigationEnabled = false; // Deshabilitar cuando pierde el foco
+        _autoNavigationEnabled = false;
       }
     });
     
     // Cierra el dropdown si se enfoca el campo de número
     _numeroFocusNode.addListener(() {
       if (_numeroFocusNode.hasFocus) {
-        _cerrarDropdowns();
+        // Usar delay para evitar conflicto con el tap del dropdown
+        closeAllDropdownsDelayed(delay: const Duration(milliseconds: 100));
       }
     });
-  }
-
-  void _onTypeAheadFocusChange() {
-    if (mounted) {
-      setState(() {
-        _isDropdownOpen = _estadoTypeAheadFocusNode.hasFocus;
-      });
-    }
   }
 
   void _onEstadoChanged() {
     _validarSiniga();
     _autoSeleccionarEstado();
     
-    // Mejorado: Solo hacer auto-navegación si:
-    // 1. El campo tiene exactamente 2 caracteres
-    // 2. El campo de estado tiene el foco actualmente (el usuario está escribiendo en él)
-    // 3. La navegación automática está habilitada
     if (_estadoController.text.length == 2 && _autoNavigationEnabled && _estadoFocusNode.hasFocus) {
-      // Pequeño delay para mejor UX
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted && _estadoFocusNode.hasFocus) {
           _numeroFocusNode.requestFocus();
@@ -133,7 +129,6 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
   void _onNumeroChanged() {
     _validarSiniga();
     
-    // Solo cerrar teclado si se completaron los 8 dígitos y el campo tiene foco
     if (_numeroController.text.length == 8 && _numeroFocusNode.hasFocus) {
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
@@ -143,25 +138,19 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
     }
   }
 
-  void _cerrarDropdowns() {
-    if (_estadoTypeAheadFocusNode.hasFocus) {
-      _estadoTypeAheadFocusNode.unfocus();
-    }
-  }
-
+  // Método público para cerrar dropdowns (llamado desde parent)
   void closeDropdowns() {
-    _cerrarDropdowns();
+    closeAllDropdowns();
   }
 
   Future<void> _cargarEstados() async {
     try {
-      final String data = await rootBundle.loadString('assets/data/estados_mexico.json');
-      final List<dynamic> estadosJson = json.decode(data);
-      
+      _estados = await JsonDataLoader.loadFromAsset(
+        path: 'assets/data/estados_mexico.json',
+        fromJson: EstadoMexico.fromJson,
+      );
       if (mounted) {
-        setState(() {
-          _estados = estadosJson.map((estado) => EstadoMexico.fromJson(estado)).toList();
-        });
+        setState(() {});
       }
     } catch (e) {
       debugPrint('Error cargando estados: $e');
@@ -181,57 +170,27 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
         widget.onEstadoCodeChanged(codigo);
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text('Estado seleccionado: ${estado.nombre}'),
-                  ),
-                ],
-              ),
-              duration: const Duration(seconds: 2),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+          _mostrarSnackBar(
+            mensaje: 'Estado seleccionado: ${estado.nombre}',
+            icono: Icons.check_circle,
+            color: Colors.green,
           );
         }
       } else if (_estadoController.text.length == 2 && estado == null) {
-        // Código inválido - limpiar selección
         setState(() {
           _estadoSeleccionado = null;
           _estadoTypeAheadController.clear();
         });
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.error, color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Text('Código de estado inválido: $codigo'),
-                ],
-              ),
-              duration: const Duration(seconds: 2),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+          _mostrarSnackBar(
+            mensaje: 'Código de estado inválido: $codigo',
+            icono: Icons.error,
+            color: Colors.red,
           );
         }
       }
     } else {
-      // Menos de 2 dígitos - limpiar selección
       if (_estadoSeleccionado != null || _estadoTypeAheadController.text.isNotEmpty) {
         setState(() {
           _estadoSeleccionado = null;
@@ -239,6 +198,31 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
         });
       }
     }
+  }
+
+  void _mostrarSnackBar({
+    required String mensaje,
+    required IconData icono,
+    required Color color,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(icono, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Expanded(child: Text(mensaje)),
+          ],
+        ),
+        duration: const Duration(seconds: 2),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
   }
 
   void _validarSiniga() {
@@ -307,33 +291,13 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
     widget.onEstadoCodeChanged(estado.clave);
     
     // Quitar foco inmediatamente
-    _estadoTypeAheadFocusNode.unfocus();
+    getDropdownFocusNode('estado')?.unfocus();
     
     // Si el número nacional no está completo, enfocar en él
     if (_numeroController.text.length < 8) {
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
           _numeroFocusNode.requestFocus();
-        }
-      });
-    }
-  }
-
-  void _toggleDropdownEstado() {
-    // Cerrar otros dropdowns si están abiertos
-    widget.onCloseAllDropdowns?.call();
-    
-    if (_estadoTypeAheadFocusNode.hasFocus) {
-      // Si ya está abierto, cerrarlo
-      _estadoTypeAheadFocusNode.unfocus();
-    } else {
-      // Cerrar cualquier teclado abierto
-      FocusScope.of(context).unfocus();
-      
-      // Pequeño delay para asegurar que el teclado se cierre completamente
-      Future.delayed(const Duration(milliseconds: 50), () {
-        if (mounted) {
-          _estadoTypeAheadFocusNode.requestFocus();
         }
       });
     }
@@ -550,82 +514,46 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
   }
 
   Widget _buildEstadoTypeAhead() {
-    return GestureDetector(
-      onTap: _toggleDropdownEstado,
-      child: AbsorbPointer(
-        child: TypeAheadField<EstadoMexico>(
-          controller: _estadoTypeAheadController,
-          focusNode: _estadoTypeAheadFocusNode,
-          builder: (context, controller, focusNode) {
-            return TextFormField(
-              controller: controller,
-              focusNode: focusNode,
-              decoration: InputDecoration(
-                labelText: 'Seleccionar Estado',
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.location_on),
-                helperText: 'Toque para seleccionar',
-                suffixIcon: Icon(
-                  _isDropdownOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                ),
-              ),
-              readOnly: true,
-            );
-          },
-          suggestionsCallback: (pattern) => _estados,
-          itemBuilder: (context, estado) {
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      estado.clave,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      estado.nombre,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-          onSelected: _onEstadoSeleccionado,
-          decorationBuilder: (context, child) {
-            return Material(
-              type: MaterialType.card,
-              elevation: 8,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                constraints: const BoxConstraints(maxHeight: 250),
+    return CustomTypeAheadDropdown<EstadoMexico>(
+      controller: _estadoTypeAheadController,
+      focusNode: getDropdownFocusNode('estado')!,
+      labelText: 'Seleccionar Estado',
+      prefixIcon: Icons.location_on,
+      helperText: 'Toque para seleccionar',
+      isOpen: isDropdownOpen('estado'),
+      onTap: () => toggleDropdown('estado'),
+      suggestionsCallback: (pattern) => _estados,
+      itemBuilder: (context, estado) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(8),
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                child: child,
+                child: Text(
+                  estado.clave,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'monospace',
+                  ),
+                ),
               ),
-            );
-          },
-          offset: const Offset(0, 4),
-          hideOnEmpty: true,
-          hideOnError: true,
-          hideOnLoading: false,
-          hideOnSelect: true,
-        ),
-      ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  estado.nombre,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      onSelected: _onEstadoSeleccionado,
     );
   }
 
@@ -635,8 +563,8 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
       padding: EdgeInsets.all(isMobile ? 10 : 12),
       decoration: BoxDecoration(
         color: _isValid 
-          ? Colors.green.withValues(alpha: 0.1)
-          : Colors.red.withValues(alpha: 0.1),
+          ? Colors.green.withOpacity(0.1)
+          : Colors.red.withOpacity(0.1),
         border: Border.all(
           color: _isValid ? Colors.green : Colors.red,
         ),
@@ -689,11 +617,10 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
     _numeroController.dispose();
     _estadoTypeAheadController.dispose();
     
-    _estadoTypeAheadFocusNode.removeListener(_onTypeAheadFocusChange);
     _estadoFocusNode.dispose();
     _numeroFocusNode.dispose();
-    _estadoTypeAheadFocusNode.dispose();
     
+    // El mixin se encarga de dispose de los dropdownFocusNodes
     super.dispose();
   }
 }
