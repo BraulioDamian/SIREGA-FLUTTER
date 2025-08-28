@@ -9,7 +9,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'dart:async';
 
 class HomeScreenMejorado extends StatefulWidget {
-  const HomeScreenMejorado({Key? key}) : super(key: key);
+  const HomeScreenMejorado({super.key});
 
   @override
   State<HomeScreenMejorado> createState() => _HomeScreenMejoradoState();

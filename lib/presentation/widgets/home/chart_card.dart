@@ -9,11 +9,11 @@ class ChartCard extends StatelessWidget {
   final int totalAnimales;
 
   const ChartCard({
-    Key? key,
+    super.key,
     required this.machos,
     required this.hembras,
     required this.totalAnimales,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

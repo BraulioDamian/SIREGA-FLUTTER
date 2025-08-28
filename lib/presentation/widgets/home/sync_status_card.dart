@@ -12,14 +12,14 @@ class SyncStatusCard extends StatelessWidget {
 
 
   const SyncStatusCard({
-    Key? key,
+    super.key,
     required this.sincronizando,
     required this.registrosPendientesSync,
     required this.ultimaSync,
     required this.syncAnimationController,
     required this.onSyncPressed,
     required this.formatearTiempo,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -8,8 +8,6 @@ import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/presentation/widgets/register_animal/register_animal_widgets.dart';
 
 // Import necesario para las clases State
-import 'package:sirega_app/presentation/widgets/register_animal/responsive_siniga_form.dart';
-import 'package:sirega_app/presentation/widgets/register_animal/responsive_basic_info_form.dart';
 
 // Mixin global para manejar todos los dropdowns
 mixin GlobalDropdownManager {

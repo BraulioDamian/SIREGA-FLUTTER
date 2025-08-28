@@ -4,7 +4,7 @@ import 'package:sirega_app/modulos/1_lista_ganado/presentacion/bloc/cattle_list_
 import 'package:sirega_app/modulos/1_lista_ganado/presentacion/widgets/animal_card.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentacion/pantallas/add_animal_screen.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentacion/pantallas/cattle_detail_screen.dart';
-import 'package:sirega_app/nucleo/modelos/enums.dart'; // Importar enums
+// Importar enums
 import 'package:sirega_app/nucleo/modelos/animal_model.dart'; // Importar Animal
 
 class CattleListScreen extends StatefulWidget {

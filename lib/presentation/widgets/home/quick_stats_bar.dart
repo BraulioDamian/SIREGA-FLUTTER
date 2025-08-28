@@ -9,12 +9,12 @@ class QuickStatsBar extends StatelessWidget {
   final VoidCallback? onStatTap;
 
   const QuickStatsBar({
-    Key? key,
+    super.key,
     required this.totalAnimales,
     required this.animalesActivos,
     required this.alertas,
     this.onStatTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -11,14 +11,14 @@ class SummaryGrid extends StatelessWidget {
   final int animalesEnfermos;
 
   const SummaryGrid({
-    Key? key,
+    super.key,
     required this.totalAnimales,
     required this.animalesActivos,
     required this.alertasSanitarias,
     required this.eventosPendientes,
     required this.produccionLecheHoy,
     required this.animalesEnfermos,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -175,7 +175,7 @@ class AlertaService {
           await _crearAlerta(
             tipo: TipoAlerta.parto,
             titulo: 'Parto próximo',
-            mensaje: '${animal.nombre} - ${diasParaParto} días para parto',
+            mensaje: '${animal.nombre} - $diasParaParto días para parto',
             animal: animal,
             fechaProgramada: animal.fechaProximoParto,
             prioridad: diasParaParto <= 2 ? Prioridad.critica : Prioridad.alta,

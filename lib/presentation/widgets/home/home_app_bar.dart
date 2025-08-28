@@ -12,7 +12,7 @@ class HomeAppBar extends StatelessWidget {
   final ValueChanged<String> onMenuOptionSelected;
 
   const HomeAppBar({
-    Key? key,
+    super.key,
     required this.isSearching,
     required this.searchController,
     required this.alertasSanitarias,
@@ -20,7 +20,7 @@ class HomeAppBar extends StatelessWidget {
     required this.onSearchSubmitted,
     required this.onShowNotifications,
     required this.onMenuOptionSelected,
-  }) : super(key: key);
+  });
 
   Widget _buildSearchField() {
     return Container(

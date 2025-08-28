@@ -8,11 +8,11 @@ class QuickActionsSection extends StatelessWidget {
   final VoidCallback onViewInventory;
 
   const QuickActionsSection({
-    Key? key,
+    super.key,
     required this.onRegisterAnimal,
     required this.onRegisterEvent,
     required this.onViewInventory,
-  }) : super(key: key);
+  });
 
   Widget _buildActionChip({
     required IconData icon,

@@ -13,10 +13,11 @@ import 'package:sirega_app/presentation/widgets/home/quick_stats_bar.dart';
 import 'package:sirega_app/presentation/widgets/home/primary_action_card.dart';
 import 'package:sirega_app/presentation/widgets/home/sync_status_card.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentacion/pantallas/cattle_list_screen.dart';
+import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/screens/escaneo_nfc_screen.dart';
 
 
 class HomeScreenMejorado extends StatefulWidget {
-  const HomeScreenMejorado({Key? key}) : super(key: key);
+  const HomeScreenMejorado({super.key});
 
   @override
   State<HomeScreenMejorado> createState() => _HomeScreenMejoradoState();
@@ -139,9 +140,9 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
   }
 
   void _scanNFC() {
-    // TODO: Implement NFC Scanning Logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Función de escaneo NFC no implementada')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const EscaneoNfcScreen()),
     );
   }
 
@@ -240,8 +241,8 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _registrarAnimal,
-        child: const Icon(Icons.add),
         backgroundColor: theme.primaryColor,
+        child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(

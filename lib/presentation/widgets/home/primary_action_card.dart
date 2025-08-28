@@ -13,7 +13,7 @@ class PrimaryActionCard extends StatefulWidget {
   final bool showPulse;
 
   const PrimaryActionCard({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -21,7 +21,7 @@ class PrimaryActionCard extends StatefulWidget {
     required this.gradientEnd,
     required this.onTap,
     this.showPulse = false,
-  }) : super(key: key);
+  });
 
   @override
   State<PrimaryActionCard> createState() => _PrimaryActionCardState();

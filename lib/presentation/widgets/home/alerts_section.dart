@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 
 class AlertsSection extends StatelessWidget {
-  const AlertsSection({Key? key}) : super(key: key);
+  const AlertsSection({super.key});
 
   Widget _buildAlertCard({
     required String title,
