@@ -60,35 +60,30 @@ class ResponsiveBasicInfoForm extends StatefulWidget {
 }
 
 class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
+  // Controllers
   final _nombreController = TextEditingController();
   final _fechaController = TextEditingController();
   final _razaTypeAheadController = TextEditingController();
   final _sexoTypeAheadController = TextEditingController();
   
-  // FocusNodes para control de foco
-  final _nombreFocusNode = FocusNode();
-  final _razaTypeAheadFocusNode = FocusNode();
-  final _sexoTypeAheadFocusNode = FocusNode();
+  // FocusNodes - todos centralizados
+  final Map<String, FocusNode> _focusNodes = {
+    'nombre': FocusNode(),
+    'raza': FocusNode(),
+    'sexo': FocusNode(),
+  };
   
+  // Estado de dropdowns - un solo mapa
+  final Map<String, bool> _dropdownStates = {
+    'raza': false,
+    'sexo': false,
+  };
+  
+  // Datos
   List<RazaBovina> _razas = [];
   RazaBovina? _razaSeleccionada;
   DateTime? _fechaNacimiento;
   Sexo _sexo = Sexo.hembra;
-  
-  // Estados de dropdowns
-  bool _isRazaDropdownOpen = false;
-  bool _isSexoDropdownOpen = false;
-
-  // Método público para cerrar dropdowns
-  void closeDropdowns() {
-    // La forma más robusta de cerrar es quitar el foco. Los listeners se encargarán del estado.
-    if (_razaTypeAheadFocusNode.hasFocus) {
-      _razaTypeAheadFocusNode.unfocus();
-    }
-    if (_sexoTypeAheadFocusNode.hasFocus) {
-      _sexoTypeAheadFocusNode.unfocus();
-    }
-  }
 
   @override
   void initState() {
@@ -96,38 +91,75 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
     _sexo = widget.initialSexo;
     _sexoTypeAheadController.text = _getSexoDisplayName(_sexo);
     _cargarRazas();
-    _setupListeners();
+    _setupUnifiedListeners();
   }
 
-  void _setupListeners() {
+  // Sistema unificado de listeners
+  void _setupUnifiedListeners() {
+    // Listener para nombre
     _nombreController.addListener(() {
       widget.onNombreChanged(_nombreController.text);
     });
     
-    // Sincroniza el estado de los dropdowns con el foco de sus TypeAhead
-    _razaTypeAheadFocusNode.addListener(_onRazaFocusChange);
-    _sexoTypeAheadFocusNode.addListener(_onSexoFocusChange);
-
-    // Cierra los dropdowns si se enfoca el campo de texto de nombre
-    _nombreFocusNode.addListener(() {
-      if (_nombreFocusNode.hasFocus) {
-        closeDropdowns();
+    // Configurar listeners para cada dropdown
+    _setupDropdownListener('raza');
+    _setupDropdownListener('sexo');
+    
+    // El campo nombre cierra todos los dropdowns al enfocarse
+    _focusNodes['nombre']!.addListener(() {
+      if (_focusNodes['nombre']!.hasFocus) {
+        _closeAllDropdowns();
       }
     });
   }
 
-  void _onRazaFocusChange() {
-    if (mounted && _isRazaDropdownOpen != _razaTypeAheadFocusNode.hasFocus) {
-      setState(() {
-        _isRazaDropdownOpen = _razaTypeAheadFocusNode.hasFocus;
-      });
-    }
+  // Método genérico para configurar listeners de dropdowns
+  void _setupDropdownListener(String key) {
+    _focusNodes[key]?.addListener(() {
+      if (mounted) {
+        setState(() {
+          _dropdownStates[key] = _focusNodes[key]?.hasFocus ?? false;
+        });
+      }
+    });
   }
 
-  void _onSexoFocusChange() {
-    if (mounted && _isSexoDropdownOpen != _sexoTypeAheadFocusNode.hasFocus) {
-      setState(() {
-        _isSexoDropdownOpen = _sexoTypeAheadFocusNode.hasFocus;
+  // Método unificado para cerrar todos los dropdowns
+  void _closeAllDropdowns() {
+    _focusNodes.forEach((key, node) {
+      if (key != 'nombre' && node.hasFocus) {
+        node.unfocus();
+      }
+    });
+  }
+
+  // Método público para cerrar dropdowns (llamado desde parent)
+  void closeDropdowns() {
+    _closeAllDropdowns();
+  }
+
+  // Método genérico y unificado para toggle de dropdowns
+  void _toggleDropdown(String key) {
+    final focusNode = _focusNodes[key];
+    if (focusNode == null) return;
+    
+    final isOpen = _dropdownStates[key] ?? false;
+    
+    // Notificar al parent para cerrar otros dropdowns
+    widget.onCloseAllDropdowns?.call();
+    
+    if (isOpen) {
+      // Si está abierto, cerrarlo
+      focusNode.unfocus();
+    } else {
+      // Cerrar teclado y cualquier otro dropdown
+      FocusScope.of(context).unfocus();
+      
+      // Delay mínimo para garantizar que el teclado se cierre
+      Future.delayed(const Duration(milliseconds: 50), () {
+        if (mounted && !focusNode.hasFocus) {
+          focusNode.requestFocus();
+        }
       });
     }
   }
@@ -154,8 +186,8 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
     });
     widget.onRazaChanged(raza);
     
-    // Quitar foco inmediatamente
-    _razaTypeAheadFocusNode.unfocus();
+    // Cerrar dropdown inmediatamente
+    _focusNodes['raza']?.unfocus();
   }
 
   void _onSexoSeleccionado(Sexo sexo) {
@@ -165,13 +197,13 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
     });
     widget.onSexoChanged(sexo);
     
-    // Quitar foco inmediatamente
-    _sexoTypeAheadFocusNode.unfocus();
+    // Cerrar dropdown inmediatamente
+    _focusNodes['sexo']?.unfocus();
   }
 
   Future<void> _seleccionarFecha() async {
-    // Cerrar dropdowns antes de abrir date picker
-    closeDropdowns();
+    // Cerrar todos los dropdowns antes de abrir date picker
+    _closeAllDropdowns();
     widget.onCloseAllDropdowns?.call();
     
     final picked = await showDatePicker(
@@ -185,40 +217,11 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
     if (picked != null && mounted) {
       setState(() {
         _fechaNacimiento = picked;
-        _fechaController.text = '${picked.day.toString().padLeft(2, '0')}/'
-                               '${picked.month.toString().padLeft(2, '0')}/'
+        _fechaController.text = '${picked.day.toString().padLeft(2, '0')}-'
+                               '${picked.month.toString().padLeft(2, '0')}-'
                                '${picked.year}';
       });
       widget.onFechaChanged(picked);
-    }
-  }
-
-  void _toggleDropdownRaza() {
-    widget.onCloseAllDropdowns?.call();
-    
-    // Lógica de toggle simplificada basada en el estado del foco.
-    if (_razaTypeAheadFocusNode.hasFocus) {
-      _razaTypeAheadFocusNode.unfocus();
-    }
-    else {
-      // Asegurarse de que el teclado esté cerrado antes de abrir el dropdown.
-      FocusScope.of(context).unfocus();
-      // Pedir foco abrirá el TypeAhead. El listener actualizará el estado.
-      _razaTypeAheadFocusNode.requestFocus();
-    }
-  }
-
-  void _toggleDropdownSexo() {
-    widget.onCloseAllDropdowns?.call();
-    
-    // Lógica de toggle simplificada basada en el estado del foco.
-    if (_sexoTypeAheadFocusNode.hasFocus) {
-      _sexoTypeAheadFocusNode.unfocus();
-    } else {
-      // Asegurarse de que el teclado esté cerrado antes de abrir el dropdown.
-      FocusScope.of(context).unfocus();
-      // Pedir foco abrirá el TypeAhead. El listener actualizará el estado.
-      _sexoTypeAheadFocusNode.requestFocus();
     }
   }
 
@@ -277,32 +280,33 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
           const SizedBox(height: 16),
           _buildRazaTypeAhead(),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: _buildSexoTypeAhead()),
-              const SizedBox(width: 12),
-              Expanded(child: _buildFechaField()),
-            ],
-          ),
+          _buildSexoTypeAhead(),
+          const SizedBox(height: 16),
+          _buildFechaField(),
         ],
       );
     } else {
-      return Column(
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(flex: 2, child: _buildNombreField()),
-              const SizedBox(width: 16),
-              Expanded(flex: 2, child: _buildRazaTypeAhead()),
-            ],
+          Expanded(
+            child: Column(
+              children: [
+                _buildNombreField(),
+                const SizedBox(height: 16),
+                _buildSexoTypeAhead(),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: _buildSexoTypeAhead()),
-              const SizedBox(width: 16),
-              Expanded(child: _buildFechaField()),
-            ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              children: [
+                _buildRazaTypeAhead(),
+                const SizedBox(height: 16),
+                _buildFechaField(),
+              ],
+            ),
           ),
         ],
       );
@@ -312,7 +316,7 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
   Widget _buildNombreField() {
     return TextFormField(
       controller: _nombreController,
-      focusNode: _nombreFocusNode,
+      focusNode: _focusNodes['nombre'],
       decoration: const InputDecoration(
         labelText: 'Nombre del Animal',
         border: OutlineInputBorder(),
@@ -329,17 +333,16 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
         }
         return null;
       },
-      // Removido onTap para permitir teclado normal
     );
   }
 
   Widget _buildRazaTypeAhead() {
     return GestureDetector(
-      onTap: _toggleDropdownRaza,
+      onTap: () => _toggleDropdown('raza'),
       child: AbsorbPointer(
         child: TypeAheadField<RazaBovina>(
           controller: _razaTypeAheadController,
-          focusNode: _razaTypeAheadFocusNode,
+          focusNode: _focusNodes['raza'],
           builder: (context, controller, focusNode) {
             return TextFormField(
               controller: controller,
@@ -350,7 +353,9 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
                 prefixIcon: const Icon(Icons.category),
                 helperText: 'Toque para seleccionar',
                 suffixIcon: Icon(
-                  _isRazaDropdownOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                  _dropdownStates['raza'] == true 
+                    ? Icons.arrow_drop_up 
+                    : Icons.arrow_drop_down,
                 ),
               ),
               readOnly: true,
@@ -444,11 +449,11 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
 
   Widget _buildSexoTypeAhead() {
     return GestureDetector(
-      onTap: _toggleDropdownSexo,
+      onTap: () => _toggleDropdown('sexo'),
       child: AbsorbPointer(
         child: TypeAheadField<Sexo>(
           controller: _sexoTypeAheadController,
-          focusNode: _sexoTypeAheadFocusNode,
+          focusNode: _focusNodes['sexo'],
           builder: (context, controller, focusNode) {
             return TextFormField(
               controller: controller,
@@ -458,7 +463,9 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.pets),
                 suffixIcon: Icon(
-                  _isSexoDropdownOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                  _dropdownStates['sexo'] == true 
+                    ? Icons.arrow_drop_up 
+                    : Icons.arrow_drop_down,
                 ),
               ),
               readOnly: true,
@@ -557,12 +564,10 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
     _sexoTypeAheadController.dispose();
     _fechaController.dispose();
     
-    _razaTypeAheadFocusNode.removeListener(_onRazaFocusChange);
-    _sexoTypeAheadFocusNode.removeListener(_onSexoFocusChange);
-
-    _nombreFocusNode.dispose();
-    _razaTypeAheadFocusNode.dispose();
-    _sexoTypeAheadFocusNode.dispose();
+    // Dispose de todos los FocusNodes
+    _focusNodes.forEach((key, node) {
+      node.dispose();
+    });
     
     super.dispose();
   }

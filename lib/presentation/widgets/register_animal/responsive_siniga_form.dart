@@ -67,6 +67,9 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
   String? _validationMessage;
   bool _isValid = false;
   bool _isDropdownOpen = false;
+  
+  // Flag para evitar saltos automáticos innecesarios
+  bool _autoNavigationEnabled = false;
 
   @override
   void initState() {
@@ -83,13 +86,17 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
     // Sincroniza el estado del dropdown con el foco del TypeAhead
     _estadoTypeAheadFocusNode.addListener(_onTypeAheadFocusChange);
 
-    // Cierra el dropdown si se enfoca uno de los campos de texto
+    // Manejo mejorado del foco para el campo de estado
     _estadoFocusNode.addListener(() {
       if (_estadoFocusNode.hasFocus) {
+        _autoNavigationEnabled = true; // Habilitar navegación automática solo cuando se está escribiendo
         _cerrarDropdowns();
+      } else {
+        _autoNavigationEnabled = false; // Deshabilitar cuando pierde el foco
       }
     });
     
+    // Cierra el dropdown si se enfoca el campo de número
     _numeroFocusNode.addListener(() {
       if (_numeroFocusNode.hasFocus) {
         _cerrarDropdowns();
@@ -98,7 +105,7 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
   }
 
   void _onTypeAheadFocusChange() {
-    if (mounted && _isDropdownOpen != _estadoTypeAheadFocusNode.hasFocus) {
+    if (mounted) {
       setState(() {
         _isDropdownOpen = _estadoTypeAheadFocusNode.hasFocus;
       });
@@ -109,19 +116,25 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
     _validarSiniga();
     _autoSeleccionarEstado();
     
-    // FIX: Solo saltar al siguiente campo si el usuario está escribiendo en el campo de código.
-    if (_estadoController.text.length == 2 && _estadoFocusNode.hasFocus) {
+    // Mejorado: Solo hacer auto-navegación si:
+    // 1. El campo tiene exactamente 2 caracteres
+    // 2. El campo de estado tiene el foco actualmente (el usuario está escribiendo en él)
+    // 3. La navegación automática está habilitada
+    if (_estadoController.text.length == 2 && _autoNavigationEnabled && _estadoFocusNode.hasFocus) {
+      // Pequeño delay para mejor UX
       Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
+        if (mounted && _estadoFocusNode.hasFocus) {
           _numeroFocusNode.requestFocus();
         }
       });
     }
   }
+  
   void _onNumeroChanged() {
     _validarSiniga();
     
-    if (_numeroController.text.length == 8) {
+    // Solo cerrar teclado si se completaron los 8 dígitos y el campo tiene foco
+    if (_numeroController.text.length == 8 && _numeroFocusNode.hasFocus) {
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
           FocusScope.of(context).unfocus();
@@ -131,7 +144,6 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
   }
 
   void _cerrarDropdowns() {
-    // La forma más robusta de cerrar es quitar el foco. El listener se encargará del estado.
     if (_estadoTypeAheadFocusNode.hasFocus) {
       _estadoTypeAheadFocusNode.unfocus();
     }
@@ -294,22 +306,36 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
     });
     widget.onEstadoCodeChanged(estado.clave);
     
-    // Quitar foco inmediatamente. Esto cerrará el dropdown y disparará el listener de foco.
+    // Quitar foco inmediatamente
     _estadoTypeAheadFocusNode.unfocus();
+    
+    // Si el número nacional no está completo, enfocar en él
+    if (_numeroController.text.length < 8) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _numeroFocusNode.requestFocus();
+        }
+      });
+    }
   }
 
   void _toggleDropdownEstado() {
+    // Cerrar otros dropdowns si están abiertos
     widget.onCloseAllDropdowns?.call();
     
-    // FIX: Lógica de toggle simplificada basada en el estado del foco.
-    // Esto soluciona el bug de no poder cerrar el dropdown con un segundo clic.
     if (_estadoTypeAheadFocusNode.hasFocus) {
+      // Si ya está abierto, cerrarlo
       _estadoTypeAheadFocusNode.unfocus();
     } else {
-      // Asegurarse de que el teclado esté cerrado antes de abrir el dropdown.
+      // Cerrar cualquier teclado abierto
       FocusScope.of(context).unfocus();
-      // Pedir foco abrirá el TypeAhead. El listener actualizará el estado _isDropdownOpen.
-      _estadoTypeAheadFocusNode.requestFocus();
+      
+      // Pequeño delay para asegurar que el teclado se cierre completamente
+      Future.delayed(const Duration(milliseconds: 50), () {
+        if (mounted) {
+          _estadoTypeAheadFocusNode.requestFocus();
+        }
+      });
     }
   }
 
@@ -433,7 +459,7 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
       decoration: InputDecoration(
         labelText: 'Estado',
         helperText: _estadoController.text.length == 2 
-            ? '✓ Completo - Saltando...' 
+            ? '✓ Completo' 
             : 'Código INEGI',
         helperStyle: TextStyle(
           color: _estadoController.text.length == 2 
@@ -473,7 +499,6 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
         fontWeight: FontWeight.bold,
       ),
       validator: (v) => (v == null || v.length != 2) ? 'Requerido' : null,
-      // Removido onTap para permitir teclado normal
     );
   }
 
@@ -484,7 +509,7 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
       decoration: InputDecoration(
         labelText: 'Número Nacional',
         helperText: _numeroController.text.length == 8 
-            ? '✓ Completo - Cerrando teclado...' 
+            ? '✓ Completo' 
             : '8 dígitos únicos',
         helperStyle: TextStyle(
           color: _numeroController.text.length == 8 
@@ -521,7 +546,6 @@ class ResponsiveSinigaFormState extends State<ResponsiveSinigaForm> {
         fontWeight: FontWeight.bold,
       ),
       validator: (v) => (v == null || v.length != 8) ? 'Requerido' : null,
-      // Removido onTap para permitir teclado normal
     );
   }
 
