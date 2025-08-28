@@ -199,7 +199,8 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
     // Lógica de toggle simplificada basada en el estado del foco.
     if (_razaTypeAheadFocusNode.hasFocus) {
       _razaTypeAheadFocusNode.unfocus();
-    } else {
+    }
+    else {
       // Asegurarse de que el teclado esté cerrado antes de abrir el dropdown.
       FocusScope.of(context).unfocus();
       // Pedir foco abrirá el TypeAhead. El listener actualizará el estado.
@@ -375,7 +376,7 @@ class ResponsiveBasicInfoFormState extends State<ResponsiveBasicInfoForm> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.1),
+                          color: Colors.blue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(3),
                         ),
                         child: Text(

@@ -1,6 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentacion/bloc/cattle_list_bloc.dart';
 import 'package:sirega_app/presentation/screens/home_screen_mejorado.dart';
@@ -31,6 +32,15 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
             inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
           ),
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', ''), // English, no country code
+            Locale('es', ''), // Spanish, no country code
+          ],
           home: const HomeScreenMejorado(),
         ),
       ),
