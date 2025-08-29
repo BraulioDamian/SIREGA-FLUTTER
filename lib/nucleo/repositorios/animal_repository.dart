@@ -1,4 +1,5 @@
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
+import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 
 /// Repositorio centralizado para operaciones con animales

@@ -45,10 +45,10 @@ class IsarService {
     }
   }
 
-  Future<void> guardarAnimal(Animal animal) async => await isar.writeTxn(() => isar.animals.put(animal));
+  Future<int> guardarAnimal(Animal animal) async => await isar.writeTxn(() => isar.animals.put(animal));
   Future<List<Animal>> obtenerTodosLosAnimales() async => await isar.animals.where().findAll();
   Future<List<Animal>> obtenerAnimalesActivos() async => await isar.animals.filter().estadoEqualTo(EstadoAnimal.activo).findAll();
-  Future<void> eliminarAnimal(int id) async => await isar.writeTxn(() => isar.animals.delete(id));
+  Future<bool> eliminarAnimal(int id) async => await isar.writeTxn(() => isar.animals.delete(id));
   Future<Animal?> obtenerAnimalPorId(int id) async => await isar.animals.get(id);
 
   Future<Animal?> obtenerAnimalPorNfc(String nfcId) async {

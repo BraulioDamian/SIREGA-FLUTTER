@@ -119,7 +119,6 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
         _scrollOffset = _scrollController.offset;
         _isScrolled = _scrollController.offset > 50;
         
-        // Calcular el porcentaje de scroll (0.0 = completamente expandido, 1.0 = completamente contraído)
         _scrollPercentage = (_scrollController.offset / expandedHeight).clamp(0.0, 1.0);
       });
     });
@@ -154,22 +153,42 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             surface: Colors.grey[50],
           ),
         ),
-        child: Scaffold(
-          extendBodyBehindAppBar: true,
-          backgroundColor: Colors.grey[50],
-          body: BlocBuilder<CattleDetailBloc, CattleDetailState>(
-            builder: (context, state) {
-              if (state is CattleDetailLoading) {
-                return _buildLoadingState();
-              }
-              if (state is CattleDetailError) {
-                return _buildErrorState(state.message);
-              }
-              if (state is CattleDetailLoaded) {
-                return _buildLoadedBody(context, state.animal);
-              }
-              return _buildLoadingState();
-            },
+        child: BlocListener<CattleDetailBloc, CattleDetailState>(
+          listenWhen: (previous, current) => current is CattleDetailActionState,
+          listener: (context, state) {
+            if (state is ShowInfoSnackbar) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              );
+            }
+            if (state is AnimalDeactivationSuccess) {
+              Navigator.of(context).pop(); // Pop after successful deactivation
+            }
+          },
+          child: Scaffold(
+            extendBodyBehindAppBar: true,
+            backgroundColor: Colors.grey[50],
+            body: BlocBuilder<CattleDetailBloc, CattleDetailState>(
+              buildWhen: (previous, current) => current is! CattleDetailActionState,
+              builder: (context, state) {
+                if (state is CattleDetailLoading || state is CattleDetailInitial) {
+                  return _buildLoadingState();
+                }
+                if (state is CattleDetailError) {
+                  return _buildErrorState(state.message);
+                }
+                if (state is CattleDetailLoaded) {
+                  return _buildLoadedBody(context, state.animal);
+                }
+                return const SizedBox.shrink(); // Should not happen
+              },
+            ),
           ),
         ),
       ),
@@ -183,8 +202,8 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).primaryColor.withOpacity(0.1),
-            Theme.of(context).primaryColor.withOpacity(0.05),
+            Theme.of(context).primaryColor.withAlpha(26), // withOpacity(0.1)
+            Theme.of(context).primaryColor.withAlpha(13), // withOpacity(0.05)
           ],
         ),
       ),
@@ -206,7 +225,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).primaryColor.withOpacity(0.2),
+                          color: Theme.of(context).primaryColor.withAlpha(51), // withOpacity(0.2)
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -236,7 +255,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                   Text(
                     'Por favor espere...',
                     style: TextStyle(
-                      color: Theme.of(context).primaryColor.withOpacity(0.6),
+                      color: Theme.of(context).primaryColor.withAlpha(153), // withOpacity(0.6)
                       fontSize: 14,
                     ),
                   ),
@@ -281,7 +300,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.red.withOpacity(0.2),
+                            color: Colors.red.withAlpha(51), // withOpacity(0.2)
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -356,22 +375,17 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             final ScrollDirection direction = notification.direction;
             final double scrollOffset = _scrollController.offset;
 
-            // Only trigger snap scrolling when the user has stopped scrolling
             if (direction == ScrollDirection.idle) {
-              // Check if the scroll offset is within the expandable area
               if (scrollOffset > 0 && scrollOffset < expandedHeight) {
-                // Define the snap point (e.g., 50% of the expandable area)
                 final double snapThreshold = expandedHeight * 0.5;
 
                 if (scrollOffset > snapThreshold) {
-                  // If past the threshold, snap to fully collapsed
                   _scrollController.animateTo(
-                    expandedHeight, // Animate to the end of the sliver's extent
+                    expandedHeight,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,
                   );
                 } else {
-                  // If before the threshold, snap to fully expanded
                   _scrollController.animateTo(
                     0,
                     duration: const Duration(milliseconds: 300),
@@ -396,7 +410,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               child: SlideTransition(
                 position: _slideAnimation,
                 child: SafeArea(
-                  top: false,  // Cambiado a false para evitar padding adicional
+                  top: false,
                   bottom: false,
                   child: TabBarView(
                     controller: _tabController,
@@ -450,9 +464,9 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
       elevation: 0,
       leading: _buildBackButton(context),
       actions: [
-        _buildActionButton(Icons.edit_rounded, () => _editAnimal(animal)),
-        _buildActionButton(Icons.share_rounded, () => _shareAnimal(animal)),
-        _buildActionButton(Icons.more_vert_rounded, () => _showMoreOptions(animal)),
+        _buildActionButton(Icons.edit_rounded, () => _editAnimal(context, animal)),
+        _buildActionButton(Icons.share_rounded, () => _shareAnimal(context, animal)),
+        _buildActionButton(Icons.more_vert_rounded, () => _showMoreOptions(context, animal)),
       ],
       flexibleSpace: CustomSliverHeader(
         animal: animal,
@@ -467,7 +481,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     return Container(
       margin: const EdgeInsets.all(8),
       child: Material(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withAlpha(51), // withOpacity(0.2)
         shape: const CircleBorder(),
         child: InkWell(
           onTap: () {
@@ -488,7 +502,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     return Container(
       margin: const EdgeInsets.all(8),
       child: Material(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withAlpha(51), // withOpacity(0.2)
         shape: const CircleBorder(),
         child: InkWell(
           onTap: () {
@@ -569,21 +583,21 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             _buildSmallFAB(
               Icons.qr_code_scanner_rounded,
               Colors.blue,
-              () => _scanNFC(animal),
+              () => _scanNFC(context, animal),
               'Escanear NFC',
             ),
             const SizedBox(height: 12),
             _buildSmallFAB(
               Icons.medical_services_rounded,
               Colors.orange,
-              () => _registerEvent(animal),
+              () => _registerEvent(context, animal),
               'Registrar Evento',
             ),
             const SizedBox(height: 12),
             _buildMainFAB(
               Icons.add_a_photo_rounded,
               Theme.of(context).primaryColor,
-              () => _addPhoto(animal),
+              () => _addPhoto(context, animal),
               'Añadir Foto',
             ),
           ],
@@ -609,7 +623,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(0.4),
+                    color: color.withAlpha(102), // withOpacity(0.4)
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -645,13 +659,13 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             end: Alignment.bottomRight,
             colors: [
               color,
-              color.withOpacity(0.8),
+              color.withAlpha(204), // withOpacity(0.8)
             ],
           ),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.4),
+              color: color.withAlpha(102), // withOpacity(0.4)
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -672,53 +686,25 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     );
   }
 
-  // Métodos de acción
-  void _editAnimal(Animal animal) {
+  // --- Métodos de Acción Refactorizados ---
+  // Ahora solo envían eventos al BLoC.
+
+  void _editAnimal(BuildContext context, Animal animal) {
     HapticFeedback.mediumImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.edit, color: Colors.white),
-            SizedBox(width: 12),
-            Text('Función de edición próximamente'),
-          ],
-        ),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
+    context.read<CattleDetailBloc>().add(EditAnimalClicked(animal));
   }
 
-  void _shareAnimal(Animal animal) {
+  void _shareAnimal(BuildContext context, Animal animal) {
     HapticFeedback.mediumImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.share, color: Colors.white),
-            SizedBox(width: 12),
-            Text('Compartiendo información...'),
-          ],
-        ),
-        backgroundColor: Colors.blue,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
+    context.read<CattleDetailBloc>().add(ShareAnimalClicked(animal));
   }
 
-  void _showMoreOptions(Animal animal) {
+  void _showMoreOptions(BuildContext context, Animal animal) {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      builder: (modalContext) => Container(
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
@@ -739,26 +725,26 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               Icons.print_rounded,
               'Imprimir ficha',
               Colors.blue,
-              () => _printAnimalCard(animal),
+              () => _printAnimalCard(context, animal),
             ),
             _buildOptionTile(
               Icons.qr_code_rounded,
               'Generar código QR',
               Colors.purple,
-              () => _generateQRCode(animal),
+              () => _generateQRCode(context, animal),
             ),
             _buildOptionTile(
               Icons.archive_rounded,
               'Archivar',
               Colors.grey,
-              () => _archiveAnimal(animal),
+              () => _archiveAnimal(context, animal),
             ),
             const Divider(height: 1),
             _buildOptionTile(
               Icons.delete_rounded,
               'Eliminar',
               Colors.red,
-              () => _deleteAnimal(animal),
+              () => _deleteAnimal(context, animal),
             ),
             const SizedBox(height: 20),
           ],
@@ -772,7 +758,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          Navigator.pop(context);
+          Navigator.pop(context); // Cierra el BottomSheet
           onTap();
         },
         child: Padding(
@@ -783,7 +769,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withAlpha(26), // withOpacity(0.1)
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: color),
@@ -804,101 +790,34 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     );
   }
 
-  void _scanNFC(Animal animal) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ),
-            SizedBox(width: 12),
-            Text('Iniciando escaneo NFC...'),
-          ],
-        ),
-        backgroundColor: Colors.blue,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
+  void _scanNFC(BuildContext context, Animal animal) {
+    context.read<CattleDetailBloc>().add(ScanNFCClicked(animal));
   }
 
-  void _registerEvent(Animal animal) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.event_note, color: Colors.white),
-            SizedBox(width: 12),
-            Text('Abriendo registro de eventos...'),
-          ],
-        ),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
+  void _registerEvent(BuildContext context, Animal animal) {
+    context.read<CattleDetailBloc>().add(RegisterEventClicked(animal));
   }
 
-  void _addPhoto(Animal animal) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.camera_alt, color: Colors.white),
-            SizedBox(width: 12),
-            Text('Abriendo cámara...'),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
+  void _addPhoto(BuildContext context, Animal animal) {
+    context.read<CattleDetailBloc>().add(AddPhotoClicked(animal));
   }
 
-  void _printAnimalCard(Animal animal) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Preparando impresión...'),
-        backgroundColor: Colors.blue,
-      ),
-    );
+  void _printAnimalCard(BuildContext context, Animal animal) {
+    context.read<CattleDetailBloc>().add(PrintAnimalCardClicked(animal));
   }
 
-  void _generateQRCode(Animal animal) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Generando código QR...'),
-        backgroundColor: Colors.purple,
-      ),
-    );
+  void _generateQRCode(BuildContext context, Animal animal) {
+    context.read<CattleDetailBloc>().add(GenerateQRCodeClicked(animal));
   }
 
-  void _archiveAnimal(Animal animal) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Animal archivado correctamente'),
-        backgroundColor: Colors.grey,
-      ),
-    );
+  void _archiveAnimal(BuildContext context, Animal animal) {
+    context.read<CattleDetailBloc>().add(ArchiveAnimalClicked(animal));
   }
 
-  void _deleteAnimal(Animal animal) {
+  void _deleteAnimal(BuildContext context, Animal animal) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -909,17 +828,16 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             const Text('Confirmar eliminación'),
           ],
         ),
-        content: Text('¿Está seguro de eliminar a ${animal.nombre}? Esta acción no se puede deshacer.'),
+        content: Text('¿Está seguro de que desea eliminar a ${animal.nombre}? Esta acción no se puede deshacer.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
               context.read<CattleDetailBloc>().add(DeactivateAnimal(animal));
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -939,10 +857,10 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverTabBarDelegate(this._tabBar);
 
   @override
-  double get minExtent => _tabBar.preferredSize.height; // Eliminado el espacio extra
+  double get minExtent => _tabBar.preferredSize.height;
   
   @override
-  double get maxExtent => _tabBar.preferredSize.height; // Eliminado el espacio extra
+  double get maxExtent => _tabBar.preferredSize.height;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -954,14 +872,14 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
           boxShadow: overlapsContent
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withAlpha(13), // withOpacity(0.05)
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
                 ]
               : null,
         ),
-        child: _tabBar, // Eliminado el padding completamente
+        child: _tabBar,
       ),
     );
   }
