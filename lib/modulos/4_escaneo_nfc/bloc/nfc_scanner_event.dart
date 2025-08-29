@@ -8,3 +8,5 @@ abstract class NfcScannerEvent extends Equatable {
 }
 
 class ScanNfcEvent extends NfcScannerEvent {}
+
+class ResetNfcScannerEvent extends NfcScannerEvent {}

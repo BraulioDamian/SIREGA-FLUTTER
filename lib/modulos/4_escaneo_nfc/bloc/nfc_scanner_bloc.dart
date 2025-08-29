@@ -8,6 +8,7 @@ class NfcScannerBloc extends Bloc<NfcScannerEvent, NfcScannerState> {
 
   NfcScannerBloc(this._scanNfcUseCase) : super(NfcScannerInitial()) {
     on<ScanNfcEvent>(_onScanNfcEvent);
+    on<ResetNfcScannerEvent>(_onResetNfcScannerEvent);
   }
 
   Future<void> _onScanNfcEvent(
@@ -16,7 +17,7 @@ class NfcScannerBloc extends Bloc<NfcScannerEvent, NfcScannerState> {
     try {
       final animal = await _scanNfcUseCase.execute();
       if (animal != null) {
-        emit(NfcScanSuccess(animal.nombre ?? 'Sin nombre'));
+        emit(NfcAnimalFound(animal));
       } else {
         emit(const NfcScanError('No se encontró ningún animal con ese UID.'));
       }
@@ -29,5 +30,10 @@ class NfcScannerBloc extends Bloc<NfcScannerEvent, NfcScannerState> {
         emit(NfcScanError(e.toString()));
       }
     }
+  }
+
+  Future<void> _onResetNfcScannerEvent(
+      ResetNfcScannerEvent event, Emitter<NfcScannerState> emit) async {
+    emit(NfcScannerInitial());
   }
 }

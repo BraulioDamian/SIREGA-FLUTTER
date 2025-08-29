@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 
 abstract class NfcScannerState extends Equatable {
   const NfcScannerState();
@@ -10,6 +11,15 @@ abstract class NfcScannerState extends Equatable {
 class NfcScannerInitial extends NfcScannerState {}
 
 class NfcScanning extends NfcScannerState {}
+
+class NfcAnimalFound extends NfcScannerState {
+  final Animal animal;
+
+  const NfcAnimalFound(this.animal);
+
+  @override
+  List<Object> get props => [animal];
+}
 
 class NfcScanSuccess extends NfcScannerState {
   final String animalName;

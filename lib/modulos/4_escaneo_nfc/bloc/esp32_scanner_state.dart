@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 
 abstract class Esp32ScannerState extends Equatable {
   const Esp32ScannerState();
@@ -12,6 +13,15 @@ class Esp32ScannerInitial extends Esp32ScannerState {}
 class Esp32Connecting extends Esp32ScannerState {}
 
 class Esp32Connected extends Esp32ScannerState {}
+
+class Esp32AnimalFound extends Esp32ScannerState {
+  final Animal animal;
+
+  const Esp32AnimalFound(this.animal);
+
+  @override
+  List<Object> get props => [animal];
+}
 
 class Esp32UidReceived extends Esp32ScannerState {
   final String animalName;

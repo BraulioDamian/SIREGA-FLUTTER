@@ -9,6 +9,8 @@ abstract class Esp32ScannerEvent extends Equatable {
 
 class ConnectToEsp32Event extends Esp32ScannerEvent {}
 
+class DisconnectFromEsp32Event extends Esp32ScannerEvent {}
+
 class UidReceivedEvent extends Esp32ScannerEvent {
   final String uid;
 
@@ -17,3 +19,7 @@ class UidReceivedEvent extends Esp32ScannerEvent {
   @override
   List<Object> get props => [uid];
 }
+
+class ResetScannerEvent extends Esp32ScannerEvent {}
+
+class CheckConnectionStatusEvent extends Esp32ScannerEvent {}
