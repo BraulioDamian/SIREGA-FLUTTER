@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/presentation/screens/agregar_animal/agregar_animal_screen.dart';
 import 'package:sirega_app/presentation/screens/register_animal_screen.dart';
+
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'dart:async';
@@ -145,11 +147,12 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
       MaterialPageRoute(builder: (context) => const EscaneoNfcScreen()),
     );
   }
-
   void _registrarAnimal() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const RegisterAnimalScreen()),
+    //MaterialPageRoute(builder: (context) => const RegisterAnimalScreen()),
+      MaterialPageRoute(builder: (context) => const AgregarAnimalScreen()),
+
     ).then((_) => _cargarDatos());
   }
 
