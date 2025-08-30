@@ -10,10 +10,20 @@ class Esp32RepositoryImpl implements Esp32Repository {
   Future<Stream<String>> connectToEsp32() async {
     final wifiEnabled = await _esp32service.isWifiEnabled();
     if (!wifiEnabled) {
-      // TODO: Open wifi settings
-      throw Exception('WiFi desactivado');
+      throw Exception('WiFi desactivado. Activa el WiFi para conectar con el ESP32.');
     }
+    
     // La URL del ESP32 en modo Access Point con el path /ws
     return _esp32service.connectToEsp32('ws://192.168.4.1/ws');
+  }
+  
+  @override
+  Future<void> openWifiSettings() async {
+    return _esp32service.openWifiSettings();
+  }
+  
+  @override
+  void disconnect() {
+    _esp32service.disconnect();
   }
 }

@@ -8,6 +8,8 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/animal_database_s
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/esp32_service.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/nfc_service.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/connect_to_esp32_use_case.dart';
+import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/disconnect_from_esp32_use_case.dart';
+import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/open_wifi_settings_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/find_animal_by_uid_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/scan_nfc_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/escaner_externo_tab.dart';
@@ -15,7 +17,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/escaner_mo
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 
 class EscaneoNfcScreen extends StatelessWidget {
-  const EscaneoNfcScreen({Key? key}) : super(key: key);
+  const EscaneoNfcScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +38,15 @@ class EscaneoNfcScreen extends StatelessWidget {
           ),
         ),
         BlocProvider(
-          create: (context) => Esp32ScannerBloc(
-            ConnectToEsp32UseCase(
-              Esp32RepositoryImpl(
-                Esp32Service(),
-              ),
-            ),
-            FindAnimalByUidUseCase(animalDbService),
-          ),
+          create: (context) {
+            final esp32Repository = Esp32RepositoryImpl(Esp32Service());
+            return Esp32ScannerBloc(
+              ConnectToEsp32UseCase(esp32Repository),
+              DisconnectFromEsp32UseCase(esp32Repository),
+              FindAnimalByUidUseCase(animalDbService),
+              OpenWifiSettingsUseCase(esp32Repository),
+            );
+          },
         ),
       ],
       child: DefaultTabController(

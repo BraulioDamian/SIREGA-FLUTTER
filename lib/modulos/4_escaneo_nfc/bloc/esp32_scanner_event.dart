@@ -23,3 +23,5 @@ class UidReceivedEvent extends Esp32ScannerEvent {
 class ResetScannerEvent extends Esp32ScannerEvent {}
 
 class CheckConnectionStatusEvent extends Esp32ScannerEvent {}
+
+class OpenWifiSettingsEvent extends Esp32ScannerEvent {}

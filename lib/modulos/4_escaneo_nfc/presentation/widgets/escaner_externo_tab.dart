@@ -4,6 +4,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/esp32_scanner_bloc.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/esp32_scanner_event.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/esp32_scanner_state.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/scan_result_widget.dart';
+import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/connection_widgets.dart' as connection;
 import 'package:android_intent_plus/android_intent.dart';
 
 class EscannerExternoTab extends StatefulWidget {
@@ -69,7 +70,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
     }
 
     if (state is Esp32Connecting) {
-      return const ScanningIndicatorWidget(
+      return const connection.ScanningIndicatorWidget(
         message: 'Conectando con ESP32...',
         submessage: 'Asegúrate de que el dispositivo esté encendido',
       );
@@ -92,10 +93,15 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
     }
 
     if (state is Esp32Error) {
-      return ScanErrorWidget(
+      return connection.ScanErrorWidget(
         errorMessage: state.errorMessage,
         onRetry: () {
           context.read<Esp32ScannerBloc>().add(ConnectToEsp32Event());
+        },
+        onOpenWifiSettings: () {
+          // Abrir configuración WiFi
+          final event = OpenWifiSettingsEvent();
+          context.read<Esp32ScannerBloc>().add(event);
         },
       );
     }
@@ -162,32 +168,59 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
             const SizedBox(height: 16),
             Card(
               elevation: 0,
-              color: Colors.amber.withAlpha((255 * 0.05).round()),
+              color: Colors.blue.withAlpha((255 * 0.05).round()),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: Colors.amber.withAlpha((255 * 0.3).round()),
+                  color: Colors.blue.withAlpha((255 * 0.3).round()),
                   width: 1,
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.amber.shade700,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'El dispositivo ESP32 debe estar en la misma red WiFi',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.amber.shade700,
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.blue.shade700,
+                          size: 20,
                         ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Instrucciones de Conexión',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Para conectar el ESP32:',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.blue.shade700,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    ...[
+                      '1. Enciende el dispositivo ESP32',
+                      '2. Conecta tu teléfono a la red WiFi "ESP32-NFC"',
+                      '3. Presiona "Conectar Dispositivo"',
+                      '4. El sistema verificará la conexión automáticamente',
+                    ].map((step) => Padding(
+                      padding: const EdgeInsets.only(left: 8, bottom: 4),
+                      child: Text(
+                        step,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.blue.shade600,
+                        ),
+                      ),
+                    )),
                   ],
                 ),
               ),
@@ -206,7 +239,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Estado de conexión
-            ConnectionStatusWidget(
+            connection.ConnectionStatusWidget(
               isConnected: true,
               deviceName: 'ESP32 Scanner',
               onDisconnect: () {

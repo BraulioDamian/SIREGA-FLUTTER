@@ -4,6 +4,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/nfc_scanner_bloc.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/nfc_scanner_event.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/nfc_scanner_state.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/scan_result_widget.dart';
+import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/connection_widgets.dart' as connection;
 import 'package:android_intent_plus/android_intent.dart';
 
 class EscannerMovilTab extends StatefulWidget {
@@ -60,7 +61,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
     }
 
     if (state is NfcScanning) {
-      return const ScanningIndicatorWidget(
+      return const connection.ScanningIndicatorWidget(
         message: 'Escaneando...',
         submessage: 'Acerca el dispositivo al arete NFC',
       );
@@ -79,7 +80,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
     }
 
     if (state is NfcScanError) {
-      return ScanErrorWidget(
+      return connection.ScanErrorWidget(
         errorMessage: state.errorMessage,
         onRetry: () {
           context.read<NfcScannerBloc>().add(ScanNfcEvent());
