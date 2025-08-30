@@ -7,7 +7,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/scan_resul
 import 'package:android_intent_plus/android_intent.dart';
 
 class EscannerMovilTab extends StatefulWidget {
-  const EscannerMovilTab({Key? key}) : super(key: key);
+  const EscannerMovilTab({super.key});
 
   @override
   State<EscannerMovilTab> createState() => _EscannerMovilTabState();
@@ -43,7 +43,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = Theme.of(context);
-    
+
     return BlocBuilder<NfcScannerBloc, NfcScannerState>(
       builder: (context, state) {
         return AnimatedSwitcher(
@@ -58,14 +58,14 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
     if (state is NfcScannerInitial) {
       return _buildInitialState(context, theme);
     }
-    
+
     if (state is NfcScanning) {
       return const ScanningIndicatorWidget(
         message: 'Escaneando...',
         submessage: 'Acerca el dispositivo al arete NFC',
       );
     }
-    
+
     if (state is NfcAnimalFound) {
       return ScanResultWidget(
         animal: state.animal,
@@ -77,7 +77,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
         onEditData: () => _editAnimalData(context, state.animal),
       );
     }
-    
+
     if (state is NfcScanError) {
       return ScanErrorWidget(
         errorMessage: state.errorMessage,
@@ -86,18 +86,18 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
         },
       );
     }
-    
+
     if (state is NfcNotAvailable) {
       return _buildNfcNotAvailableState(theme);
     }
-    
+
     if (state is NfcDisabled) {
       return _buildNfcDisabledState(theme);
     }
-    
+
     return Container();
   }
-  
+
   Widget _buildInitialState(BuildContext context, ThemeData theme) {
     return Center(
       child: Padding(
@@ -109,7 +109,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -153,11 +153,11 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
             const SizedBox(height: 16),
             Card(
               elevation: 0,
-              color: Colors.blue.withOpacity(0.05),
+              color: Colors.blue.withAlpha((255 * 0.05).round()),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: Colors.blue.withOpacity(0.2),
+                  color: Colors.blue.withAlpha((255 * 0.2).round()),
                   width: 1,
                 ),
               ),
@@ -188,7 +188,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
       ),
     );
   }
-  
+
   Widget _buildNfcNotAvailableState(ThemeData theme) {
     return Center(
       child: Padding(
@@ -200,7 +200,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: Colors.orange.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -229,7 +229,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.05),
+                color: theme.colorScheme.primary.withAlpha((255 * 0.05).round()),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -261,7 +261,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
       ),
     );
   }
-  
+
   Widget _buildNfcDisabledState(ThemeData theme) {
     return Center(
       child: Padding(
@@ -273,7 +273,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: const Icon(

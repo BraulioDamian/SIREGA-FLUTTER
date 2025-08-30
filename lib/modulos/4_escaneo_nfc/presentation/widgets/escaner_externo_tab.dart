@@ -7,7 +7,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/scan_resul
 import 'package:android_intent_plus/android_intent.dart';
 
 class EscannerExternoTab extends StatefulWidget {
-  const EscannerExternoTab({Key? key}) : super(key: key);
+  const EscannerExternoTab({super.key});
 
   @override
   State<EscannerExternoTab> createState() => _EscannerExternoTabState();
@@ -52,7 +52,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = Theme.of(context);
-    
+
     return BlocBuilder<Esp32ScannerBloc, Esp32ScannerState>(
       builder: (context, state) {
         return AnimatedSwitcher(
@@ -67,18 +67,18 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
     if (state is Esp32ScannerInitial) {
       return _buildInitialState(context, theme);
     }
-    
+
     if (state is Esp32Connecting) {
       return const ScanningIndicatorWidget(
         message: 'Conectando con ESP32...',
         submessage: 'Asegúrate de que el dispositivo esté encendido',
       );
     }
-    
+
     if (state is Esp32Connected) {
       return _buildConnectedState(context, theme);
     }
-    
+
     if (state is Esp32AnimalFound) {
       return ScanResultWidget(
         animal: state.animal,
@@ -90,7 +90,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
         onEditData: () => _editAnimalData(context, state.animal),
       );
     }
-    
+
     if (state is Esp32Error) {
       return ScanErrorWidget(
         errorMessage: state.errorMessage,
@@ -99,14 +99,14 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
         },
       );
     }
-    
+
     if (state is WifiDisabled) {
       return _buildWifiDisabledState(theme);
     }
-    
+
     return Container();
   }
-  
+
   Widget _buildInitialState(BuildContext context, ThemeData theme) {
     return Center(
       child: Padding(
@@ -118,7 +118,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -162,11 +162,11 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
             const SizedBox(height: 16),
             Card(
               elevation: 0,
-              color: Colors.amber.withOpacity(0.05),
+              color: Colors.amber.withAlpha((255 * 0.05).round()),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: Colors.amber.withOpacity(0.3),
+                  color: Colors.amber.withAlpha((255 * 0.3).round()),
                   width: 1,
                 ),
               ),
@@ -197,7 +197,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
       ),
     );
   }
-  
+
   Widget _buildConnectedState(BuildContext context, ThemeData theme) {
     return Center(
       child: Padding(
@@ -214,7 +214,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
               },
             ),
             const SizedBox(height: 32),
-            
+
             // Animación de espera
             Container(
               width: 200,
@@ -223,8 +223,8 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    theme.colorScheme.primary.withOpacity(0.1),
-                    theme.colorScheme.primary.withOpacity(0.0),
+                    theme.colorScheme.primary.withAlpha((255 * 0.1).round()),
+                    theme.colorScheme.primary.withAlpha((255 * 0.0).round()),
                   ],
                 ),
               ),
@@ -244,7 +244,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: theme.colorScheme.primary.withOpacity(0.3),
+                              color: theme.colorScheme.primary.withAlpha((255 * 0.3).round()),
                               width: 2,
                             ),
                           ),
@@ -266,7 +266,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Mensaje de estado
             Text(
               'Esperando lectura NFC',
@@ -282,15 +282,15 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
               ),
             ),
             const SizedBox(height: 32),
-            
+
             // Información adicional
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.05),
+                color: Colors.green.withAlpha((255 * 0.05).round()),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.green.withOpacity(0.2),
+                  color: Colors.green.withAlpha((255 * 0.2).round()),
                   width: 1,
                 ),
               ),
@@ -320,7 +320,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
       ),
     );
   }
-  
+
   Widget _buildWifiDisabledState(ThemeData theme) {
     return Center(
       child: Padding(
@@ -332,7 +332,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: Colors.orange.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: const Icon(

@@ -10,20 +10,20 @@ class ScanResultWidget extends StatelessWidget {
   final VoidCallback? onViewDetails;
   final VoidCallback? onEditData;
   final String successMessage;
-  
+
   const ScanResultWidget({
-    Key? key,
+    super.key,
     required this.animal,
     required this.onScanAnother,
     this.onViewDetails,
     this.onEditData,
     this.successMessage = 'Animal encontrado',
-  }) : super(key: key);
-  
+  });
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -31,7 +31,7 @@ class ScanResultWidget extends StatelessWidget {
           // Banner de éxito
           _buildSuccessBanner(theme),
           const SizedBox(height: 16),
-          
+
           // Tarjeta con información del animal
           AnimalInfoCard(
             animal: animal,
@@ -39,19 +39,19 @@ class ScanResultWidget extends StatelessWidget {
             onEditarDatos: onEditData,
           ),
           const SizedBox(height: 20),
-          
+
           // Botón para escanear otro
           _buildScanAnotherButton(context),
         ],
       ),
     );
   }
-  
+
   Widget _buildSuccessBanner(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.green.withOpacity(0.1),
+        color: Colors.green.withAlpha((255 * 0.1).round()),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.green, width: 1.5),
       ),
@@ -60,7 +60,7 @@ class ScanResultWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.2),
+              color: Colors.green.withAlpha((255 * 0.2).round()),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -95,7 +95,7 @@ class ScanResultWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildScanAnotherButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
@@ -124,20 +124,20 @@ class ScanErrorWidget extends StatelessWidget {
   final VoidCallback onRetry;
   final IconData icon;
   final Color? color;
-  
+
   const ScanErrorWidget({
-    Key? key,
+    super.key,
     required this.errorMessage,
     required this.onRetry,
     this.icon = Icons.error_outline,
     this.color,
-  }) : super(key: key);
-  
+  });
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final errorColor = color ?? theme.colorScheme.error;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -148,7 +148,7 @@ class ScanErrorWidget extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: errorColor.withOpacity(0.1),
+                color: errorColor.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -200,18 +200,18 @@ class ConnectionStatusWidget extends StatelessWidget {
   final bool isConnected;
   final String deviceName;
   final VoidCallback? onDisconnect;
-  
+
   const ConnectionStatusWidget({
-    Key? key,
+    super.key,
     required this.isConnected,
     this.deviceName = 'Dispositivo',
     this.onDisconnect,
-  }) : super(key: key);
-  
+  });
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -224,9 +224,9 @@ class ConnectionStatusWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: isConnected 
-                  ? Colors.green.withOpacity(0.1)
-                  : Colors.grey.withOpacity(0.1),
+                color: isConnected
+                    ? Colors.green.withAlpha((255 * 0.1).round())
+                    : Colors.grey.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -273,17 +273,17 @@ class ConnectionStatusWidget extends StatelessWidget {
 class ScanningIndicatorWidget extends StatelessWidget {
   final String message;
   final String? submessage;
-  
+
   const ScanningIndicatorWidget({
-    Key? key,
+    super.key,
     required this.message,
     this.submessage,
-  }) : super(key: key);
-  
+  });
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -304,7 +304,7 @@ class ScanningIndicatorWidget extends StatelessWidget {
               Icon(
                 Icons.nfc,
                 size: 60,
-                color: theme.colorScheme.primary.withOpacity(0.5),
+                color: theme.colorScheme.primary.withAlpha((255 * 0.5).round()),
               ),
             ],
           ),

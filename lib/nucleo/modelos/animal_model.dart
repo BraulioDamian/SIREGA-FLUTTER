@@ -140,6 +140,22 @@ class Animal {
   
   @Backlink(to: 'madre')
   final crias = IsarLinks<Animal>();
+
+  @ignore
+  String get idAreteVisualParaMostrar {
+    if (idAreteVisual != null && idAreteVisual!.trim().isNotEmpty) {
+      return idAreteVisual!.trim();
+    }
+    return 'Sin Arete';
+  }
+
+  @ignore
+  String get idSinigaParaMostrar {
+    if (siniigaId != null && siniigaId!.esValidoBasico) {
+      return siniigaId!.formatoVisual;
+    }
+    return 'Sin Arete';
+  }
   
   // ===== MÉTODOS DE UTILIDAD =====
   int getEdadEnMeses() {

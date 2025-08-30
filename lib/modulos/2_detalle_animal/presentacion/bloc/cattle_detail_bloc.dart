@@ -15,11 +15,12 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
     // Handlers for main logic
     on<LoadCattleDetail>(_onLoadCattleDetail);
     on<DeactivateAnimal>(_onDeactivateAnimal);
+    on<UpdateAnimal>(_onUpdateAnimal);
+    on<DeleteAnimalPermanently>(_onDeleteAnimalPermanently);
 
     // Handlers for UI actions that just show a message
     on<EditAnimalClicked>(_onEditAnimalClicked);
     on<ShareAnimalClicked>(_onShareAnimalClicked);
-    on<ScanNFCClicked>(_onScanNFCClicked);
     on<RegisterEventClicked>(_onRegisterEventClicked);
     on<AddPhotoClicked>(_onAddPhotoClicked);
     on<PrintAnimalCardClicked>(_onPrintAnimalCardClicked);
@@ -56,15 +57,11 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
   // --- Handlers for simple UI actions ---
 
   void _onEditAnimalClicked(EditAnimalClicked event, Emitter<CattleDetailState> emit) {
-    emit(ShowInfoSnackbar('Función de edición próximamente'));
+    emit(NavigateToEditScreen(event.animal));
   }
 
   void _onShareAnimalClicked(ShareAnimalClicked event, Emitter<CattleDetailState> emit) {
     emit(ShowInfoSnackbar('Compartiendo información...'));
-  }
-
-  void _onScanNFCClicked(ScanNFCClicked event, Emitter<CattleDetailState> emit) {
-    emit(ShowInfoSnackbar('Iniciando escaneo NFC...'));
   }
 
   void _onRegisterEventClicked(RegisterEventClicked event, Emitter<CattleDetailState> emit) {
@@ -85,5 +82,28 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
 
   void _onArchiveAnimalClicked(ArchiveAnimalClicked event, Emitter<CattleDetailState> emit) {
     emit(ShowInfoSnackbar('Animal archivado correctamente'));
+  }
+
+  Future<void> _onUpdateAnimal(UpdateAnimal event, Emitter<CattleDetailState> emit) async {
+    try {
+      await isarService.guardarAnimal(event.animal);
+      // Recargar los datos del animal
+      final eventos = await isarService.obtenerEventosPorAnimal(event.animal.id);
+      emit(CattleDetailLoaded(animal: event.animal, eventos: eventos));
+      emit(ShowInfoSnackbar('Animal actualizado correctamente'));
+    } catch (e) {
+      emit(ShowInfoSnackbar('Error al actualizar: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onDeleteAnimalPermanently(DeleteAnimalPermanently event, Emitter<CattleDetailState> emit) async {
+    try {
+      // Eliminar físicamente de la base de datos
+      await isarService.eliminarAnimal(event.animalId);
+      emit(AnimalDeactivationSuccess());
+      emit(ShowInfoSnackbar('Animal eliminado permanentemente'));
+    } catch (e) {
+      emit(ShowInfoSnackbar('Error al eliminar: ${e.toString()}'));
+    }
   }
 }

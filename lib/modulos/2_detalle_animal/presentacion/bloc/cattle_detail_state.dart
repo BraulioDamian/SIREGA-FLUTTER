@@ -34,3 +34,15 @@ class ShowInfoSnackbar extends CattleDetailActionState {
 
 // Estado para indicar que el animal fue desactivado y se debe navegar hacia atrás
 class AnimalDeactivationSuccess extends CattleDetailActionState {}
+
+// Estado para navegar a la pantalla de edición
+class NavigateToEditScreen extends CattleDetailActionState {
+  final Animal animal;
+  NavigateToEditScreen(this.animal);
+}
+
+// Estado para actualización exitosa
+class AnimalUpdateSuccess extends CattleDetailActionState {
+  final Animal animal;
+  AnimalUpdateSuccess(this.animal);
+}

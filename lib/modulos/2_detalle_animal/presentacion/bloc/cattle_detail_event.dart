@@ -14,6 +14,17 @@ class DeactivateAnimal extends CattleDetailEvent {
   DeactivateAnimal(this.animal);
 }
 
+// Evento para actualizar un animal
+class UpdateAnimal extends CattleDetailEvent {
+  final Animal animal;
+  UpdateAnimal(this.animal);
+}
+
+class DeleteAnimalPermanently extends CattleDetailEvent {
+  final int animalId;
+  DeleteAnimalPermanently(this.animalId);
+}
+
 // --- Eventos para acciones del usuario desde la UI ---
 
 class EditAnimalClicked extends CattleDetailEvent {
@@ -24,11 +35,6 @@ class EditAnimalClicked extends CattleDetailEvent {
 class ShareAnimalClicked extends CattleDetailEvent {
   final Animal animal;
   ShareAnimalClicked(this.animal);
-}
-
-class ScanNFCClicked extends CattleDetailEvent {
-  final Animal animal;
-  ScanNFCClicked(this.animal);
 }
 
 class RegisterEventClicked extends CattleDetailEvent {

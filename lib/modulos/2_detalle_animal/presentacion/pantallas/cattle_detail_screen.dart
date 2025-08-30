@@ -6,6 +6,8 @@ import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentacion/bloc/cattle_detail_bloc.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentacion/widgets/detail_tab_content.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentacion/widgets/custom_sliver_header.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentacion/widgets/delete_animal_dialog.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentacion/pantallas/editar_animal/editar_animal_screen.dart';
 import 'package:flutter/rendering.dart';
 
 class CattleDetailScreen extends StatefulWidget {
@@ -169,6 +171,19 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             }
             if (state is AnimalDeactivationSuccess) {
               Navigator.of(context).pop(); // Pop after successful deactivation
+            }
+            if (state is NavigateToEditScreen) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditarAnimalScreen(animal: state.animal),
+                ),
+              ).then((result) {
+                if (result != null && result is Animal) {
+                  // Recargar los detalles del animal actualizado
+                  context.read<CattleDetailBloc>().add(LoadCattleDetail(result.id));
+                }
+              });
             }
           },
           child: Scaffold(
@@ -581,13 +596,6 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildSmallFAB(
-              Icons.qr_code_scanner_rounded,
-              Colors.blue,
-              () => _scanNFC(context, animal),
-              'Escanear NFC',
-            ),
-            const SizedBox(height: 12),
-            _buildSmallFAB(
               Icons.medical_services_rounded,
               Colors.orange,
               () => _registerEvent(context, animal),
@@ -790,9 +798,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     );
   }
 
-  void _scanNFC(BuildContext context, Animal animal) {
-    context.read<CattleDetailBloc>().add(ScanNFCClicked(animal));
-  }
+  
 
   void _registerEvent(BuildContext context, Animal animal) {
     context.read<CattleDetailBloc>().add(RegisterEventClicked(animal));
@@ -817,35 +823,9 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
   void _deleteAnimal(BuildContext context, Animal animal) {
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Row(
-          children: [
-            Icon(Icons.warning_rounded, color: Colors.red.shade400),
-            const SizedBox(width: 12),
-            const Text('Confirmar eliminación'),
-          ],
-        ),
-        content: Text('¿Está seguro de que desea eliminar a ${animal.nombre}? Esta acción no se puede deshacer.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              context.read<CattleDetailBloc>().add(DeactivateAnimal(animal));
-              Navigator.pop(dialogContext);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Eliminar'),
-          ),
-        ],
+      builder: (_) => BlocProvider.value(
+        value: context.read<CattleDetailBloc>(),
+        child: DeleteAnimalDialog(animal: animal),
       ),
     );
   }
