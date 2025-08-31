@@ -124,7 +124,7 @@ class BasicInfoFormSection extends StatelessWidget {
 
   Widget _buildRazaDropdown(BuildContext context, AnimalFormController controller) {
     return NativeSearchableDropdown<RazaBovina>(
-      controller: controller.razaDisplayController, // Usar controller del provider
+      controller: controller.razaDisplayController,
       focusNode: controller.razaFocus,
       labelText: 'Raza',
       prefixIcon: Icons.category,
@@ -153,7 +153,7 @@ class BasicInfoFormSection extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withAlpha(26),
+                      color: Colors.blue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
@@ -186,12 +186,12 @@ class BasicInfoFormSection extends StatelessWidget {
     final sexoOptions = Sexo.values;
 
     return NativeDropdown<Sexo>(
-      controller: controller.sexoDisplayController, // Usar controller del provider
+      controller: controller.sexoDisplayController,
       focusNode: controller.sexoFocus,
       labelText: 'Sexo',
       prefixIcon: Icons.pets,
       items: sexoOptions,
-      displayStringForOption: (sexo) => controller.sexoDisplayController.text,
+      displayStringForOption: _getSexoDisplayName,
       onSelected: (sexo) {
         controller.setSexo(sexo);
       },
@@ -211,7 +211,7 @@ class BasicInfoFormSection extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                controller.sexoDisplayController.text,
+                _getSexoDisplayName(sexo),
                 style: const TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 15,
@@ -259,5 +259,16 @@ class BasicInfoFormSection extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getSexoDisplayName(Sexo sexo) {
+    switch (sexo) {
+      case Sexo.macho:
+        return 'Macho';
+      case Sexo.hembra:
+        return 'Hembra';
+      case Sexo.castrado:
+        return 'Castrado';
+    }
   }
 }

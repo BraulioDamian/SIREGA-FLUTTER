@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:provider/provider.dart';
+import 'package:sirega_app/nucleo/servicios/nfc_service.dart';
 import '../controllers/animal_form_controller.dart';
 
 class NfcSection extends StatefulWidget {
@@ -11,7 +11,39 @@ class NfcSection extends StatefulWidget {
 }
 
 class _NfcSectionState extends State<NfcSection> {
+  final _nfcService = NfcService();
   bool _isReading = false;
+
+  Future<void> _startNfcReading(AnimalFormController controller) async {
+    if (_isReading) return;
+    setState(() => _isReading = true);
+
+    final nfcId = await _nfcService.readNfcTag(context);
+
+    if (mounted && nfcId != null) {
+      // La combinación del ID se hace en el controlador
+      controller.setNfcId(nfcId);
+    }
+
+    if (mounted) {
+      setState(() => _isReading = false);
+    }
+  }
+
+  Future<void> _startNfcSimulation(AnimalFormController controller) async {
+    if (_isReading) return;
+    setState(() => _isReading = true);
+
+    final nfcId = await _nfcService.simulateNfcTag(context);
+
+    if (mounted && nfcId != null) {
+      controller.setNfcId(nfcId);
+    }
+
+    if (mounted) {
+      setState(() => _isReading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +63,11 @@ class _NfcSectionState extends State<NfcSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(context, isMobile),
-                    SizedBox(height: isMobile ? 12 : 16),
-                    _buildNfcContent(context, controller, hasNfc, isMobile),
+                    const SizedBox(height: 16),
+                    if (hasNfc)
+                      _buildNfcDetected(controller, isMobile)
+                    else
+                      _buildNfcButtons(context, controller, isMobile),
                   ],
                 ),
               ),
@@ -63,52 +98,6 @@ class _NfcSectionState extends State<NfcSection> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildNfcContent(
-    BuildContext context,
-    AnimalFormController controller,
-    bool hasNfc,
-    bool isMobile,
-  ) {
-    if (_isReading) {
-      return _buildReadingState(isMobile);
-    }
-    
-    if (hasNfc) {
-      return _buildNfcDetected(controller, isMobile);
-    }
-    
-    return _buildReadNfcButton(context, controller, isMobile);
-  }
-
-  Widget _buildReadingState(bool isMobile) {
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 20 : 24),
-      child: Column(
-        children: [
-          const CircularProgressIndicator(),
-          SizedBox(height: isMobile ? 16 : 20),
-          Text(
-            'Acerque el chip NFC al dispositivo',
-            style: TextStyle(
-              fontSize: isMobile ? 14 : 16,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Mantenga el chip cerca hasta que se detecte',
-            style: TextStyle(
-              fontSize: isMobile ? 12 : 14,
-              color: Colors.grey.shade600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
     );
   }
 
@@ -169,7 +158,7 @@ class _NfcSectionState extends State<NfcSection> {
     );
   }
 
-  Widget _buildReadNfcButton(
+  Widget _buildNfcButtons(
     BuildContext context,
     AnimalFormController controller,
     bool isMobile,
@@ -209,15 +198,29 @@ class _NfcSectionState extends State<NfcSection> {
           ),
         SizedBox(
           width: double.infinity,
-          height: isMobile ? 48 : 56,
           child: ElevatedButton.icon(
-            onPressed: canRead ? () => _startNfcReading(controller) : null,
-            icon: const Icon(Icons.nfc),
-            label: Text(
-              'Leer Chip NFC',
-              style: TextStyle(fontSize: isMobile ? 16 : 18),
-            ),
+            onPressed: canRead && !_isReading ? () => _startNfcReading(controller) : null,
+            icon: _isReading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.nfc),
+            label: Text(_isReading ? 'Escaneando...' : 'Leer Chip NFC'),
             style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: canRead && !_isReading ? () => _startNfcSimulation(controller) : null,
+            icon: const Icon(Icons.sensors_off),
+            label: const Text('Simular Lectura'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              backgroundColor: Colors.grey.shade300,
+              foregroundColor: Colors.black87,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -226,67 +229,5 @@ class _NfcSectionState extends State<NfcSection> {
         ),
       ],
     );
-  }
-
-  Future<void> _startNfcReading(AnimalFormController controller) async {
-    var availability = await FlutterNfcKit.nfcAvailability;
-    if (availability != NFCAvailability.available) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('NFC no disponible o desactivado.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      return;
-    }
-
-    setState(() {
-      _isReading = true;
-    });
-
-    try {
-      final tag = await FlutterNfcKit.poll(
-        timeout: const Duration(seconds: 15),
-        iosAlertMessage: "Acerca el chip NFC al dispositivo",
-      );
-
-      String nfcId = tag.id;
-
-      // Si tenemos SINIGA, podemos combinar para hacer único
-      if (controller.sinigaId != null && nfcId.isNotEmpty) {
-        nfcId = '${controller.sinigaId!.fullId}-$nfcId';
-      } else if (nfcId.isEmpty) {
-        // Generar un ID basado en timestamp si no hay ID del tag
-        nfcId = 'NFC-${DateTime.now().millisecondsSinceEpoch}';
-      }
-      
-      if (mounted) {
-        controller.setNfcId(nfcId);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Chip NFC leído exitosamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al leer NFC: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isReading = false;
-        });
-      }
-      await FlutterNfcKit.finish();
-    }
   }
 }

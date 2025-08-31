@@ -15,7 +15,6 @@ class NfcService {
     try {
       final tag = await FlutterNfcKit.poll(
         timeout: const Duration(seconds: 15),
-        iosAlertMessage: "Acerca el chip NFC al dispositivo",
       );
       return tag.id;
     } finally {
@@ -23,3 +22,4 @@ class NfcService {
     }
   }
 }
+

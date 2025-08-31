@@ -84,11 +84,11 @@ class AnimalFormController extends ChangeNotifier {
   late final TextEditingController fechaController;
   late final TextEditingController nfcController;
   
-  // Controllers para los dropdowns (para evitar crearlos en el build)
+  // Controllers para displays de dropdowns
   late final TextEditingController razaDisplayController;
   late final TextEditingController sexoDisplayController;
   late final TextEditingController estadoDisplayController;
-
+  
   // Focus Nodes
   final FocusNode nombreFocus = FocusNode();
   final FocusNode estadoFocus = FocusNode();
@@ -96,6 +96,11 @@ class AnimalFormController extends ChangeNotifier {
   final FocusNode razaFocus = FocusNode();
   final FocusNode sexoFocus = FocusNode();
   final FocusNode estadoDropdownFocus = FocusNode();
+  
+  // Control de navegación automática
+  bool _autoNavigationEnabled = true;
+  bool _isEditingEstado = false;
+  bool _isEditingNumero = false;
   
   // Estados seleccionados
   RazaBovina? _razaSeleccionada;
@@ -165,16 +170,14 @@ class AnimalFormController extends ChangeNotifier {
       text: animalOriginal?.idAreteNFC ?? ''
     );
     
+    // Inicializar controllers de display
     razaDisplayController = TextEditingController();
-    sexoDisplayController = TextEditingController();
+    sexoDisplayController = TextEditingController(text: _getSexoDisplayName(Sexo.hembra));
     estadoDisplayController = TextEditingController();
     
     // Si es modo edición, cargar los datos del animal
     if (isEditMode && animalOriginal != null) {
       _loadAnimalData();
-    } else {
-      // Valores por defecto para creación
-      sexoDisplayController.text = _getSexoDisplayName(_sexo);
     }
   }
   
@@ -195,6 +198,7 @@ class AnimalFormController extends ChangeNotifier {
     
     // Cargar otros datos
     _sexo = animalOriginal!.sexo;
+    sexoDisplayController.text = _getSexoDisplayName(_sexo);
     _fechaNacimiento = animalOriginal!.fechaNacimiento;
     _nfcId = animalOriginal!.idAreteNFC;
     
@@ -203,7 +207,6 @@ class AnimalFormController extends ChangeNotifier {
                             '${_fechaNacimiento!.month.toString().padLeft(2, '0')}-'
                             '${_fechaNacimiento!.year}';
     }
-    sexoDisplayController.text = _getSexoDisplayName(animalOriginal!.sexo);
   }
   
   Future<void> _loadData() async {
@@ -226,27 +229,18 @@ class AnimalFormController extends ChangeNotifier {
       _razas = results[0] as List<RazaBovina>;
       _estados = results[1] as List<EstadoMexico>;
       
-      // Si es modo edición, buscar la raza y estado seleccionados
+      // Si es modo edición, buscar la raza seleccionada
       if (isEditMode && animalOriginal != null) {
-        // Cargar raza
-        final matchingRaza = _razas.where((r) => r.nombre == animalOriginal!.raza);
-        if (matchingRaza.isNotEmpty) {
-          _razaSeleccionada = matchingRaza.first;
-        } else {
-          _razaSeleccionada = _razas.isNotEmpty ? _razas.first : null;
-        }
+        _razaSeleccionada = _razas.firstWhere(
+          (r) => r.nombre == animalOriginal!.raza,
+          orElse: () => _razas.first,
+        );
         razaDisplayController.text = _razaSeleccionada?.nombre ?? '';
-
-        // Cargar estado
-        final estadoClave = animalOriginal?.siniigaId?.estadoClave;
-        if (estadoClave != null) {
-          final matchingEstado = _estados.where((e) => e.clave == estadoClave);
-          if (matchingEstado.isNotEmpty) {
-            final estado = matchingEstado.first;
-            _estadoSeleccionado = estado;
-            estadoDisplayController.text = '${estado.clave} - ${estado.nombre}';
-          }
-        }
+      }
+      
+      // Auto-seleccionar estado si ya hay un código
+      if (estadoController.text.length == 2) {
+        _autoSeleccionarEstado();
       }
     } catch (e) {
       debugPrint('Error cargando datos: $e');
@@ -257,35 +251,80 @@ class AnimalFormController extends ChangeNotifier {
   }
   
   void _setupListeners() {
-    // Listener para estado SINIGA
+    // Listener para estado SINIGA con validación
     estadoController.addListener(_onEstadoChanged);
     numeroController.addListener(_onNumeroChanged);
     
-    // Auto-navegación cuando se completan campos
+    // Listener para navegación con número nacional
+    numeroController.addListener(_onNumeroChangedForFocus);
+    
+    // Control de foco para estado
     estadoFocus.addListener(() {
-      if (estadoFocus.hasFocus && estadoController.text.length == 2) {
-        Future.delayed(const Duration(milliseconds: 100), () {
-          numeroFocus.requestFocus();
-        });
+      if (estadoFocus.hasFocus) {
+        _isEditingEstado = true;
+        _autoNavigationEnabled = true;
+      } else {
+        _isEditingEstado = false;
       }
     });
     
+    // Control de foco para número
     numeroFocus.addListener(() {
-      if (numeroFocus.hasFocus && numeroController.text.length == 8) {
-        Future.delayed(const Duration(milliseconds: 100), () {
-          numeroFocus.unfocus();
-        });
+      if (numeroFocus.hasFocus) {
+        _isEditingNumero = true;
+      } else {
+        _isEditingNumero = false;
       }
     });
   }
   
   void _onEstadoChanged() {
+    final texto = estadoController.text;
+    
+    // Validación de estado (01-32)
+    if (texto.isNotEmpty) {
+      final numero = int.tryParse(texto) ?? 0;
+      if (numero > 32) {
+        // No permitir números mayores a 32
+        estadoController.text = '32';
+        estadoController.selection = TextSelection.fromPosition(
+          TextPosition(offset: estadoController.text.length),
+        );
+      }
+    }
+    
     _validarSiniga();
     _autoSeleccionarEstado();
+    
+    // Auto-navegación solo si estamos editando y tenemos 2 dígitos
+    if (_isEditingEstado && 
+        _autoNavigationEnabled && 
+        estadoController.text.length == 2 &&
+        estadoFocus.hasFocus) {
+      // Delay para permitir que se procese el texto
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (_autoNavigationEnabled && estadoFocus.hasFocus) {
+          numeroFocus.requestFocus();
+        }
+      });
+    }
   }
   
   void _onNumeroChanged() {
     _validarSiniga();
+  }
+  
+  void _onNumeroChangedForFocus() {
+    // Auto-desenfoque cuando se completan los 8 dígitos
+    if (_isEditingNumero && 
+        numeroController.text.length == 8 && 
+        numeroFocus.hasFocus) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (numeroFocus.hasFocus) {
+          numeroFocus.unfocus();
+        }
+      });
+    }
   }
   
   void _autoSeleccionarEstado() {
@@ -294,14 +333,16 @@ class AnimalFormController extends ChangeNotifier {
       final estado = _estados.where((e) => e.clave == codigo).firstOrNull;
       
       if (estado != null && _estadoSeleccionado?.clave != codigo) {
-        setEstadoSeleccionado(estado);
+        _estadoSeleccionado = estado;
+        estadoDisplayController.text = '${estado.clave} - ${estado.nombre}';
+        notifyListeners();
       } else if (estado == null) {
         _estadoSeleccionado = null;
         estadoDisplayController.clear();
         notifyListeners();
       }
     } else {
-      if (_estadoSeleccionado != null) {
+      if (_estadoSeleccionado != null || estadoDisplayController.text.isNotEmpty) {
         _estadoSeleccionado = null;
         estadoDisplayController.clear();
         notifyListeners();
@@ -319,6 +360,13 @@ class AnimalFormController extends ChangeNotifier {
       return;
     }
     
+    // Validación adicional del estado
+    final estadoNum = int.tryParse(estado) ?? 0;
+    if (estadoNum < 1 || estadoNum > 32) {
+      _updateValidation(null, false, '❌ Código de estado inválido. Debe ser entre 01 y 32');
+      return;
+    }
+    
     try {
       final rawId = '$especie$estado$numero';
       final siniga = SinigaId.fromString(rawId);
@@ -330,9 +378,9 @@ class AnimalFormController extends ChangeNotifier {
         mensaje = '❌ Código de especie inválido. Debe ser "00" para bovinos';
         isValid = false;
       } else if (!_esEstadoValido(estado)) {
-        mensaje = '❌ Código de estado inválido ($estado)';
+        mensaje = '❌ Código de estado no registrado ($estado)';
         isValid = false;
-      } else if (!RegExp(r'^\d{8}').hasMatch(numero)) {
+      } else if (!RegExp(r'^\d{8}$').hasMatch(numero)) {
         mensaje = '❌ Número nacional debe tener 8 dígitos numéricos';
         isValid = false;
       } else {
@@ -468,6 +516,7 @@ class AnimalFormController extends ChangeNotifier {
     nombreController.dispose();
     especieController.dispose();
     estadoController.dispose();
+    numeroController.removeListener(_onNumeroChangedForFocus);
     numeroController.dispose();
     fechaController.dispose();
     nfcController.dispose();
