@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Widget de dropdown nativo reutilizable que usa Autocomplete de Flutter
-/// Reemplaza al CustomTypeAheadDropdown que usaba flutter_typeahead
+/// Widget de dropdown nativo reutilizable que usa Overlay de Flutter
 class NativeDropdown<T> extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -42,12 +41,12 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>> {
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
   bool _isOpen = false;
+  final GlobalKey _fieldKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     
-    // Si hay selección inicial, establecer el texto
     if (widget.initialSelection != null) {
       widget.controller.text = widget.displayStringForOption(widget.initialSelection as T);
     }
@@ -72,13 +71,17 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>> {
   void _showOverlay() {
     if (_isOpen || !widget.enabled) return;
     
-    // Dar foco al campo para mantener consistencia
     widget.focusNode.requestFocus();
     
-    _overlayEntry = _createOverlay();
-    Overlay.of(context).insert(_overlayEntry!);
-    setState(() {
-      _isOpen = true;
+    // Asegurar que el widget esté construido antes de crear el overlay
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
+      _overlayEntry = _createOverlay();
+      Overlay.of(context).insert(_overlayEntry!);
+      setState(() {
+        _isOpen = true;
+      });
     });
   }
 
@@ -88,18 +91,21 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>> {
     setState(() {
       _isOpen = false;
     });
-    // Quitar el foco cuando se cierra
     widget.focusNode.unfocus();
   }
 
   OverlayEntry _createOverlay() {
-    RenderBox renderBox = context.findRenderObject() as RenderBox;
-    var size = renderBox.size;
+    // Obtener el RenderBox del campo para posicionar correctamente
+    final RenderBox? renderBox = _fieldKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return OverlayEntry(builder: (_) => const SizedBox.shrink());
+    
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
 
     return OverlayEntry(
       builder: (context) => Stack(
         children: [
-          // Capa invisible para detectar clicks fuera del dropdown
+          // Capa invisible para detectar clicks fuera
           Positioned.fill(
             child: GestureDetector(
               onTap: _hideOverlay,
@@ -107,50 +113,60 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>> {
               child: Container(color: Colors.transparent),
             ),
           ),
-          // El dropdown en sí
+          // Posicionar el dropdown justo debajo del campo
           Positioned(
+            left: offset.dx,
+            top: offset.dy + size.height + 4,
             width: size.width,
-            child: CompositedTransformFollower(
-              link: _layerLink,
-              showWhenUnlinked: false,
-              offset: Offset(0.0, size.height + 5.0),
-              child: Material(
-                elevation: 8,
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 250),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Theme.of(context).dividerColor,
-                    ),
-                  ),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: widget.items.length,
-                    itemBuilder: (context, index) {
-                      final item = widget.items[index];
-                      return InkWell(
-                        onTap: () {
-                          widget.onSelected(item);
-                          widget.controller.text = widget.displayStringForOption(item);
-                          _hideOverlay();
-                        },
-                        child: widget.itemBuilder != null
-                            ? widget.itemBuilder!(context, item)
-                            : Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                child: Text(widget.displayStringForOption(item)),
-                              ),
-                      );
-                    },
+            child: Material(
+              elevation: 8,
+              borderRadius: BorderRadius.circular(8),
+              clipBehavior: Clip.antiAlias,
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: 250,
+                  maxWidth: size.width,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Theme.of(context).dividerColor.withOpacity(0.5),
+                    width: 1,
                   ),
                 ),
+                child: widget.items.isEmpty
+                    ? Container(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'No hay opciones disponibles',
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: widget.items.length,
+                        itemBuilder: (context, index) {
+                          final item = widget.items[index];
+                          return InkWell(
+                            onTap: () {
+                              widget.onSelected(item);
+                              widget.controller.text = widget.displayStringForOption(item);
+                              _hideOverlay();
+                            },
+                            child: widget.itemBuilder != null
+                                ? widget.itemBuilder!(context, item)
+                                : Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    child: Text(widget.displayStringForOption(item)),
+                                  ),
+                          );
+                        },
+                      ),
               ),
             ),
           ),
@@ -161,38 +177,39 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return CompositedTransformTarget(
-      link: _layerLink,
-      child: TextFormField(
-        controller: widget.controller,
-        focusNode: widget.focusNode,
-        readOnly: widget.readOnly,
-        enabled: widget.enabled,
-        validator: widget.validator,
-        onTap: widget.readOnly && widget.enabled ? _toggleDropdown : null,
-        decoration: InputDecoration(
-          labelText: widget.labelText,
-          helperText: widget.helperText,
-          border: const OutlineInputBorder(),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Theme.of(context).primaryColor,
-              width: 2,
-            ),
+    return TextFormField(
+      key: _fieldKey,
+      controller: widget.controller,
+      focusNode: widget.focusNode,
+      readOnly: widget.readOnly,
+      enabled: widget.enabled,
+      validator: widget.validator,
+      onTap: widget.readOnly && widget.enabled ? _toggleDropdown : null,
+      decoration: InputDecoration(
+        labelText: widget.labelText,
+        helperText: widget.helperText,
+        border: const OutlineInputBorder(),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Theme.of(context).primaryColor,
+            width: 2,
           ),
-          prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
-          suffixIcon: GestureDetector(
-            onTap: widget.enabled ? _toggleDropdown : null,
-            child: AnimatedRotation(
-              duration: const Duration(milliseconds: 200),
-              turns: _isOpen ? 0.5 : 0,
-              child: const Icon(Icons.arrow_drop_down),
-            ),
-          ),
-          enabled: widget.enabled,
-          fillColor: widget.enabled ? null : Colors.grey.shade100,
-          filled: !widget.enabled,
         ),
+        prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+        suffixIcon: GestureDetector(
+          onTap: widget.enabled ? _toggleDropdown : null,
+          child: AnimatedRotation(
+            duration: const Duration(milliseconds: 200),
+            turns: _isOpen ? 0.5 : 0,
+            child: Icon(
+              Icons.arrow_drop_down,
+              color: widget.enabled ? null : Colors.grey,
+            ),
+          ),
+        ),
+        enabled: widget.enabled,
+        fillColor: widget.enabled ? null : Colors.grey.shade100,
+        filled: !widget.enabled,
       ),
     );
   }
@@ -205,7 +222,7 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>> {
   }
 }
 
-/// Widget de Autocomplete nativo de Flutter para búsqueda
+/// Widget de Autocomplete nativo con búsqueda
 class NativeSearchableDropdown<T extends Object> extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -241,9 +258,9 @@ class NativeSearchableDropdown<T extends Object> extends StatefulWidget {
 
 class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearchableDropdown<T>> {
   bool _isOpen = false;
-  final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
   List<T> _filteredItems = [];
+  final GlobalKey _fieldKey = GlobalKey();
 
   @override
   void initState() {
@@ -267,7 +284,6 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
       }
     });
     
-    // Actualizar el overlay si está abierto
     if (_isOpen) {
       _updateOverlay();
     }
@@ -277,8 +293,7 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
     if (widget.focusNode.hasFocus && !_isOpen) {
       _showOverlay();
     } else if (!widget.focusNode.hasFocus && _isOpen) {
-      // Delay para permitir clicks en items
-      Future.delayed(const Duration(milliseconds: 100), () {
+      Future.delayed(const Duration(milliseconds: 200), () {
         if (!widget.focusNode.hasFocus) {
           _hideOverlay();
         }
@@ -299,10 +314,14 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
   void _showOverlay() {
     if (_isOpen || !widget.enabled) return;
     
-    _overlayEntry = _createOverlay();
-    Overlay.of(context).insert(_overlayEntry!);
-    setState(() {
-      _isOpen = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
+      _overlayEntry = _createOverlay();
+      Overlay.of(context).insert(_overlayEntry!);
+      setState(() {
+        _isOpen = true;
+      });
     });
   }
 
@@ -316,20 +335,23 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
 
   void _updateOverlay() {
     _overlayEntry?.remove();
-    if (_isOpen) {
+    if (_isOpen && mounted) {
       _overlayEntry = _createOverlay();
       Overlay.of(context).insert(_overlayEntry!);
     }
   }
 
   OverlayEntry _createOverlay() {
-    RenderBox renderBox = context.findRenderObject() as RenderBox;
-    var size = renderBox.size;
+    final RenderBox? renderBox = _fieldKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return OverlayEntry(builder: (_) => const SizedBox.shrink());
+    
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
 
     return OverlayEntry(
       builder: (context) => Stack(
         children: [
-          // Capa invisible para detectar clicks fuera
+          // Capa invisible
           Positioned.fill(
             child: GestureDetector(
               onTap: () {
@@ -342,73 +364,75 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
           ),
           // El dropdown con búsqueda
           Positioned(
+            left: offset.dx,
+            top: offset.dy + size.height + 4,
             width: size.width,
-            child: CompositedTransformFollower(
-              link: _layerLink,
-              showWhenUnlinked: false,
-              offset: Offset(0.0, size.height + 5.0),
-              child: Material(
-                elevation: 8,
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 250),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Theme.of(context).dividerColor,
-                    ),
-                  ),
-                  child: _filteredItems.isEmpty
-                      ? Container(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.search_off,
-                                color: Colors.grey.shade400,
-                                size: 32,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'No se encontraron resultados',
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: _filteredItems.length,
-                          itemBuilder: (context, index) {
-                            final item = _filteredItems[index];
-                            return InkWell(
-                              onTap: () {
-                                widget.onSelected(item);
-                                widget.controller.text = 
-                                    widget.displayStringForOption(item);
-                                _hideOverlay();
-                                widget.focusNode.unfocus();
-                              },
-                              child: widget.itemBuilder != null
-                                  ? widget.itemBuilder!(context, item)
-                                  : Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 12,
-                                      ),
-                                      child: Text(
-                                        widget.displayStringForOption(item),
-                                      ),
-                                    ),
-                            );
-                          },
-                        ),
+            child: Material(
+              elevation: 8,
+              borderRadius: BorderRadius.circular(8),
+              clipBehavior: Clip.antiAlias,
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: 250,
+                  maxWidth: size.width,
                 ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Theme.of(context).dividerColor.withOpacity(0.5),
+                    width: 1,
+                  ),
+                ),
+                child: _filteredItems.isEmpty
+                    ? Container(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              color: Colors.grey.shade400,
+                              size: 32,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'No se encontraron resultados',
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: _filteredItems.length,
+                        itemBuilder: (context, index) {
+                          final item = _filteredItems[index];
+                          return InkWell(
+                            onTap: () {
+                              widget.onSelected(item);
+                              widget.controller.text = 
+                                  widget.displayStringForOption(item);
+                              _hideOverlay();
+                              widget.focusNode.unfocus();
+                            },
+                            child: widget.itemBuilder != null
+                                ? widget.itemBuilder!(context, item)
+                                : Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    child: Text(
+                                      widget.displayStringForOption(item),
+                                    ),
+                                  ),
+                          );
+                        },
+                      ),
               ),
             ),
           ),
@@ -419,36 +443,37 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
 
   @override
   Widget build(BuildContext context) {
-    return CompositedTransformTarget(
-      link: _layerLink,
-      child: TextFormField(
-        controller: widget.controller,
-        focusNode: widget.focusNode,
-        enabled: widget.enabled,
-        validator: widget.validator,
-        decoration: InputDecoration(
-          labelText: widget.labelText,
-          helperText: widget.helperText,
-          border: const OutlineInputBorder(),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Theme.of(context).primaryColor,
-              width: 2,
-            ),
+    return TextFormField(
+      key: _fieldKey,
+      controller: widget.controller,
+      focusNode: widget.focusNode,
+      enabled: widget.enabled,
+      validator: widget.validator,
+      decoration: InputDecoration(
+        labelText: widget.labelText,
+        helperText: widget.helperText,
+        border: const OutlineInputBorder(),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Theme.of(context).primaryColor,
+            width: 2,
           ),
-          prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
-          suffixIcon: GestureDetector(
-            onTap: widget.enabled ? _toggleDropdown : null,
-            child: AnimatedRotation(
-              duration: const Duration(milliseconds: 200),
-              turns: _isOpen ? 0.5 : 0,
-              child: const Icon(Icons.arrow_drop_down),
-            ),
-          ),
-          enabled: widget.enabled,
-          fillColor: widget.enabled ? null : Colors.grey.shade100,
-          filled: !widget.enabled,
         ),
+        prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+        suffixIcon: GestureDetector(
+          onTap: widget.enabled ? _toggleDropdown : null,
+          child: AnimatedRotation(
+            duration: const Duration(milliseconds: 200),
+            turns: _isOpen ? 0.5 : 0,
+            child: Icon(
+              Icons.arrow_drop_down,
+              color: widget.enabled ? null : Colors.grey,
+            ),
+          ),
+        ),
+        enabled: widget.enabled,
+        fillColor: widget.enabled ? null : Colors.grey.shade100,
+        filled: !widget.enabled,
       ),
     );
   }
