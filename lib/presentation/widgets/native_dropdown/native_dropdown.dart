@@ -46,7 +46,6 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
   bool _isOpen = false;
   late AnimationController _animationController;
   late Animation<double> _expandAnimation;
-  late Animation<double> _fadeAnimation;
   bool _isDisposed = false;
 
   @override
@@ -62,12 +61,6 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
       parent: _animationController,
       curve: Curves.easeOutCubic,
       reverseCurve: Curves.easeInCubic,
-    );
-    
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-      reverseCurve: Curves.easeIn,
     );
     
     if (widget.initialSelection != null) {
@@ -368,7 +361,6 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
   bool _isUpdating = false;
   late AnimationController _animationController;
   late Animation<double> _expandAnimation;
-  late Animation<double> _fadeAnimation;
   bool _isDisposed = false;
 
   @override
@@ -384,12 +376,6 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
       parent: _animationController,
       curve: Curves.easeOutBack,
       reverseCurve: Curves.easeInCubic,
-    );
-    
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-      reverseCurve: Curves.easeIn,
     );
     
     _filteredItems = widget.items.take(50).toList();
