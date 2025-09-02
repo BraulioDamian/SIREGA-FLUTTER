@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:math' as math;
 
 /// Widget de dropdown nativo reutilizable con animaciones suaves
 class NativeDropdown<T> extends StatefulWidget {
@@ -16,6 +17,10 @@ class NativeDropdown<T> extends StatefulWidget {
   final bool enabled;
   final String? Function(String?)? validator;
   final T? initialSelection;
+  /// Altura máxima del menú desplegable.
+  final double maxMenuHeight;
+  /// Alignment usado en Scrollable.ensureVisible (0 = top). Default: 0.02 para subir un poco más.
+  final double scrollAlignment;
 
   const NativeDropdown({
     super.key,
@@ -32,6 +37,8 @@ class NativeDropdown<T> extends StatefulWidget {
     this.enabled = true,
     this.validator,
     this.initialSelection,
+  this.maxMenuHeight = 320,
+  this.scrollAlignment = 0.02,
   });
 
   @override
@@ -47,6 +54,9 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
   late AnimationController _animationController;
   late Animation<double> _expandAnimation;
   bool _isDisposed = false;
+  ScrollPosition? _scrollPosition; // posicion de scroll para cierre
+  double? _openScrollOffset; // offset al abrir
+  bool _scrollAttached = false;
 
   @override
   void initState() {
@@ -89,18 +99,42 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
 
   void _showOverlay() {
     if (_isOpen || !widget.enabled || _isDisposed) return;
-    
+
     widget.focusNode.requestFocus();
-    
+
+    // Ensure the field is visible and has space for the dropdown
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _isOpen || _isDisposed) return;
-      
-      _overlayEntry = _createOverlay();
-      Overlay.of(context).insert(_overlayEntry!);
-      _animationController.forward();
-      setState(() {
-        _isOpen = true;
-      });
+      if (!mounted || _isDisposed) return;
+
+      final context = _fieldKey.currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          alignment: widget.scrollAlignment.clamp(0.0, 1.0),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+        ).then((_) {
+          // After scrolling, create and show the overlay
+          if (!mounted || _isOpen || _isDisposed) return;
+          _overlayEntry = _createOverlay();
+          Overlay.of(this.context).insert(_overlayEntry!);
+          _animationController.forward();
+          setState(() {
+            _isOpen = true;
+          });
+          _attachScrollListener();
+        });
+      } else {
+        // Fallback for when context is not available
+        if (!mounted || _isOpen || _isDisposed) return;
+        _overlayEntry = _createOverlay();
+        Overlay.of(this.context).insert(_overlayEntry!);
+        _animationController.forward();
+        setState(() {
+          _isOpen = true;
+        });
+  _attachScrollListener();
+      }
     });
   }
 
@@ -122,6 +156,7 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
         }
       }
     });
+  _detachScrollListener();
     
     widget.focusNode.unfocus();
   }
@@ -136,12 +171,21 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
         _isOpen = false;
       });
     }
+  _detachScrollListener();
   }
 
   OverlayEntry _createOverlay() {
     final renderBox = _fieldKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return OverlayEntry(builder: (_) => const SizedBox.shrink());
-    final size = renderBox.size;
+  final size = renderBox.size;
+  final fieldOffset = renderBox.localToGlobal(Offset.zero);
+  final screenSize = MediaQuery.of(context).size;
+  final spaceAbove = fieldOffset.dy;
+  final spaceBelow = screenSize.height - (fieldOffset.dy + size.height);
+  // Altura deseada (puede ser menor que maxMenuHeight según ítems)
+  final desiredHeight = math.min(widget.items.length * 52.0, widget.maxMenuHeight).toDouble();
+  final openUp = spaceBelow < desiredHeight && spaceAbove > spaceBelow;
+  final effectiveHeight = desiredHeight;
 
     return OverlayEntry(
       builder: (context) => Stack(
@@ -150,7 +194,7 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
           CompositedTransformFollower(
             link: _layerLink,
             showWhenUnlinked: false,
-            offset: Offset(0.0, size.height),
+            offset: openUp ? Offset(0.0, -effectiveHeight.toDouble()) : Offset(0.0, size.height),
             child: AnimatedBuilder(
               animation: _expandAnimation,
               builder: (context, child) {
@@ -158,16 +202,22 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
                   opacity: _expandAnimation.value,
                   child: Material(
                     elevation: 4.0,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(openUp ? 8 : 0),
+                      bottom: Radius.circular(openUp ? 0 : 8),
+                    ),
                     clipBehavior: Clip.antiAlias,
                     child: Container(
                       constraints: BoxConstraints(
-                        maxHeight: 250 * _expandAnimation.value,
+                        maxHeight: effectiveHeight * _expandAnimation.value,
                         maxWidth: size.width,
                       ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(openUp ? 8 : 0),
+                          bottom: Radius.circular(openUp ? 0 : 8),
+                        ),
                         border: Border.all(
                           color: Theme.of(context).primaryColor.withAlpha((255 * 0.2).round()),
                           width: 1,
@@ -312,7 +362,34 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
     widget.focusNode.removeListener(_onFocusChanged);
     _hideOverlayImmediately();
     _animationController.dispose();
+    _detachScrollListener();
     super.dispose();
+  }
+
+  void _attachScrollListener() {
+    if (_scrollAttached || !mounted) return;
+    final scrollableState = Scrollable.of(context);
+  _scrollPosition = scrollableState.position;
+  _openScrollOffset = _scrollPosition!.pixels;
+  _scrollPosition!.addListener(_onScrollChange);
+  _scrollAttached = true;
+  }
+
+  void _detachScrollListener() {
+    if (_scrollAttached && _scrollPosition != null) {
+      _scrollPosition!.removeListener(_onScrollChange);
+    }
+    _scrollAttached = false;
+    _scrollPosition = null;
+    _openScrollOffset = null;
+  }
+
+  void _onScrollChange() {
+    if (!_isOpen || _scrollPosition == null || _openScrollOffset == null) return;
+    // Cierra si hubo desplazamiento perceptible (>4 px)
+    if ((_scrollPosition!.pixels - _openScrollOffset!).abs() > 4) {
+      _hideOverlay();
+    }
   }
 }
 
@@ -329,6 +406,9 @@ class NativeSearchableDropdown<T extends Object> extends StatefulWidget {
   final Widget Function(BuildContext, T)? itemBuilder;
   final bool enabled;
   final String? Function(String?)? validator;
+  final T? initialSelection;
+  final double maxMenuHeight;
+  final double scrollAlignment;
 
   const NativeSearchableDropdown({
     super.key,
@@ -343,6 +423,9 @@ class NativeSearchableDropdown<T extends Object> extends StatefulWidget {
     this.itemBuilder,
     this.enabled = true,
     this.validator,
+    this.initialSelection,
+  this.maxMenuHeight = 340,
+  this.scrollAlignment = 0.02,
   });
 
   @override
@@ -362,6 +445,9 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
   late AnimationController _animationController;
   late Animation<double> _expandAnimation;
   bool _isDisposed = false;
+  ScrollPosition? _scrollPosition; // para detectar scroll
+  double? _openScrollOffset;
+  bool _scrollAttached = false;
 
   @override
   void initState() {
@@ -378,7 +464,11 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
       reverseCurve: Curves.easeInCubic,
     );
     
-    _filteredItems = widget.items.take(50).toList();
+    if (widget.initialSelection != null) {
+      widget.controller.text = widget.displayStringForOption(widget.initialSelection as T);
+    }
+    
+  _filteredItems = List<T>.from(widget.items);
     widget.controller.addListener(_onSearchChanged);
     widget.focusNode.addListener(_onFocusChanged);
   }
@@ -386,7 +476,7 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
   void _onSearchChanged() {
     _debounceTimer?.cancel();
     
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+  _debounceTimer = Timer(const Duration(milliseconds: 180), () {
       if (!mounted || _isDisposed) return;
       
       final searchTerm = widget.controller.text.toLowerCase();
@@ -395,24 +485,24 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
       
       setState(() {
         if (searchTerm.isEmpty) {
-          _filteredItems = List<T>.from(widget.items.take(50));
+          _filteredItems = List<T>.from(widget.items);
         } else {
           _filteredItems = List<T>.from(
             widget.items.where((item) {
               return widget.displayStringForOption(item)
                   .toLowerCase()
                   .contains(searchTerm);
-            }).take(50)
+            })
           );
         }
       });
       
       if (_isOpen && mounted && !_isDisposed) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          _isUpdating = false; // liberar antes de intentar actualizar
           if (mounted && _isOpen && !_isDisposed) {
             _updateOverlay();
           }
-          _isUpdating = false;
         });
       } else {
         _isUpdating = false;
@@ -447,17 +537,43 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
 
   void _showOverlay() {
     if (_isOpen || !widget.enabled || _isUpdating || _isDisposed) return;
-    
+
+    // Ensure the field is visible and has space for the dropdown
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _isOpen || _isDisposed) return;
-      
-      _overlayEntry = _createOverlay();
-      if (_overlayEntry != null) {
-        Overlay.of(context).insert(_overlayEntry!);
-        _animationController.forward();
-        setState(() {
-          _isOpen = true;
+      if (!mounted || _isDisposed) return;
+
+      final context = _fieldKey.currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          alignment: widget.scrollAlignment.clamp(0.0, 1.0),
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeOutCubic,
+        ).then((_) {
+          // After scrolling, create and show the overlay
+          if (!mounted || _isOpen || _isDisposed) return;
+          _overlayEntry = _createOverlay();
+          if (_overlayEntry != null) {
+            Overlay.of(this.context).insert(_overlayEntry!);
+            _animationController.forward();
+            setState(() {
+              _isOpen = true;
+            });
+            _attachScrollListener();
+          }
         });
+      } else {
+        // Fallback for when context is not available
+        if (!mounted || _isOpen || _isDisposed) return;
+        _overlayEntry = _createOverlay();
+        if (_overlayEntry != null) {
+          Overlay.of(this.context).insert(_overlayEntry!);
+          _animationController.forward();
+          setState(() {
+            _isOpen = true;
+          });
+          _attachScrollListener();
+        }
       }
     });
   }
@@ -483,6 +599,7 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
         }
       }
     });
+  _detachScrollListener();
   }
 
   void _hideOverlayImmediately() {
@@ -497,10 +614,11 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
         _isUpdating = false;
       });
     }
+  _detachScrollListener();
   }
 
   void _updateOverlay() {
-    if (!_isOpen || _isUpdating || _isDisposed) return;
+    if (!_isOpen || _isDisposed) return;
     
     _overlayEntry?.remove();
     _overlayEntry = null;
@@ -517,8 +635,34 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
     final renderBox = _fieldKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return OverlayEntry(builder: (_) => const SizedBox.shrink());
     final size = renderBox.size;
-    
     final itemsCopy = List<T>.from(_filteredItems);
+    final fieldOffset = renderBox.localToGlobal(Offset.zero);
+    final mediaQuery = MediaQuery.of(context);
+    final screenSize = mediaQuery.size;
+    final keyboardHeight = mediaQuery.viewInsets.bottom; // altura del teclado
+    final topPadding = mediaQuery.padding.top;
+    final spaceAbove = fieldOffset.dy - topPadding; // espacio útil arriba
+    final spaceBelowAvailable = screenSize.height - keyboardHeight - (fieldOffset.dy + size.height);
+    // Altura deseada basada en items (52 aprox por fila)
+  // Estimación de altura: si sólo hay un ítem damos más espacio (multi‑línea / badges, etc.)
+  final double perItemBase = itemsCopy.length == 1 ? 90.0 : 52.0;
+  final desiredHeight = math.min(itemsCopy.length * perItemBase, widget.maxMenuHeight).toDouble();
+    // Determinar si conviene abrir hacia arriba (cuando abajo no cabe por teclado)
+    bool openUp = spaceBelowAvailable < desiredHeight && spaceAbove > spaceBelowAvailable;
+    if (spaceBelowAvailable < 120 && spaceAbove > spaceBelowAvailable + 40) {
+      openUp = true; // heurística extra cuando el espacio abajo es muy pequeño
+    }
+    final availableHeight = openUp
+        ? math.max(0, spaceAbove - 8)
+        : math.max(0, spaceBelowAvailable - 8);
+    double effectiveHeight = math.min(desiredHeight, availableHeight).clamp(0, widget.maxMenuHeight).toDouble();
+    // Permitir que se vea aunque sea una fracción de un item si el teclado ocupa casi todo
+    const double minPixelsVisible = 36; // muestra parte de un item para indicar scroll
+    if (effectiveHeight > 0 && effectiveHeight < minPixelsVisible) {
+      effectiveHeight = math.min(minPixelsVisible, desiredHeight);
+    }
+    
+  // itemsCopy ya definido arriba
 
     return OverlayEntry(
       builder: (context) => Stack(
@@ -527,7 +671,7 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
           CompositedTransformFollower(
             link: _layerLink,
             showWhenUnlinked: false,
-            offset: Offset(0.0, size.height),
+            offset: openUp ? Offset(0.0, -effectiveHeight) : Offset(0.0, size.height),
             child: AnimatedBuilder(
               animation: _expandAnimation,
               builder: (context, child) {
@@ -535,17 +679,23 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
                   opacity: _expandAnimation.value.clamp(0.0, 1.0),
                   child: Material(
                     elevation: 4.0,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(openUp ? 8 : 0),
+                      bottom: Radius.circular(openUp ? 0 : 8),
+                    ),
                     clipBehavior: Clip.antiAlias,
                     animationDuration: Duration.zero,
                     child: Container(
                       constraints: BoxConstraints(
-                        maxHeight: 250 * _expandAnimation.value,
+                        maxHeight: effectiveHeight * _expandAnimation.value,
                         maxWidth: size.width,
                       ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(openUp ? 8 : 0),
+                          bottom: Radius.circular(openUp ? 0 : 8),
+                        ),
                         border: Border.all(
                           color: Theme.of(context).primaryColor.withAlpha((255 * 0.2).round()),
                           width: 1,
@@ -722,6 +872,32 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
     widget.focusNode.removeListener(_onFocusChanged);
     _hideOverlayImmediately();
     _animationController.dispose();
+    _detachScrollListener();
     super.dispose();
+  }
+
+  void _attachScrollListener() {
+    if (_scrollAttached || !mounted) return;
+    final scrollableState = Scrollable.of(context);
+  _scrollPosition = scrollableState.position;
+  _openScrollOffset = _scrollPosition!.pixels;
+  _scrollPosition!.addListener(_onScrollChange);
+  _scrollAttached = true;
+  }
+
+  void _detachScrollListener() {
+    if (_scrollAttached && _scrollPosition != null) {
+      _scrollPosition!.removeListener(_onScrollChange);
+    }
+    _scrollAttached = false;
+    _scrollPosition = null;
+    _openScrollOffset = null;
+  }
+
+  void _onScrollChange() {
+    if (!_isOpen || _scrollPosition == null || _openScrollOffset == null) return;
+    if ((_scrollPosition!.pixels - _openScrollOffset!).abs() > 4) {
+      _hideOverlay();
+    }
   }
 }
