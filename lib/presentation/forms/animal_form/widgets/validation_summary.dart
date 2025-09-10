@@ -130,6 +130,7 @@ class SaveButton extends StatelessWidget {
                     vertical: isMobile ? 14 : 16,
                   ),
                   backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white, // Color del texto e iconos
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -145,7 +146,7 @@ class SaveButton extends StatelessWidget {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white.withOpacity(0.8),
+                                Colors.white,
                               ),
                             ),
                           ),
@@ -155,6 +156,7 @@ class SaveButton extends StatelessWidget {
                             style: TextStyle(
                               fontSize: isMobile ? 16 : 18,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                         ],
@@ -162,13 +164,14 @@ class SaveButton extends StatelessWidget {
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.save),
+                          const Icon(Icons.save, color: Colors.white),
                           const SizedBox(width: 8),
                           Text(
                             text,
                             style: TextStyle(
                               fontSize: isMobile ? 16 : 18,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                         ],

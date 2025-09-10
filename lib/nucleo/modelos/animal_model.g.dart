@@ -211,165 +211,170 @@ const AnimalSchema = CollectionSchema(
       name: r'longitud',
       type: IsarType.double,
     ),
-    r'nombre': PropertySchema(
+    r'nfcChipId': PropertySchema(
       id: 38,
+      name: r'nfcChipId',
+      type: IsarType.string,
+    ),
+    r'nombre': PropertySchema(
+      id: 39,
       name: r'nombre',
       type: IsarType.string,
     ),
     r'notas': PropertySchema(
-      id: 39,
+      id: 40,
       name: r'notas',
       type: IsarType.string,
     ),
     r'numeroCrias': PropertySchema(
-      id: 40,
+      id: 41,
       name: r'numeroCrias',
       type: IsarType.long,
     ),
     r'numeroHerrado': PropertySchema(
-      id: 41,
+      id: 42,
       name: r'numeroHerrado',
       type: IsarType.string,
     ),
     r'numeroPartos': PropertySchema(
-      id: 42,
+      id: 43,
       name: r'numeroPartos',
       type: IsarType.long,
     ),
     r'pesoActual': PropertySchema(
-      id: 43,
+      id: 44,
       name: r'pesoActual',
       type: IsarType.double,
     ),
     r'pesoNacimiento': PropertySchema(
-      id: 44,
+      id: 45,
       name: r'pesoNacimiento',
       type: IsarType.double,
     ),
     r'produccionLecheTotal': PropertySchema(
-      id: 45,
+      id: 46,
       name: r'produccionLecheTotal',
       type: IsarType.double,
     ),
     r'programaNutricional': PropertySchema(
-      id: 46,
+      id: 47,
       name: r'programaNutricional',
       type: IsarType.string,
     ),
     r'promedioLecheDiario': PropertySchema(
-      id: 47,
+      id: 48,
       name: r'promedioLecheDiario',
       type: IsarType.double,
     ),
     r'raza': PropertySchema(
-      id: 48,
+      id: 49,
       name: r'raza',
       type: IsarType.string,
     ),
     r'razaMadre': PropertySchema(
-      id: 49,
+      id: 50,
       name: r'razaMadre',
       type: IsarType.string,
     ),
     r'razaPadre': PropertySchema(
-      id: 50,
+      id: 51,
       name: r'razaPadre',
       type: IsarType.string,
     ),
     r'registroGenealogico': PropertySchema(
-      id: 51,
+      id: 52,
       name: r'registroGenealogico',
       type: IsarType.string,
     ),
     r'senasParticulares': PropertySchema(
-      id: 52,
+      id: 53,
       name: r'senasParticulares',
       type: IsarType.string,
     ),
     r'serverId': PropertySchema(
-      id: 53,
+      id: 54,
       name: r'serverId',
       type: IsarType.string,
     ),
     r'sexo': PropertySchema(
-      id: 54,
+      id: 55,
       name: r'sexo',
       type: IsarType.string,
       enumMap: _AnimalsexoEnumValueMap,
     ),
     r'siniigaId': PropertySchema(
-      id: 55,
+      id: 56,
       name: r'siniigaId',
       type: IsarType.object,
       target: r'SinigaId',
     ),
     r'suplementos': PropertySchema(
-      id: 56,
+      id: 57,
       name: r'suplementos',
       type: IsarType.stringList,
     ),
     r'temperaturaActual': PropertySchema(
-      id: 57,
+      id: 58,
       name: r'temperaturaActual',
       type: IsarType.double,
     ),
     r'tipoAlimentacion': PropertySchema(
-      id: 58,
+      id: 59,
       name: r'tipoAlimentacion',
       type: IsarType.string,
     ),
     r'toroUltimoServicio': PropertySchema(
-      id: 59,
+      id: 60,
       name: r'toroUltimoServicio',
       type: IsarType.string,
     ),
     r'ultimaActualizacion': PropertySchema(
-      id: 60,
+      id: 61,
       name: r'ultimaActualizacion',
       type: IsarType.dateTime,
     ),
     r'usuarioCreacion': PropertySchema(
-      id: 61,
+      id: 62,
       name: r'usuarioCreacion',
       type: IsarType.string,
     ),
     r'usuarioModificacion': PropertySchema(
-      id: 62,
+      id: 63,
       name: r'usuarioModificacion',
       type: IsarType.string,
     ),
     r'valorCompra': PropertySchema(
-      id: 63,
+      id: 64,
       name: r'valorCompra',
       type: IsarType.double,
     ),
     r'valorEstimado': PropertySchema(
-      id: 64,
+      id: 65,
       name: r'valorEstimado',
       type: IsarType.double,
     ),
     r'vendedor': PropertySchema(
-      id: 65,
+      id: 66,
       name: r'vendedor',
       type: IsarType.string,
     ),
     r'versionLocal': PropertySchema(
-      id: 66,
+      id: 67,
       name: r'versionLocal',
       type: IsarType.long,
     ),
     r'veterinarioUltimaRevision': PropertySchema(
-      id: 67,
+      id: 68,
       name: r'veterinarioUltimaRevision',
       type: IsarType.string,
     ),
     r'videosUrls': PropertySchema(
-      id: 68,
+      id: 69,
       name: r'videosUrls',
       type: IsarType.stringList,
     ),
     r'zonaActual': PropertySchema(
-      id: 69,
+      id: 70,
       name: r'zonaActual',
       type: IsarType.string,
     )
@@ -388,6 +393,19 @@ const AnimalSchema = CollectionSchema(
       properties: [
         IndexPropertySchema(
           name: r'idAreteNFC',
+          type: IndexType.hash,
+          caseSensitive: false,
+        )
+      ],
+    ),
+    r'nfcChipId': IndexSchema(
+      id: -2017615473009466056,
+      name: r'nfcChipId',
+      unique: true,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'nfcChipId',
           type: IndexType.hash,
           caseSensitive: false,
         )
@@ -542,6 +560,12 @@ int _animalEstimateSize(
   }
   {
     final value = object.idAreteVisual;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.nfcChipId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -707,43 +731,44 @@ void _animalSerialize(
   writer.writeDouble(offsets[35], object.ingresoGeneradoTotal);
   writer.writeDouble(offsets[36], object.latitud);
   writer.writeDouble(offsets[37], object.longitud);
-  writer.writeString(offsets[38], object.nombre);
-  writer.writeString(offsets[39], object.notas);
-  writer.writeLong(offsets[40], object.numeroCrias);
-  writer.writeString(offsets[41], object.numeroHerrado);
-  writer.writeLong(offsets[42], object.numeroPartos);
-  writer.writeDouble(offsets[43], object.pesoActual);
-  writer.writeDouble(offsets[44], object.pesoNacimiento);
-  writer.writeDouble(offsets[45], object.produccionLecheTotal);
-  writer.writeString(offsets[46], object.programaNutricional);
-  writer.writeDouble(offsets[47], object.promedioLecheDiario);
-  writer.writeString(offsets[48], object.raza);
-  writer.writeString(offsets[49], object.razaMadre);
-  writer.writeString(offsets[50], object.razaPadre);
-  writer.writeString(offsets[51], object.registroGenealogico);
-  writer.writeString(offsets[52], object.senasParticulares);
-  writer.writeString(offsets[53], object.serverId);
-  writer.writeString(offsets[54], object.sexo.name);
+  writer.writeString(offsets[38], object.nfcChipId);
+  writer.writeString(offsets[39], object.nombre);
+  writer.writeString(offsets[40], object.notas);
+  writer.writeLong(offsets[41], object.numeroCrias);
+  writer.writeString(offsets[42], object.numeroHerrado);
+  writer.writeLong(offsets[43], object.numeroPartos);
+  writer.writeDouble(offsets[44], object.pesoActual);
+  writer.writeDouble(offsets[45], object.pesoNacimiento);
+  writer.writeDouble(offsets[46], object.produccionLecheTotal);
+  writer.writeString(offsets[47], object.programaNutricional);
+  writer.writeDouble(offsets[48], object.promedioLecheDiario);
+  writer.writeString(offsets[49], object.raza);
+  writer.writeString(offsets[50], object.razaMadre);
+  writer.writeString(offsets[51], object.razaPadre);
+  writer.writeString(offsets[52], object.registroGenealogico);
+  writer.writeString(offsets[53], object.senasParticulares);
+  writer.writeString(offsets[54], object.serverId);
+  writer.writeString(offsets[55], object.sexo.name);
   writer.writeObject<SinigaId>(
-    offsets[55],
+    offsets[56],
     allOffsets,
     SinigaIdSchema.serialize,
     object.siniigaId,
   );
-  writer.writeStringList(offsets[56], object.suplementos);
-  writer.writeDouble(offsets[57], object.temperaturaActual);
-  writer.writeString(offsets[58], object.tipoAlimentacion);
-  writer.writeString(offsets[59], object.toroUltimoServicio);
-  writer.writeDateTime(offsets[60], object.ultimaActualizacion);
-  writer.writeString(offsets[61], object.usuarioCreacion);
-  writer.writeString(offsets[62], object.usuarioModificacion);
-  writer.writeDouble(offsets[63], object.valorCompra);
-  writer.writeDouble(offsets[64], object.valorEstimado);
-  writer.writeString(offsets[65], object.vendedor);
-  writer.writeLong(offsets[66], object.versionLocal);
-  writer.writeString(offsets[67], object.veterinarioUltimaRevision);
-  writer.writeStringList(offsets[68], object.videosUrls);
-  writer.writeString(offsets[69], object.zonaActual);
+  writer.writeStringList(offsets[57], object.suplementos);
+  writer.writeDouble(offsets[58], object.temperaturaActual);
+  writer.writeString(offsets[59], object.tipoAlimentacion);
+  writer.writeString(offsets[60], object.toroUltimoServicio);
+  writer.writeDateTime(offsets[61], object.ultimaActualizacion);
+  writer.writeString(offsets[62], object.usuarioCreacion);
+  writer.writeString(offsets[63], object.usuarioModificacion);
+  writer.writeDouble(offsets[64], object.valorCompra);
+  writer.writeDouble(offsets[65], object.valorEstimado);
+  writer.writeString(offsets[66], object.vendedor);
+  writer.writeLong(offsets[67], object.versionLocal);
+  writer.writeString(offsets[68], object.veterinarioUltimaRevision);
+  writer.writeStringList(offsets[69], object.videosUrls);
+  writer.writeString(offsets[70], object.zonaActual);
 }
 
 Animal _animalDeserialize(
@@ -799,43 +824,44 @@ Animal _animalDeserialize(
   object.ingresoGeneradoTotal = reader.readDoubleOrNull(offsets[35]);
   object.latitud = reader.readDoubleOrNull(offsets[36]);
   object.longitud = reader.readDoubleOrNull(offsets[37]);
-  object.nombre = reader.readString(offsets[38]);
-  object.notas = reader.readStringOrNull(offsets[39]);
-  object.numeroCrias = reader.readLong(offsets[40]);
-  object.numeroHerrado = reader.readStringOrNull(offsets[41]);
-  object.numeroPartos = reader.readLong(offsets[42]);
-  object.pesoActual = reader.readDoubleOrNull(offsets[43]);
-  object.pesoNacimiento = reader.readDoubleOrNull(offsets[44]);
-  object.produccionLecheTotal = reader.readDoubleOrNull(offsets[45]);
-  object.programaNutricional = reader.readStringOrNull(offsets[46]);
-  object.promedioLecheDiario = reader.readDoubleOrNull(offsets[47]);
-  object.raza = reader.readString(offsets[48]);
-  object.razaMadre = reader.readStringOrNull(offsets[49]);
-  object.razaPadre = reader.readStringOrNull(offsets[50]);
-  object.registroGenealogico = reader.readStringOrNull(offsets[51]);
-  object.senasParticulares = reader.readStringOrNull(offsets[52]);
-  object.serverId = reader.readStringOrNull(offsets[53]);
-  object.sexo = _AnimalsexoValueEnumMap[reader.readStringOrNull(offsets[54])] ??
+  object.nfcChipId = reader.readStringOrNull(offsets[38]);
+  object.nombre = reader.readString(offsets[39]);
+  object.notas = reader.readStringOrNull(offsets[40]);
+  object.numeroCrias = reader.readLong(offsets[41]);
+  object.numeroHerrado = reader.readStringOrNull(offsets[42]);
+  object.numeroPartos = reader.readLong(offsets[43]);
+  object.pesoActual = reader.readDoubleOrNull(offsets[44]);
+  object.pesoNacimiento = reader.readDoubleOrNull(offsets[45]);
+  object.produccionLecheTotal = reader.readDoubleOrNull(offsets[46]);
+  object.programaNutricional = reader.readStringOrNull(offsets[47]);
+  object.promedioLecheDiario = reader.readDoubleOrNull(offsets[48]);
+  object.raza = reader.readString(offsets[49]);
+  object.razaMadre = reader.readStringOrNull(offsets[50]);
+  object.razaPadre = reader.readStringOrNull(offsets[51]);
+  object.registroGenealogico = reader.readStringOrNull(offsets[52]);
+  object.senasParticulares = reader.readStringOrNull(offsets[53]);
+  object.serverId = reader.readStringOrNull(offsets[54]);
+  object.sexo = _AnimalsexoValueEnumMap[reader.readStringOrNull(offsets[55])] ??
       Sexo.macho;
   object.siniigaId = reader.readObjectOrNull<SinigaId>(
-    offsets[55],
+    offsets[56],
     SinigaIdSchema.deserialize,
     allOffsets,
   );
-  object.suplementos = reader.readStringList(offsets[56]) ?? [];
-  object.temperaturaActual = reader.readDoubleOrNull(offsets[57]);
-  object.tipoAlimentacion = reader.readStringOrNull(offsets[58]);
-  object.toroUltimoServicio = reader.readStringOrNull(offsets[59]);
-  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[60]);
-  object.usuarioCreacion = reader.readStringOrNull(offsets[61]);
-  object.usuarioModificacion = reader.readStringOrNull(offsets[62]);
-  object.valorCompra = reader.readDoubleOrNull(offsets[63]);
-  object.valorEstimado = reader.readDoubleOrNull(offsets[64]);
-  object.vendedor = reader.readStringOrNull(offsets[65]);
-  object.versionLocal = reader.readLong(offsets[66]);
-  object.veterinarioUltimaRevision = reader.readStringOrNull(offsets[67]);
-  object.videosUrls = reader.readStringList(offsets[68]) ?? [];
-  object.zonaActual = reader.readStringOrNull(offsets[69]);
+  object.suplementos = reader.readStringList(offsets[57]) ?? [];
+  object.temperaturaActual = reader.readDoubleOrNull(offsets[58]);
+  object.tipoAlimentacion = reader.readStringOrNull(offsets[59]);
+  object.toroUltimoServicio = reader.readStringOrNull(offsets[60]);
+  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[61]);
+  object.usuarioCreacion = reader.readStringOrNull(offsets[62]);
+  object.usuarioModificacion = reader.readStringOrNull(offsets[63]);
+  object.valorCompra = reader.readDoubleOrNull(offsets[64]);
+  object.valorEstimado = reader.readDoubleOrNull(offsets[65]);
+  object.vendedor = reader.readStringOrNull(offsets[66]);
+  object.versionLocal = reader.readLong(offsets[67]);
+  object.veterinarioUltimaRevision = reader.readStringOrNull(offsets[68]);
+  object.videosUrls = reader.readStringList(offsets[69]) ?? [];
+  object.zonaActual = reader.readStringOrNull(offsets[70]);
   return object;
 }
 
@@ -927,29 +953,29 @@ P _animalDeserializeProp<P>(
     case 37:
       return (reader.readDoubleOrNull(offset)) as P;
     case 38:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 39:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 40:
-      return (reader.readLong(offset)) as P;
-    case 41:
       return (reader.readStringOrNull(offset)) as P;
-    case 42:
+    case 41:
       return (reader.readLong(offset)) as P;
+    case 42:
+      return (reader.readStringOrNull(offset)) as P;
     case 43:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 44:
       return (reader.readDoubleOrNull(offset)) as P;
     case 45:
       return (reader.readDoubleOrNull(offset)) as P;
     case 46:
-      return (reader.readStringOrNull(offset)) as P;
-    case 47:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 48:
-      return (reader.readString(offset)) as P;
-    case 49:
+    case 47:
       return (reader.readStringOrNull(offset)) as P;
+    case 48:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 49:
+      return (reader.readString(offset)) as P;
     case 50:
       return (reader.readStringOrNull(offset)) as P;
     case 51:
@@ -959,41 +985,43 @@ P _animalDeserializeProp<P>(
     case 53:
       return (reader.readStringOrNull(offset)) as P;
     case 54:
+      return (reader.readStringOrNull(offset)) as P;
+    case 55:
       return (_AnimalsexoValueEnumMap[reader.readStringOrNull(offset)] ??
           Sexo.macho) as P;
-    case 55:
+    case 56:
       return (reader.readObjectOrNull<SinigaId>(
         offset,
         SinigaIdSchema.deserialize,
         allOffsets,
       )) as P;
-    case 56:
-      return (reader.readStringList(offset) ?? []) as P;
     case 57:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 58:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 59:
       return (reader.readStringOrNull(offset)) as P;
     case 60:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 61:
       return (reader.readStringOrNull(offset)) as P;
+    case 61:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 62:
       return (reader.readStringOrNull(offset)) as P;
     case 63:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 64:
       return (reader.readDoubleOrNull(offset)) as P;
     case 65:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 66:
-      return (reader.readLong(offset)) as P;
-    case 67:
       return (reader.readStringOrNull(offset)) as P;
+    case 67:
+      return (reader.readLong(offset)) as P;
     case 68:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 69:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 70:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1163,6 +1191,59 @@ extension AnimalByIndex on IsarCollection<Animal> {
       {bool saveLinks = true}) {
     return putAllByIndexSync(r'idAreteNFC', objects, saveLinks: saveLinks);
   }
+
+  Future<Animal?> getByNfcChipId(String? nfcChipId) {
+    return getByIndex(r'nfcChipId', [nfcChipId]);
+  }
+
+  Animal? getByNfcChipIdSync(String? nfcChipId) {
+    return getByIndexSync(r'nfcChipId', [nfcChipId]);
+  }
+
+  Future<bool> deleteByNfcChipId(String? nfcChipId) {
+    return deleteByIndex(r'nfcChipId', [nfcChipId]);
+  }
+
+  bool deleteByNfcChipIdSync(String? nfcChipId) {
+    return deleteByIndexSync(r'nfcChipId', [nfcChipId]);
+  }
+
+  Future<List<Animal?>> getAllByNfcChipId(List<String?> nfcChipIdValues) {
+    final values = nfcChipIdValues.map((e) => [e]).toList();
+    return getAllByIndex(r'nfcChipId', values);
+  }
+
+  List<Animal?> getAllByNfcChipIdSync(List<String?> nfcChipIdValues) {
+    final values = nfcChipIdValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'nfcChipId', values);
+  }
+
+  Future<int> deleteAllByNfcChipId(List<String?> nfcChipIdValues) {
+    final values = nfcChipIdValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'nfcChipId', values);
+  }
+
+  int deleteAllByNfcChipIdSync(List<String?> nfcChipIdValues) {
+    final values = nfcChipIdValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'nfcChipId', values);
+  }
+
+  Future<Id> putByNfcChipId(Animal object) {
+    return putByIndex(r'nfcChipId', object);
+  }
+
+  Id putByNfcChipIdSync(Animal object, {bool saveLinks = true}) {
+    return putByIndexSync(r'nfcChipId', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByNfcChipId(List<Animal> objects) {
+    return putAllByIndex(r'nfcChipId', objects);
+  }
+
+  List<Id> putAllByNfcChipIdSync(List<Animal> objects,
+      {bool saveLinks = true}) {
+    return putAllByIndexSync(r'nfcChipId', objects, saveLinks: saveLinks);
+  }
 }
 
 extension AnimalQueryWhereSort on QueryBuilder<Animal, Animal, QWhere> {
@@ -1298,6 +1379,71 @@ extension AnimalQueryWhere on QueryBuilder<Animal, Animal, QWhereClause> {
               indexName: r'idAreteNFC',
               lower: [],
               upper: [idAreteNFC],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterWhereClause> nfcChipIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'nfcChipId',
+        value: [null],
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterWhereClause> nfcChipIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'nfcChipId',
+        lower: [null],
+        includeLower: false,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterWhereClause> nfcChipIdEqualTo(
+      String? nfcChipId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'nfcChipId',
+        value: [nfcChipId],
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterWhereClause> nfcChipIdNotEqualTo(
+      String? nfcChipId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'nfcChipId',
+              lower: [],
+              upper: [nfcChipId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'nfcChipId',
+              lower: [nfcChipId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'nfcChipId',
+              lower: [nfcChipId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'nfcChipId',
+              lower: [],
+              upper: [nfcChipId],
               includeUpper: false,
             ));
       }
@@ -5571,6 +5717,152 @@ extension AnimalQueryFilter on QueryBuilder<Animal, Animal, QFilterCondition> {
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'nfcChipId',
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'nfcChipId',
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'nfcChipId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'nfcChipId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'nfcChipId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'nfcChipId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'nfcChipId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'nfcChipId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'nfcChipId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'nfcChipId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'nfcChipId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> nfcChipIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'nfcChipId',
+        value: '',
       ));
     });
   }
@@ -10092,6 +10384,18 @@ extension AnimalQuerySortBy on QueryBuilder<Animal, Animal, QSortBy> {
     });
   }
 
+  QueryBuilder<Animal, Animal, QAfterSortBy> sortByNfcChipId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nfcChipId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterSortBy> sortByNfcChipIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nfcChipId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Animal, Animal, QAfterSortBy> sortByNombre() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nombre', Sort.asc);
@@ -10866,6 +11170,18 @@ extension AnimalQuerySortThenBy on QueryBuilder<Animal, Animal, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Animal, Animal, QAfterSortBy> thenByNfcChipId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nfcChipId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterSortBy> thenByNfcChipIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nfcChipId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Animal, Animal, QAfterSortBy> thenByNombre() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nombre', Sort.asc);
@@ -11462,6 +11778,13 @@ extension AnimalQueryWhereDistinct on QueryBuilder<Animal, Animal, QDistinct> {
     });
   }
 
+  QueryBuilder<Animal, Animal, QDistinct> distinctByNfcChipId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'nfcChipId', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Animal, Animal, QDistinct> distinctByNombre(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -11919,6 +12242,12 @@ extension AnimalQueryProperty on QueryBuilder<Animal, Animal, QQueryProperty> {
   QueryBuilder<Animal, double?, QQueryOperations> longitudProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'longitud');
+    });
+  }
+
+  QueryBuilder<Animal, String?, QQueryOperations> nfcChipIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'nfcChipId');
     });
   }
 

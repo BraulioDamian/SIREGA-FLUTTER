@@ -115,7 +115,8 @@ class AnimalFormController extends ChangeNotifier {
   String? _sinigaValidationMessage;
   
   // Validación NFC
-  String? _nfcId;
+  String? _nfcId; // ID completo del arete (puede incluir SINIGA)
+  String? _pureNfcId; // Solo el ID del chip NFC
   
   // Listas de datos
   List<RazaBovina> _razas = [];
@@ -453,6 +454,14 @@ class AnimalFormController extends ChangeNotifier {
     nfcController.text = nfcId ?? '';
     notifyListeners();
   }
+
+  /// Establece tanto el ID puro del NFC como el ID completo del arete
+  void setNfcIds({required String? pureNfcId, String? fullAreteId}) {
+    _pureNfcId = pureNfcId;
+    _nfcId = fullAreteId ?? pureNfcId;
+    nfcController.text = _nfcId ?? '';
+    notifyListeners();
+  }
   
   void setImageFile(File? file) {
     _imageFile = file;
@@ -474,6 +483,8 @@ class AnimalFormController extends ChangeNotifier {
   Animal buildAnimal() {
     final animal = animalOriginal ?? Animal();
     
+    final extractedNfcId = _pureNfcId ?? _extractPureNfcId(_nfcId);
+    
     return animal
       ..nombre = nombreController.text.trim().isNotEmpty 
           ? nombreController.text.trim() 
@@ -481,9 +492,29 @@ class AnimalFormController extends ChangeNotifier {
       ..raza = _razaSeleccionada?.nombre ?? 'Sin especificar'
       ..sexo = _sexo
       ..fechaNacimiento = _fechaNacimiento ?? DateTime.now()
-      ..idAreteNFC = _nfcId
+      ..idAreteNFC = _nfcId // ID completo del arete
+      ..nfcChipId = extractedNfcId // Solo el ID del chip NFC
       ..siniigaId = _sinigaId
       ..fotoPerfilUrl = _imageFile?.path ?? animalOriginal?.fotoPerfilUrl;
+  }
+  
+  /// Extrae solo el ID del chip NFC de la cadena completa
+  /// Si el formato es "SINIGA-NFCID", devuelve solo la parte del NFC
+  /// Si no tiene el formato esperado, devuelve la cadena completa
+  String? _extractPureNfcId(String? fullId) {
+    if (fullId == null || fullId.isEmpty) return null;
+    
+    // Si contiene un guión, tomar la parte después del último guión
+    if (fullId.contains('-')) {
+      final parts = fullId.split('-');
+      if (parts.length >= 2) {
+        final nfcPart = parts.last; // Devuelve la última parte (el ID del NFC)
+        return nfcPart;
+      }
+    }
+    
+    // Si no tiene guión o formato esperado, devolver la cadena completa
+    return fullId;
   }
   
   // Método para resetear el formulario

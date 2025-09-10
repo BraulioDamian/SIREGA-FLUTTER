@@ -16,6 +16,10 @@ class Animal {
   @Index(unique: true, caseSensitive: false)
   String? idAreteNFC;
   
+  // Campo separado para el ID puro del chip NFC (para búsquedas de escaneo)
+  @Index(unique: true, caseSensitive: false)
+  String? nfcChipId;
+  
   // El campo idAreteSINIIGA ha sido reemplazado por siniigaId
   SinigaId? siniigaId; // <-- CAMBIADO
   

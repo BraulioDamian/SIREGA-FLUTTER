@@ -4,9 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/presentation/screens/agregar_animal/agregar_animal_screen.dart';
-import 'package:sirega_app/presentation/screens/register_animal_screen.dart';
 
-import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'dart:async';
 

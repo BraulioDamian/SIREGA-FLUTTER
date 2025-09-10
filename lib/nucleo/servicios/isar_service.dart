@@ -52,7 +52,8 @@ class IsarService {
   Future<Animal?> obtenerAnimalPorId(int id) async => await isar.animals.get(id);
 
   Future<Animal?> obtenerAnimalPorNfc(String nfcId) async {
-    return await isar.animals.filter().idAreteNFCEqualTo(nfcId).findFirst();
+    // Buscar por el ID puro del chip NFC usando el método generado
+    return await isar.animals.getByNfcChipId(nfcId);
   }
 
   Future<void> guardarEvento(EventoSanitario evento, Animal animal) async {

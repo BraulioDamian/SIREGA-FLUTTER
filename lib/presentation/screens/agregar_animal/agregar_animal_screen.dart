@@ -108,25 +108,34 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen> {
   void _mostrarMensaje(String mensaje, {required bool esError}) {
     if (!mounted) return;
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              esError ? Icons.error : Icons.check_circle,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 8),
-            Expanded(child: Text(mensaje)),
-          ],
+    // Verificar que el contexto sigue siendo válido
+    try {
+      final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
+      if (scaffoldMessenger == null) return;
+      
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                esError ? Icons.error : Icons.check_circle,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: Text(mensaje)),
+            ],
+          ),
+          backgroundColor: esError ? Colors.red : Colors.green,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
-        backgroundColor: esError ? Colors.red : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
+      );
+    } catch (e) {
+      // Si no se puede mostrar el SnackBar, simplemente ignora el error
+      debugPrint('No se pudo mostrar mensaje: $mensaje');
+    }
   }
 }

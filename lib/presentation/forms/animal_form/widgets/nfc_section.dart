@@ -300,22 +300,7 @@ class _NfcSectionState extends State<NfcSection> {
             message = 'Este dispositivo no soporta NFC';
           }
           
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: Colors.red,
-              action: availability == NFCAvailability.disabled 
-                  ? SnackBarAction(
-                      label: 'Configuración',
-                      textColor: Colors.white,
-                      onPressed: () {
-                        // Abrir configuración de NFC
-                        FlutterNfcKit.finish();
-                      },
-                    )
-                  : null,
-            ),
-          );
+          _mostrarMensajeSeguro(message, esError: true);
         }
         return;
       }
@@ -347,8 +332,9 @@ class _NfcSectionState extends State<NfcSection> {
       }
       
       // Si tenemos SINIGA, combinar para hacer único usando fullId
+      String fullAreteId = nfcId; // ID puro del NFC
       if (controller.sinigaId != null && nfcId.isNotEmpty) {
-        nfcId = '${controller.sinigaId!.fullId}-$nfcId';
+        fullAreteId = '${controller.sinigaId!.fullId}-$nfcId'; // ID completo del arete
       }
       
       // Intentar leer datos NDEF si están disponibles
@@ -375,22 +361,14 @@ class _NfcSectionState extends State<NfcSection> {
           _isReading = false;
         });
         
-        controller.setNfcId(nfcId);
+        controller.setNfcIds(
+          pureNfcId: nfcId, // ID puro del NFC
+          fullAreteId: fullAreteId, // ID completo del arete
+        );
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text('Chip NFC leído exitosamente'),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
+        _mostrarMensajeSeguro(
+          'Chip NFC leído exitosamente',
+          esError: false,
         );
       }
     } on Exception catch (e) {
@@ -407,11 +385,9 @@ class _NfcSectionState extends State<NfcSection> {
           errorMessage = 'Lectura cancelada';
         }
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: e.toString().contains('timeout') ? Colors.orange : Colors.red,
-          ),
+        _mostrarMensajeSeguro(
+          errorMessage,
+          esError: !e.toString().contains('user_canceled'),
         );
       }
       
@@ -438,29 +414,52 @@ class _NfcSectionState extends State<NfcSection> {
         // Generar ID simulado usando fullId correcto
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         final randomId = (timestamp % 10000).toString().padLeft(4, '0');
-        final simulatedId = controller.sinigaId != null 
-            ? '${controller.sinigaId!.fullId}-SIM-$randomId'
-            : 'NFC-SIM-$randomId';
+        final pureSimulatedId = 'SIM-$randomId';
+        final fullSimulatedId = controller.sinigaId != null 
+            ? '${controller.sinigaId!.fullId}-$pureSimulatedId'
+            : 'NFC-$pureSimulatedId';
         
-        controller.setNfcId(simulatedId);
+        controller.setNfcIds(
+          pureNfcId: pureSimulatedId,
+          fullAreteId: fullSimulatedId,
+        );
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.bug_report, color: Colors.white, size: 20),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text('Chip NFC simulado (Desarrollo)'),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.blue,
-            duration: const Duration(seconds: 2),
-          ),
+        _mostrarMensajeSeguro(
+          'Chip NFC simulado (Desarrollo)',
+          esError: false,
         );
       }
     });
+  }
+
+  /// Método seguro para mostrar mensajes que verifica el estado del widget
+  void _mostrarMensajeSeguro(String mensaje, {required bool esError}) {
+    if (!mounted) return;
+    
+    try {
+      final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
+      if (scaffoldMessenger == null) return;
+      
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                esError ? Icons.error : Icons.check_circle,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: Text(mensaje)),
+            ],
+          ),
+          backgroundColor: esError ? Colors.red : Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      debugPrint('No se pudo mostrar mensaje NFC: $mensaje');
+    }
   }
 
   @override

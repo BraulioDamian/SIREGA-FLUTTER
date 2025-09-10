@@ -159,15 +159,22 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           listenWhen: (previous, current) => current is CattleDetailActionState,
           listener: (context, state) {
             if (state is ShowInfoSnackbar) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              );
+              try {
+                final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
+                if (scaffoldMessenger != null) {
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  );
+                }
+              } catch (e) {
+                debugPrint('Error mostrando snackbar: ${state.message}');
+              }
             }
             if (state is AnimalDeactivationSuccess) {
               Navigator.of(context).pop(); // Pop after successful deactivation
