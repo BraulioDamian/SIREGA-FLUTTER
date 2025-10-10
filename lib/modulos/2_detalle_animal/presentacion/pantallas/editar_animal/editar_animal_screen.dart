@@ -522,7 +522,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<Sexo>(
-                      value: _sexoSeleccionado,
+                      initialValue: _sexoSeleccionado,
                       decoration: _inputDecoration('Sexo', Icons.wc),
                       items: Sexo.values.map((sexo) {
                         return DropdownMenuItem(
@@ -617,7 +617,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
             title: 'Estado de Salud',
             children: [
               DropdownButtonFormField<EstadoSalud>(
-                value: _estadoSaludSeleccionado,
+                initialValue: _estadoSaludSeleccionado,
                 decoration: _inputDecoration('Estado de Salud', _getHealthIcon(_estadoSaludSeleccionado)),
                 items: EstadoSalud.values.map((estado) {
                   return DropdownMenuItem(
@@ -641,7 +641,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<EstadoAnimal>(
-                value: _estadoSeleccionado,
+                initialValue: _estadoSeleccionado,
                 decoration: _inputDecoration('Estado del Animal', Icons.pets),
                 items: EstadoAnimal.values.map((estado) {
                   return DropdownMenuItem(
@@ -674,7 +674,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
             children: [
               if (_sexoSeleccionado == Sexo.hembra) ...[
                 DropdownButtonFormField<EstadoReproductivo>(
-                  value: _estadoReproductivo,
+                  initialValue: _estadoReproductivo,
                   decoration: _inputDecoration('Estado Reproductivo', Icons.pregnant_woman),
                   items: EstadoReproductivo.values.map((estado) {
                     return DropdownMenuItem(
@@ -701,7 +701,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                     });
                   },
                   secondary: const Icon(Icons.check_circle_outline),
-                  activeColor: Theme.of(context).primaryColor,
+                  activeThumbColor: Theme.of(context).primaryColor,
                 ),
               ] else ...[
                 const ListTile(

@@ -74,12 +74,6 @@ class SinigaId {
     }
   }
 
-  // Método sincrónico para validar estado (requiere que se haya cargado previamente)
-  bool get _esEstadoValidoSync {
-    if (estadoClave == null || _estadosCache == null) return false;
-    return _estadosCache!.containsKey(estadoClave);
-  }
-
   // Método asíncrono para validar estado (carga el JSON si es necesario)
   Future<bool> esEstadoValido() async {
     if (estadoClave == null) return false;

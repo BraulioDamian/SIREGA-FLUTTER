@@ -5,7 +5,6 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/connect_to_esp
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/disconnect_from_esp32_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/open_wifi_settings_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/find_animal_by_uid_use_case.dart';
-import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/esp32_service.dart';
 
 class Esp32ScannerBloc extends Bloc<Esp32ScannerEvent, Esp32ScannerState> {
   final ConnectToEsp32UseCase _connectToEsp32UseCase;

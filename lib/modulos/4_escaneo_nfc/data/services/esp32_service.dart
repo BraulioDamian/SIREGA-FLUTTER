@@ -93,7 +93,7 @@ class Esp32Service {
       return _streamController!.stream;
     } catch (e) {
       if (e is Esp32ConnectionException) {
-        throw e;
+        rethrow;
       }
       throw Esp32ConnectionException(_mapWebSocketError(e));
     }

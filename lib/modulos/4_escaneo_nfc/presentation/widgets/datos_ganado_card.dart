@@ -7,12 +7,12 @@ class DatosGanadoCard extends StatelessWidget {
   final String? sexo;
 
   const DatosGanadoCard({
-    Key? key,
+    super.key,
     this.imageUrl,
     this.numeroArete,
     this.raza,
     this.sexo,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

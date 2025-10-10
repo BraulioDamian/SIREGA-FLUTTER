@@ -1,6 +1,5 @@
 // lib/presentation/widgets/home/primary_action_card.dart
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 /// Tarjeta de acción principal con diseño prominente para funciones críticas
 class PrimaryActionCard extends StatefulWidget {
