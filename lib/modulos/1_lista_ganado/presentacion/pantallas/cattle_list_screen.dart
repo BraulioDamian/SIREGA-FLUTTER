@@ -119,26 +119,37 @@ class _CattleListScreenState extends State<CattleListScreen> with SingleTickerPr
       );
     }
 
-    return ListView.builder(
-      itemCount: animals.length,
-      itemBuilder: (context, index) {
-        final animal = animals[index];
-        return AnimalCard(
-          animal: animal,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => CattleDetailScreen(id: animal.id),
-              ),
-            ).then((_) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<CattleListBloc>().add(LoadCattle());
+        // Esperar un poco para que se complete la carga
+        await Future.delayed(const Duration(milliseconds: 500));
+      },
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: animals.length,
+        itemBuilder: (context, index) {
+          final animal = animals[index];
+          return AnimalCard(
+            key: ValueKey(animal.id), // Key para forzar actualización
+            animal: animal,
+            onTap: () async {
+              // Esperar a que regrese de la pantalla de detalle
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CattleDetailScreen(id: animal.id),
+                ),
+              );
+              
+              // Recargar la lista cuando regrese
               if (context.mounted) {
                 context.read<CattleListBloc>().add(LoadCattle());
               }
-            });
-          },
-        );
-      },
+            },
+          );
+        },
+      ),
     );
   }
 }

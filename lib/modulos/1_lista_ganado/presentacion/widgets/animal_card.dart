@@ -13,30 +13,43 @@ class AnimalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
+      elevation: 3,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  _buildAnimalImage(),
-                  const SizedBox(width: 16),
-                  _buildAnimalInfo(context),
-                ],
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white,
+                Colors.grey.shade50,
+              ],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    _buildAnimalImage(),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildAnimalInfo(context)),
+                  ],
+                ),
               ),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: _buildStatusChip(context),
-            ),
-          ],
+              Positioned(
+                top: 12,
+                right: 12,
+                child: _buildStatusChip(context),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -45,93 +58,348 @@ class AnimalCard extends StatelessWidget {
   Widget _buildAnimalImage() {
     return Hero(
       tag: 'animal_image_${animal.id}',
-      child: CircleAvatar(
-        radius: 40,
-        backgroundImage: animal.fotoPerfilUrl != null && animal.fotoPerfilUrl!.isNotEmpty
-            ? FileImage(File(animal.fotoPerfilUrl!))
-            : null,
-        child: animal.fotoPerfilUrl == null || animal.fotoPerfilUrl!.isEmpty
-            ? const Icon(Icons.pets, size: 40, color: Colors.grey)
-            : null,
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: CircleAvatar(
+          radius: 45,
+          backgroundColor: Colors.grey.shade200,
+          backgroundImage: animal.fotoPerfilUrl != null && animal.fotoPerfilUrl!.isNotEmpty
+              ? FileImage(File(animal.fotoPerfilUrl!))
+              : null,
+          child: animal.fotoPerfilUrl == null || animal.fotoPerfilUrl!.isEmpty
+              ? Icon(
+                  Icons.pets,
+                  size: 45,
+                  color: Colors.grey.shade400,
+                )
+              : null,
+        ),
       ),
     );
   }
 
   Widget _buildAnimalInfo(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final edad = _calcularEdad();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Nombre del animal
+        Text(
+          animal.nombre,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 6),
+        
+        // ID/Arete
+        Row(
+          children: [
+            Icon(
+              Icons.tag,
+              size: 14,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                _getIdentificador(),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        
+        // Información adicional
+        Wrap(
+          spacing: 12,
+          runSpacing: 6,
+          children: [
+            // Sexo
+            _buildInfoChip(
+              icon: animal.sexo == Sexo.macho ? Icons.male : Icons.female,
+              label: animal.sexo == Sexo.macho ? 'Macho' : 'Hembra',
+              color: animal.sexo == Sexo.macho ? Colors.blue : Colors.pink,
+            ),
+            
+            // Raza
+            _buildInfoChip(
+              icon: Icons.pets,
+              label: animal.raza,
+              color: Colors.green,
+            ),
+            
+            // Edad
+            if (edad.isNotEmpty)
+              _buildInfoChip(
+                icon: Icons.cake,
+                label: edad,
+                color: Colors.orange,
+              ),
+          ],
+        ),
+        
+        const SizedBox(height: 8),
+        
+        // Estado de salud
+        if (animal.estadoSalud != EstadoSalud.sano)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _getHealthColor(animal.estadoSalud).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: _getHealthColor(animal.estadoSalud).withOpacity(0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _getHealthIcon(animal.estadoSalud),
+                  size: 14,
+                  color: _getHealthColor(animal.estadoSalud),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _getEstadoSaludText(animal.estadoSalud),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _getHealthColor(animal.estadoSalud),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+  
+  Widget _buildInfoChip({
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
           Text(
-            animal.nombre,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
           ),
-          const SizedBox(height: 4),
+        ],
+      ),
+    );
+  }
+  
+  String _getIdentificador() {
+    if (animal.idAreteNFC != null && animal.idAreteNFC!.isNotEmpty) {
+      return 'NFC: ${animal.idAreteNFC}';
+    }
+    if (animal.idAreteVisual != null && animal.idAreteVisual!.isNotEmpty) {
+      return 'Arete: ${animal.idAreteVisual}';
+    }
+    if (animal.numeroHerrado != null && animal.numeroHerrado!.isNotEmpty) {
+      return 'Herrado: ${animal.numeroHerrado}';
+    }
+    return 'Sin identificador';
+  }
+  
+  String _calcularEdad() {
+    try {
+      final ahora = DateTime.now();
+      final diferencia = ahora.difference(animal.fechaNacimiento);
+      final meses = (diferencia.inDays / 30).floor();
+      final anos = (meses / 12).floor();
+      
+      if (anos > 0) {
+        final mesesRestantes = meses % 12;
+        if (mesesRestantes > 0) {
+          return '$anos a ${mesesRestantes}m';
+        }
+        return '$anos año${anos > 1 ? 's' : ''}';
+      } else if (meses > 0) {
+        return '$meses mes${meses > 1 ? 'es' : ''}';
+      } else {
+        final dias = diferencia.inDays;
+        return '$dias día${dias > 1 ? 's' : ''}';
+      }
+    } catch (e) {
+      return '';
+    }
+  }
+  
+  String _getEstadoSaludText(EstadoSalud estado) {
+    switch (estado) {
+      case EstadoSalud.sano:
+        return 'Sano';
+      case EstadoSalud.enfermo:
+        return 'Enfermo';
+      case EstadoSalud.critico:
+        return 'Crítico';
+      case EstadoSalud.convaleciente:
+        return 'Convaleciente';
+      case EstadoSalud.enTratamiento:
+        return 'En tratamiento';
+      case EstadoSalud.enObservacion:
+        return 'En observación';
+    }
+  }
+  
+  Color _getHealthColor(EstadoSalud estado) {
+    switch (estado) {
+      case EstadoSalud.sano:
+        return Colors.green;
+      case EstadoSalud.enfermo:
+        return Colors.orange;
+      case EstadoSalud.critico:
+        return Colors.red;
+      case EstadoSalud.convaleciente:
+        return Colors.blue;
+      case EstadoSalud.enTratamiento:
+        return Colors.purple;
+      case EstadoSalud.enObservacion:
+        return Colors.grey;
+    }
+  }
+  
+  IconData _getHealthIcon(EstadoSalud estado) {
+    switch (estado) {
+      case EstadoSalud.sano:
+        return Icons.check_circle;
+      case EstadoSalud.enfermo:
+        return Icons.sick;
+      case EstadoSalud.critico:
+        return Icons.warning;
+      case EstadoSalud.convaleciente:
+        return Icons.health_and_safety;
+      case EstadoSalud.enTratamiento:
+        return Icons.medical_services;
+      case EstadoSalud.enObservacion:
+        return Icons.visibility;
+    }
+  }
+
+  Widget _buildStatusChip(BuildContext context) {
+    final statusInfo = _getStatusInfo(animal.estado);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: statusInfo['color'] as Color,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: (statusInfo['color'] as Color).withOpacity(0.4),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            statusInfo['icon'] as IconData,
+            size: 14,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 6),
           Text(
-            animal.idAreteNFC ?? 'Sin arete NFC',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(animal.sexo == Sexo.macho ? Icons.male : Icons.female, color: Colors.blue, size: 16),
-              const SizedBox(width: 4),
-              Text(animal.sexo.name),
-              const SizedBox(width: 12),
-              const Icon(Icons.cake, color: Colors.orange, size: 16),
-              const SizedBox(width: 4),
-              Text(animal.getEdadFormateada()),
-            ],
+            statusInfo['text'] as String,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatusChip(BuildContext context) {
-    Color chipColor;
-    String statusText;
-
-    switch (animal.estado) {
+  Map<String, dynamic> _getStatusInfo(EstadoAnimal estado) {
+    switch (estado) {
       case EstadoAnimal.activo:
-        chipColor = Colors.green;
-        statusText = 'Activo';
-        break;
+        return {
+          'color': Colors.green,
+          'text': 'Activo',
+          'icon': Icons.check_circle,
+        };
       case EstadoAnimal.vendido:
-        chipColor = Colors.blueGrey;
-        statusText = 'Vendido';
-        break;
+        return {
+          'color': Colors.blueGrey,
+          'text': 'Vendido',
+          'icon': Icons.shopping_cart,
+        };
       case EstadoAnimal.muerto:
-        chipColor = Colors.red;
-        statusText = 'Muerto';
-        break;
+        return {
+          'color': Colors.red,
+          'text': 'Muerto',
+          'icon': Icons.dangerous,
+        };
       case EstadoAnimal.enfermo:
-        chipColor = Colors.orange;
-        statusText = 'Enfermo';
-        break;
+        return {
+          'color': Colors.orange,
+          'text': 'Enfermo',
+          'icon': Icons.sick,
+        };
       case EstadoAnimal.cuarentena:
-        chipColor = Colors.purple;
-        statusText = 'Cuarentena';
-        break;
+        return {
+          'color': Colors.purple,
+          'text': 'Cuarentena',
+          'icon': Icons.lock,
+        };
       case EstadoAnimal.perdido:
-        chipColor = Colors.brown;
-        statusText = 'Perdido';
-        break;
+        return {
+          'color': Colors.brown,
+          'text': 'Perdido',
+          'icon': Icons.search_off,
+        };
       case EstadoAnimal.prestado:
-        chipColor = Colors.indigo;
-        statusText = 'Prestado';
-        break;
+        return {
+          'color': Colors.indigo,
+          'text': 'Prestado',
+          'icon': Icons.handshake,
+        };
       case EstadoAnimal.enTransito:
-        chipColor = Colors.teal;
-        statusText = 'En Tránsito';
-        break;
+        return {
+          'color': Colors.teal,
+          'text': 'En Tránsito',
+          'icon': Icons.local_shipping,
+        };
     }
-
-    return Chip(
-      label: Text(statusText, style: const TextStyle(color: Colors.white, fontSize: 10)),
-      backgroundColor: chipColor,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-    );
   }
 }

@@ -31,6 +31,9 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
             useMaterial3: true,
             inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
+            snackBarTheme: const SnackBarThemeData(
+              behavior: SnackBarBehavior.fixed,
+            ),
           ),
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,

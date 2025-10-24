@@ -114,6 +114,7 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
           const SnackBar(
             content: Text('✅ Sincronización completada'),
             backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.fixed,
           ),
         );
       }
@@ -123,6 +124,7 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
           SnackBar(
             content: Text('❌ Error al sincronizar: $e'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.fixed,
           ),
         );
       }
@@ -157,7 +159,10 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
   void _registrarEvento() {
     // TODO: Navigate to event registration screen
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Función no implementada')),
+      const SnackBar(
+        content: Text('Función no implementada'),
+        behavior: SnackBarBehavior.fixed,
+      ),
     );
   }
 
@@ -236,6 +241,8 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
               // Placeholder for secondary tools
               _buildSecondaryTool(Icons.bar_chart, 'Reportes', () {}),
               _buildSecondaryTool(Icons.medication, 'Botiquín', () {}),
+              // Espacio adicional para evitar que el SnackBar se salga de pantalla
+              const SizedBox(height: 100),
             ],
           ),
         ),

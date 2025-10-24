@@ -83,11 +83,20 @@ class AnimalFormController extends ChangeNotifier {
   late final TextEditingController numeroController;
   late final TextEditingController fechaController;
   late final TextEditingController nfcController;
-  
+
   // Controllers para displays de dropdowns
   late final TextEditingController razaDisplayController;
   late final TextEditingController sexoDisplayController;
   late final TextEditingController estadoDisplayController;
+
+  // Controllers adicionales para edición completa
+  late final TextEditingController idAreteVisualController;
+  late final TextEditingController numeroHerradoController;
+  late final TextEditingController colorPelajeController;
+  late final TextEditingController senasParticularesController;
+  late final TextEditingController pesoNacimientoController;
+  late final TextEditingController pesoActualController;
+  late final TextEditingController zonaActualController;
   
   // Focus Nodes
   final FocusNode nombreFocus = FocusNode();
@@ -108,6 +117,12 @@ class AnimalFormController extends ChangeNotifier {
   Sexo _sexo = Sexo.hembra;
   DateTime? _fechaNacimiento;
   File? _imageFile;
+
+  // Estados adicionales para edición completa
+  EstadoAnimal _estadoAnimal = EstadoAnimal.activo;
+  EstadoSalud _estadoSalud = EstadoSalud.sano;
+  EstadoReproductivo? _estadoReproductivo;
+  bool _gestante = false;
   
   // Validación SINIGA
   SinigaId? _sinigaId;
@@ -140,6 +155,12 @@ class AnimalFormController extends ChangeNotifier {
   List<EstadoMexico> get estados => _estados;
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
+
+  // Getters adicionales para campos extendidos
+  EstadoAnimal get estadoAnimal => _estadoAnimal;
+  EstadoSalud get estadoSalud => _estadoSalud;
+  EstadoReproductivo? get estadoReproductivo => _estadoReproductivo;
+  bool get gestante => _gestante;
   
   // Validación general del formulario
   bool get isFormValid => 
@@ -170,12 +191,35 @@ class AnimalFormController extends ChangeNotifier {
     nfcController = TextEditingController(
       text: animalOriginal?.idAreteNFC ?? ''
     );
-    
+
     // Inicializar controllers de display
     razaDisplayController = TextEditingController();
     sexoDisplayController = TextEditingController(text: _getSexoDisplayName(Sexo.hembra));
     estadoDisplayController = TextEditingController();
-    
+
+    // Inicializar controllers adicionales
+    idAreteVisualController = TextEditingController(
+      text: animalOriginal?.idAreteVisual ?? ''
+    );
+    numeroHerradoController = TextEditingController(
+      text: animalOriginal?.numeroHerrado ?? ''
+    );
+    colorPelajeController = TextEditingController(
+      text: animalOriginal?.colorPelaje ?? ''
+    );
+    senasParticularesController = TextEditingController(
+      text: animalOriginal?.senasParticulares ?? ''
+    );
+    pesoNacimientoController = TextEditingController(
+      text: animalOriginal?.pesoNacimiento?.toString() ?? ''
+    );
+    pesoActualController = TextEditingController(
+      text: animalOriginal?.pesoActual?.toString() ?? ''
+    );
+    zonaActualController = TextEditingController(
+      text: animalOriginal?.zonaActual ?? ''
+    );
+
     // Si es modo edición, cargar los datos del animal
     if (isEditMode && animalOriginal != null) {
       _loadAnimalData();
@@ -184,7 +228,7 @@ class AnimalFormController extends ChangeNotifier {
   
   void _loadAnimalData() {
     if (animalOriginal == null) return;
-    
+
     // Cargar SINIGA
     if (animalOriginal!.siniigaId != null) {
       _sinigaId = animalOriginal!.siniigaId;
@@ -196,18 +240,24 @@ class AnimalFormController extends ChangeNotifier {
         _sinigaValidationMessage = '✅ ID SINIGA válido';
       }
     }
-    
-    // Cargar otros datos
+
+    // Cargar datos básicos
     _sexo = animalOriginal!.sexo;
     sexoDisplayController.text = _getSexoDisplayName(_sexo);
     _fechaNacimiento = animalOriginal!.fechaNacimiento;
     _nfcId = animalOriginal!.idAreteNFC;
-    
+
     if (_fechaNacimiento != null) {
       fechaController.text = '${_fechaNacimiento!.day.toString().padLeft(2, '0')}-'
                             '${_fechaNacimiento!.month.toString().padLeft(2, '0')}-'
                             '${_fechaNacimiento!.year}';
     }
+
+    // Cargar datos extendidos
+    _estadoAnimal = animalOriginal!.estado;
+    _estadoSalud = animalOriginal!.estadoSalud;
+    _estadoReproductivo = animalOriginal!.estadoReproductivo;
+    _gestante = animalOriginal!.gestante;
   }
   
   Future<void> _loadData() async {
@@ -468,6 +518,27 @@ class AnimalFormController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Setters para campos adicionales
+  void setEstadoAnimal(EstadoAnimal estado) {
+    _estadoAnimal = estado;
+    notifyListeners();
+  }
+
+  void setEstadoSalud(EstadoSalud estado) {
+    _estadoSalud = estado;
+    notifyListeners();
+  }
+
+  void setEstadoReproductivo(EstadoReproductivo? estado) {
+    _estadoReproductivo = estado;
+    notifyListeners();
+  }
+
+  void setGestante(bool value) {
+    _gestante = value;
+    notifyListeners();
+  }
+
   String _getSexoDisplayName(Sexo sexo) {
     switch (sexo) {
       case Sexo.macho:
@@ -482,12 +553,12 @@ class AnimalFormController extends ChangeNotifier {
   // Método para construir el objeto Animal
   Animal buildAnimal() {
     final animal = animalOriginal ?? Animal();
-    
+
     final extractedNfcId = _pureNfcId ?? _extractPureNfcId(_nfcId);
-    
+
     return animal
-      ..nombre = nombreController.text.trim().isNotEmpty 
-          ? nombreController.text.trim() 
+      ..nombre = nombreController.text.trim().isNotEmpty
+          ? nombreController.text.trim()
           : 'Sin nombre'
       ..raza = _razaSeleccionada?.nombre ?? 'Sin especificar'
       ..sexo = _sexo
@@ -495,7 +566,19 @@ class AnimalFormController extends ChangeNotifier {
       ..idAreteNFC = _nfcId // ID completo del arete
       ..nfcChipId = extractedNfcId // Solo el ID del chip NFC
       ..siniigaId = _sinigaId
-      ..fotoPerfilUrl = _imageFile?.path ?? animalOriginal?.fotoPerfilUrl;
+      ..fotoPerfilUrl = _imageFile?.path ?? animalOriginal?.fotoPerfilUrl
+      // Campos adicionales
+      ..idAreteVisual = idAreteVisualController.text.isEmpty ? null : idAreteVisualController.text
+      ..numeroHerrado = numeroHerradoController.text.isEmpty ? null : numeroHerradoController.text
+      ..colorPelaje = colorPelajeController.text.isEmpty ? null : colorPelajeController.text
+      ..senasParticulares = senasParticularesController.text.isEmpty ? null : senasParticularesController.text
+      ..pesoNacimiento = double.tryParse(pesoNacimientoController.text)
+      ..pesoActual = double.tryParse(pesoActualController.text)
+      ..zonaActual = zonaActualController.text.isEmpty ? null : zonaActualController.text
+      ..estado = _estadoAnimal
+      ..estadoSalud = _estadoSalud
+      ..estadoReproductivo = _estadoReproductivo
+      ..gestante = _gestante;
   }
   
   /// Extrae solo el ID del chip NFC de la cadena completa
@@ -551,10 +634,19 @@ class AnimalFormController extends ChangeNotifier {
     numeroController.dispose();
     fechaController.dispose();
     nfcController.dispose();
-    
+
     razaDisplayController.dispose();
     sexoDisplayController.dispose();
     estadoDisplayController.dispose();
+
+    // Dispose de controllers adicionales
+    idAreteVisualController.dispose();
+    numeroHerradoController.dispose();
+    colorPelajeController.dispose();
+    senasParticularesController.dispose();
+    pesoNacimientoController.dispose();
+    pesoActualController.dispose();
+    zonaActualController.dispose();
 
     nombreFocus.dispose();
     estadoFocus.dispose();
@@ -562,7 +654,7 @@ class AnimalFormController extends ChangeNotifier {
     razaFocus.dispose();
     sexoFocus.dispose();
     estadoDropdownFocus.dispose();
-    
+
     super.dispose();
   }
 }
