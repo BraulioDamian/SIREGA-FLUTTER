@@ -43,13 +43,6 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
     // Escuchar cambios del controlador para actualizar badges
     _formController.addListener(_actualizarEstadoTabs);
 
-    // Escuchar cambios de tab para actualizar la UI
-    _tabController.addListener(() {
-      if (mounted) {
-        setState(() {}); // Rebuilds para actualizar los tabs
-      }
-    });
-
     // Ocultar tutorial de swipe después de 4 segundos
     Future.delayed(const Duration(seconds: 4), () {
       if (mounted) {
@@ -110,23 +103,18 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
           elevation: 0,
           backgroundColor: theme.primaryColor,
           foregroundColor: Colors.white,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(48),
-            child: TabBar(
-              controller: _tabController,
-              indicatorColor: Colors.white,
-              indicatorWeight: 3,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white70,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              tabs: [
-                _buildAdaptiveTab(0, 'General', Icons.info, isRequired: true),
-                _buildAdaptiveTab(1, 'Salud', Icons.favorite, isRequired: false),
-                _buildAdaptiveTab(2, 'Reproducción', Icons.child_care, isRequired: false),
-                _buildAdaptiveTab(3, 'Producción', Icons.show_chart, isRequired: false),
-              ],
-            ),
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: Colors.white,
+            indicatorWeight: 3,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            tabs: [
+              _buildTab('General', Icons.info, isRequired: true),
+              _buildTab('Salud', Icons.favorite, isRequired: false),
+              _buildTab('Reproducción', Icons.child_care, isRequired: false),
+              _buildTab('Producción', Icons.show_chart, isRequired: false),
+            ],
           ),
         ),
         body: Form(
@@ -174,75 +162,26 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
     );
   }
 
-  Widget _buildAdaptiveTab(
-    int index,
-    String label,
-    IconData icon,
-    {required bool isRequired}
-  ) {
-    // Determinar si este tab está activo
-    final isActive = _tabController.index == index;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      // El tab activo es más ancho, los inactivos son más pequeños
-      width: isActive ? null : 70,
-      constraints: BoxConstraints(
-        minWidth: isActive ? 120 : 70,
-        maxWidth: isActive ? 200 : 70,
-      ),
-      child: Tab(
-        child: isActive
-            ? Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 22),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      label,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  if (isRequired)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 2),
-                      child: Text(
-                        '*',
-                        style: TextStyle(
-                          color: Colors.orange,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              )
-            : Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Icon(icon, size: 20),
-                  if (isRequired)
-                    Positioned(
-                      right: -4,
-                      top: -4,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.orange,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+  Widget _buildTab(String label, IconData icon, {required bool isRequired}) {
+    return Tab(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12),
+            ),
+          ),
+          if (isRequired)
+            const Padding(
+              padding: EdgeInsets.only(left: 2),
+              child: Text('*', style: TextStyle(color: Colors.orange, fontSize: 16)),
+            ),
+        ],
       ),
     );
   }
@@ -470,65 +409,80 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
     return Container(
       width: 120,
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withAlpha(38),
+        color: Theme.of(context).primaryColor.withAlpha(38), // withOpacity(0.15)
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(60),
           bottomLeft: Radius.circular(60),
         ),
       ),
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: Clip.hardEdge, // Evita que las flechas se salgan del panel
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Icono grande de mano (fijo)
           Icon(
             Icons.swipe,
             color: Theme.of(context).primaryColor,
             size: 60,
           ),
           const SizedBox(height: 16),
+
+          // Contenedor para las flechas con altura fija
           SizedBox(
             height: 50,
             width: 120,
-            child: ClipRect(
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 1500),
-                curve: Curves.easeInOut,
-                builder: (context, value, child) {
-                  final double offsetX = 12 - (value * 24);
-                  return Transform.translate(
-                    offset: Offset(offsetX, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.chevron_left,
-                          color: Theme.of(context).primaryColor,
-                          size: 38,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 1500),
+              curve: Curves.easeInOut, // Movimiento más suave
+              builder: (context, value, child) {
+                // Las flechas se mueven de derecha a izquierda dentro del contenedor
+                // Movimiento más corto para que no se salgan: 15px → -15px
+                final double offsetX = 15 - (value * 30);
+
+                return Stack(
+                  clipBehavior: Clip.hardEdge, // Recorta lo que salga del stack
+                  children: [
+                    // Flechas animadas
+                    Positioned.fill(
+                      child: Transform.translate(
+                        offset: Offset(offsetX, 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.chevron_left,
+                              color: Theme.of(context).primaryColor,
+                              size: 38,
+                            ),
+                            Icon(
+                              Icons.chevron_left,
+                              color: Theme.of(context).primaryColor.withAlpha(179), // withOpacity(0.7)
+                              size: 38,
+                            ),
+                            Icon(
+                              Icons.chevron_left,
+                              color: Theme.of(context).primaryColor.withAlpha(128), // withOpacity(0.5)
+                              size: 38,
+                            ),
+                          ],
                         ),
-                        Icon(
-                          Icons.chevron_left,
-                          color: Theme.of(context).primaryColor.withAlpha(179),
-                          size: 38,
-                        ),
-                        Icon(
-                          Icons.chevron_left,
-                          color: Theme.of(context).primaryColor.withAlpha(128),
-                          size: 38,
-                        ),
-                      ],
+                      ),
                     ),
-                  );
-                },
-                onEnd: () {
-                  if (mounted && _mostrarTutorialSwipe) {
-                    setState(() {});
-                  }
-                },
+                  ],
+                ),
               ),
+              onEnd: () {
+                // Reiniciar animación solo si el tutorial sigue visible
+                if (mounted && _mostrarTutorialSwipe) {
+                  setState(() {});
+                }
+              },
             ),
           ),
+
           const SizedBox(height: 16),
+          // Texto "Desliza" (fijo)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(

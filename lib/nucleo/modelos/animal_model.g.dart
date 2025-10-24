@@ -47,334 +47,339 @@ const AnimalSchema = CollectionSchema(
       name: r'costoMantenimientoMensual',
       type: IsarType.double,
     ),
-    r'diasGestacion': PropertySchema(
+    r'descripcionSalud': PropertySchema(
       id: 6,
+      name: r'descripcionSalud',
+      type: IsarType.string,
+    ),
+    r'diasGestacion': PropertySchema(
+      id: 7,
       name: r'diasGestacion',
       type: IsarType.long,
     ),
     r'documentosUrls': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'documentosUrls',
       type: IsarType.stringList,
     ),
     r'estado': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'estado',
       type: IsarType.string,
       enumMap: _AnimalestadoEnumValueMap,
     ),
     r'estadoReproductivo': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'estadoReproductivo',
       type: IsarType.string,
       enumMap: _AnimalestadoReproductivoEnumValueMap,
     ),
     r'estadoSalud': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'estadoSalud',
       type: IsarType.string,
       enumMap: _AnimalestadoSaludEnumValueMap,
     ),
     r'estadoSync': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'estadoSync',
       type: IsarType.string,
       enumMap: _AnimalestadoSyncEnumValueMap,
     ),
     r'etiquetas': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'etiquetas',
       type: IsarType.stringList,
     ),
     r'fechaCompra': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'fechaCompra',
       type: IsarType.dateTime,
     ),
     r'fechaCreacion': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'fechaCreacion',
       type: IsarType.dateTime,
     ),
     r'fechaNacimiento': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'fechaNacimiento',
       type: IsarType.dateTime,
     ),
     r'fechaProximoCelo': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'fechaProximoCelo',
       type: IsarType.dateTime,
     ),
     r'fechaProximoParto': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'fechaProximoParto',
       type: IsarType.dateTime,
     ),
     r'fechaUbicacion': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'fechaUbicacion',
       type: IsarType.dateTime,
     ),
     r'fechaUltimaRevision': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'fechaUltimaRevision',
       type: IsarType.dateTime,
     ),
     r'fechaUltimoParto': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'fechaUltimoParto',
       type: IsarType.dateTime,
     ),
     r'fechaUltimoPesaje': PropertySchema(
-      id: 21,
+      id: 22,
       name: r'fechaUltimoPesaje',
       type: IsarType.dateTime,
     ),
     r'fechaUltimoServicio': PropertySchema(
-      id: 22,
+      id: 23,
       name: r'fechaUltimoServicio',
       type: IsarType.dateTime,
     ),
     r'fotoPerfilUrl': PropertySchema(
-      id: 23,
+      id: 24,
       name: r'fotoPerfilUrl',
       type: IsarType.string,
     ),
     r'fotoUrl': PropertySchema(
-      id: 24,
+      id: 25,
       name: r'fotoUrl',
       type: IsarType.string,
     ),
     r'fotosUrls': PropertySchema(
-      id: 25,
+      id: 26,
       name: r'fotosUrls',
       type: IsarType.stringList,
     ),
     r'frecuenciaCardiaca': PropertySchema(
-      id: 26,
+      id: 27,
       name: r'frecuenciaCardiaca',
       type: IsarType.long,
     ),
     r'frecuenciaRespiratoria': PropertySchema(
-      id: 27,
+      id: 28,
       name: r'frecuenciaRespiratoria',
       type: IsarType.long,
     ),
     r'gananciaPromedioDiaria': PropertySchema(
-      id: 28,
+      id: 29,
       name: r'gananciaPromedioDiaria',
       type: IsarType.double,
     ),
     r'generacion': PropertySchema(
-      id: 29,
+      id: 30,
       name: r'generacion',
       type: IsarType.long,
     ),
     r'gestante': PropertySchema(
-      id: 30,
+      id: 31,
       name: r'gestante',
       type: IsarType.bool,
     ),
     r'hashDatos': PropertySchema(
-      id: 31,
+      id: 32,
       name: r'hashDatos',
       type: IsarType.string,
     ),
     r'historialModificaciones': PropertySchema(
-      id: 32,
+      id: 33,
       name: r'historialModificaciones',
       type: IsarType.stringList,
     ),
     r'idAreteNFC': PropertySchema(
-      id: 33,
+      id: 34,
       name: r'idAreteNFC',
       type: IsarType.string,
     ),
     r'idAreteVisual': PropertySchema(
-      id: 34,
+      id: 35,
       name: r'idAreteVisual',
       type: IsarType.string,
     ),
     r'ingresoGeneradoTotal': PropertySchema(
-      id: 35,
+      id: 36,
       name: r'ingresoGeneradoTotal',
       type: IsarType.double,
     ),
     r'latitud': PropertySchema(
-      id: 36,
+      id: 37,
       name: r'latitud',
       type: IsarType.double,
     ),
     r'longitud': PropertySchema(
-      id: 37,
+      id: 38,
       name: r'longitud',
       type: IsarType.double,
     ),
     r'nfcChipId': PropertySchema(
-      id: 38,
+      id: 39,
       name: r'nfcChipId',
       type: IsarType.string,
     ),
     r'nombre': PropertySchema(
-      id: 39,
+      id: 40,
       name: r'nombre',
       type: IsarType.string,
     ),
     r'notas': PropertySchema(
-      id: 40,
+      id: 41,
       name: r'notas',
       type: IsarType.string,
     ),
     r'numeroCrias': PropertySchema(
-      id: 41,
+      id: 42,
       name: r'numeroCrias',
       type: IsarType.long,
     ),
     r'numeroHerrado': PropertySchema(
-      id: 42,
+      id: 43,
       name: r'numeroHerrado',
       type: IsarType.string,
     ),
     r'numeroPartos': PropertySchema(
-      id: 43,
+      id: 44,
       name: r'numeroPartos',
       type: IsarType.long,
     ),
     r'pesoActual': PropertySchema(
-      id: 44,
+      id: 45,
       name: r'pesoActual',
       type: IsarType.double,
     ),
     r'pesoNacimiento': PropertySchema(
-      id: 45,
+      id: 46,
       name: r'pesoNacimiento',
       type: IsarType.double,
     ),
     r'produccionLecheTotal': PropertySchema(
-      id: 46,
+      id: 47,
       name: r'produccionLecheTotal',
       type: IsarType.double,
     ),
     r'programaNutricional': PropertySchema(
-      id: 47,
+      id: 48,
       name: r'programaNutricional',
       type: IsarType.string,
     ),
     r'promedioLecheDiario': PropertySchema(
-      id: 48,
+      id: 49,
       name: r'promedioLecheDiario',
       type: IsarType.double,
     ),
     r'raza': PropertySchema(
-      id: 49,
+      id: 50,
       name: r'raza',
       type: IsarType.string,
     ),
     r'razaMadre': PropertySchema(
-      id: 50,
+      id: 51,
       name: r'razaMadre',
       type: IsarType.string,
     ),
     r'razaPadre': PropertySchema(
-      id: 51,
+      id: 52,
       name: r'razaPadre',
       type: IsarType.string,
     ),
     r'registroGenealogico': PropertySchema(
-      id: 52,
+      id: 53,
       name: r'registroGenealogico',
       type: IsarType.string,
     ),
     r'senasParticulares': PropertySchema(
-      id: 53,
+      id: 54,
       name: r'senasParticulares',
       type: IsarType.string,
     ),
     r'serverId': PropertySchema(
-      id: 54,
+      id: 55,
       name: r'serverId',
       type: IsarType.string,
     ),
     r'sexo': PropertySchema(
-      id: 55,
+      id: 56,
       name: r'sexo',
       type: IsarType.string,
       enumMap: _AnimalsexoEnumValueMap,
     ),
     r'siniigaId': PropertySchema(
-      id: 56,
+      id: 57,
       name: r'siniigaId',
       type: IsarType.object,
       target: r'SinigaId',
     ),
     r'suplementos': PropertySchema(
-      id: 57,
+      id: 58,
       name: r'suplementos',
       type: IsarType.stringList,
     ),
     r'temperaturaActual': PropertySchema(
-      id: 58,
+      id: 59,
       name: r'temperaturaActual',
       type: IsarType.double,
     ),
     r'tipoAlimentacion': PropertySchema(
-      id: 59,
+      id: 60,
       name: r'tipoAlimentacion',
       type: IsarType.string,
     ),
     r'toroUltimoServicio': PropertySchema(
-      id: 60,
+      id: 61,
       name: r'toroUltimoServicio',
       type: IsarType.string,
     ),
     r'ultimaActualizacion': PropertySchema(
-      id: 61,
+      id: 62,
       name: r'ultimaActualizacion',
       type: IsarType.dateTime,
     ),
     r'usuarioCreacion': PropertySchema(
-      id: 62,
+      id: 63,
       name: r'usuarioCreacion',
       type: IsarType.string,
     ),
     r'usuarioModificacion': PropertySchema(
-      id: 63,
+      id: 64,
       name: r'usuarioModificacion',
       type: IsarType.string,
     ),
     r'valorCompra': PropertySchema(
-      id: 64,
+      id: 65,
       name: r'valorCompra',
       type: IsarType.double,
     ),
     r'valorEstimado': PropertySchema(
-      id: 65,
+      id: 66,
       name: r'valorEstimado',
       type: IsarType.double,
     ),
     r'vendedor': PropertySchema(
-      id: 66,
+      id: 67,
       name: r'vendedor',
       type: IsarType.string,
     ),
     r'versionLocal': PropertySchema(
-      id: 67,
+      id: 68,
       name: r'versionLocal',
       type: IsarType.long,
     ),
     r'veterinarioUltimaRevision': PropertySchema(
-      id: 68,
+      id: 69,
       name: r'veterinarioUltimaRevision',
       type: IsarType.string,
     ),
     r'videosUrls': PropertySchema(
-      id: 69,
+      id: 70,
       name: r'videosUrls',
       type: IsarType.stringList,
     ),
     r'zonaActual': PropertySchema(
-      id: 70,
+      id: 71,
       name: r'zonaActual',
       type: IsarType.string,
     )
@@ -493,6 +498,12 @@ int _animalEstimateSize(
   }
   {
     final value = object.compradorPotencial;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.descripcionSalud;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -699,76 +710,77 @@ void _animalSerialize(
   writer.writeDouble(offsets[3], object.consanguinidad);
   writer.writeDouble(offsets[4], object.consumoDiarioKg);
   writer.writeDouble(offsets[5], object.costoMantenimientoMensual);
-  writer.writeLong(offsets[6], object.diasGestacion);
-  writer.writeStringList(offsets[7], object.documentosUrls);
-  writer.writeString(offsets[8], object.estado.name);
-  writer.writeString(offsets[9], object.estadoReproductivo?.name);
-  writer.writeString(offsets[10], object.estadoSalud.name);
-  writer.writeString(offsets[11], object.estadoSync.name);
-  writer.writeStringList(offsets[12], object.etiquetas);
-  writer.writeDateTime(offsets[13], object.fechaCompra);
-  writer.writeDateTime(offsets[14], object.fechaCreacion);
-  writer.writeDateTime(offsets[15], object.fechaNacimiento);
-  writer.writeDateTime(offsets[16], object.fechaProximoCelo);
-  writer.writeDateTime(offsets[17], object.fechaProximoParto);
-  writer.writeDateTime(offsets[18], object.fechaUbicacion);
-  writer.writeDateTime(offsets[19], object.fechaUltimaRevision);
-  writer.writeDateTime(offsets[20], object.fechaUltimoParto);
-  writer.writeDateTime(offsets[21], object.fechaUltimoPesaje);
-  writer.writeDateTime(offsets[22], object.fechaUltimoServicio);
-  writer.writeString(offsets[23], object.fotoPerfilUrl);
-  writer.writeString(offsets[24], object.fotoUrl);
-  writer.writeStringList(offsets[25], object.fotosUrls);
-  writer.writeLong(offsets[26], object.frecuenciaCardiaca);
-  writer.writeLong(offsets[27], object.frecuenciaRespiratoria);
-  writer.writeDouble(offsets[28], object.gananciaPromedioDiaria);
-  writer.writeLong(offsets[29], object.generacion);
-  writer.writeBool(offsets[30], object.gestante);
-  writer.writeString(offsets[31], object.hashDatos);
-  writer.writeStringList(offsets[32], object.historialModificaciones);
-  writer.writeString(offsets[33], object.idAreteNFC);
-  writer.writeString(offsets[34], object.idAreteVisual);
-  writer.writeDouble(offsets[35], object.ingresoGeneradoTotal);
-  writer.writeDouble(offsets[36], object.latitud);
-  writer.writeDouble(offsets[37], object.longitud);
-  writer.writeString(offsets[38], object.nfcChipId);
-  writer.writeString(offsets[39], object.nombre);
-  writer.writeString(offsets[40], object.notas);
-  writer.writeLong(offsets[41], object.numeroCrias);
-  writer.writeString(offsets[42], object.numeroHerrado);
-  writer.writeLong(offsets[43], object.numeroPartos);
-  writer.writeDouble(offsets[44], object.pesoActual);
-  writer.writeDouble(offsets[45], object.pesoNacimiento);
-  writer.writeDouble(offsets[46], object.produccionLecheTotal);
-  writer.writeString(offsets[47], object.programaNutricional);
-  writer.writeDouble(offsets[48], object.promedioLecheDiario);
-  writer.writeString(offsets[49], object.raza);
-  writer.writeString(offsets[50], object.razaMadre);
-  writer.writeString(offsets[51], object.razaPadre);
-  writer.writeString(offsets[52], object.registroGenealogico);
-  writer.writeString(offsets[53], object.senasParticulares);
-  writer.writeString(offsets[54], object.serverId);
-  writer.writeString(offsets[55], object.sexo.name);
+  writer.writeString(offsets[6], object.descripcionSalud);
+  writer.writeLong(offsets[7], object.diasGestacion);
+  writer.writeStringList(offsets[8], object.documentosUrls);
+  writer.writeString(offsets[9], object.estado.name);
+  writer.writeString(offsets[10], object.estadoReproductivo?.name);
+  writer.writeString(offsets[11], object.estadoSalud.name);
+  writer.writeString(offsets[12], object.estadoSync.name);
+  writer.writeStringList(offsets[13], object.etiquetas);
+  writer.writeDateTime(offsets[14], object.fechaCompra);
+  writer.writeDateTime(offsets[15], object.fechaCreacion);
+  writer.writeDateTime(offsets[16], object.fechaNacimiento);
+  writer.writeDateTime(offsets[17], object.fechaProximoCelo);
+  writer.writeDateTime(offsets[18], object.fechaProximoParto);
+  writer.writeDateTime(offsets[19], object.fechaUbicacion);
+  writer.writeDateTime(offsets[20], object.fechaUltimaRevision);
+  writer.writeDateTime(offsets[21], object.fechaUltimoParto);
+  writer.writeDateTime(offsets[22], object.fechaUltimoPesaje);
+  writer.writeDateTime(offsets[23], object.fechaUltimoServicio);
+  writer.writeString(offsets[24], object.fotoPerfilUrl);
+  writer.writeString(offsets[25], object.fotoUrl);
+  writer.writeStringList(offsets[26], object.fotosUrls);
+  writer.writeLong(offsets[27], object.frecuenciaCardiaca);
+  writer.writeLong(offsets[28], object.frecuenciaRespiratoria);
+  writer.writeDouble(offsets[29], object.gananciaPromedioDiaria);
+  writer.writeLong(offsets[30], object.generacion);
+  writer.writeBool(offsets[31], object.gestante);
+  writer.writeString(offsets[32], object.hashDatos);
+  writer.writeStringList(offsets[33], object.historialModificaciones);
+  writer.writeString(offsets[34], object.idAreteNFC);
+  writer.writeString(offsets[35], object.idAreteVisual);
+  writer.writeDouble(offsets[36], object.ingresoGeneradoTotal);
+  writer.writeDouble(offsets[37], object.latitud);
+  writer.writeDouble(offsets[38], object.longitud);
+  writer.writeString(offsets[39], object.nfcChipId);
+  writer.writeString(offsets[40], object.nombre);
+  writer.writeString(offsets[41], object.notas);
+  writer.writeLong(offsets[42], object.numeroCrias);
+  writer.writeString(offsets[43], object.numeroHerrado);
+  writer.writeLong(offsets[44], object.numeroPartos);
+  writer.writeDouble(offsets[45], object.pesoActual);
+  writer.writeDouble(offsets[46], object.pesoNacimiento);
+  writer.writeDouble(offsets[47], object.produccionLecheTotal);
+  writer.writeString(offsets[48], object.programaNutricional);
+  writer.writeDouble(offsets[49], object.promedioLecheDiario);
+  writer.writeString(offsets[50], object.raza);
+  writer.writeString(offsets[51], object.razaMadre);
+  writer.writeString(offsets[52], object.razaPadre);
+  writer.writeString(offsets[53], object.registroGenealogico);
+  writer.writeString(offsets[54], object.senasParticulares);
+  writer.writeString(offsets[55], object.serverId);
+  writer.writeString(offsets[56], object.sexo.name);
   writer.writeObject<SinigaId>(
-    offsets[56],
+    offsets[57],
     allOffsets,
     SinigaIdSchema.serialize,
     object.siniigaId,
   );
-  writer.writeStringList(offsets[57], object.suplementos);
-  writer.writeDouble(offsets[58], object.temperaturaActual);
-  writer.writeString(offsets[59], object.tipoAlimentacion);
-  writer.writeString(offsets[60], object.toroUltimoServicio);
-  writer.writeDateTime(offsets[61], object.ultimaActualizacion);
-  writer.writeString(offsets[62], object.usuarioCreacion);
-  writer.writeString(offsets[63], object.usuarioModificacion);
-  writer.writeDouble(offsets[64], object.valorCompra);
-  writer.writeDouble(offsets[65], object.valorEstimado);
-  writer.writeString(offsets[66], object.vendedor);
-  writer.writeLong(offsets[67], object.versionLocal);
-  writer.writeString(offsets[68], object.veterinarioUltimaRevision);
-  writer.writeStringList(offsets[69], object.videosUrls);
-  writer.writeString(offsets[70], object.zonaActual);
+  writer.writeStringList(offsets[58], object.suplementos);
+  writer.writeDouble(offsets[59], object.temperaturaActual);
+  writer.writeString(offsets[60], object.tipoAlimentacion);
+  writer.writeString(offsets[61], object.toroUltimoServicio);
+  writer.writeDateTime(offsets[62], object.ultimaActualizacion);
+  writer.writeString(offsets[63], object.usuarioCreacion);
+  writer.writeString(offsets[64], object.usuarioModificacion);
+  writer.writeDouble(offsets[65], object.valorCompra);
+  writer.writeDouble(offsets[66], object.valorEstimado);
+  writer.writeString(offsets[67], object.vendedor);
+  writer.writeLong(offsets[68], object.versionLocal);
+  writer.writeString(offsets[69], object.veterinarioUltimaRevision);
+  writer.writeStringList(offsets[70], object.videosUrls);
+  writer.writeString(offsets[71], object.zonaActual);
 }
 
 Animal _animalDeserialize(
@@ -784,84 +796,85 @@ Animal _animalDeserialize(
   object.consanguinidad = reader.readDoubleOrNull(offsets[3]);
   object.consumoDiarioKg = reader.readDoubleOrNull(offsets[4]);
   object.costoMantenimientoMensual = reader.readDoubleOrNull(offsets[5]);
-  object.diasGestacion = reader.readLongOrNull(offsets[6]);
-  object.documentosUrls = reader.readStringList(offsets[7]) ?? [];
+  object.descripcionSalud = reader.readStringOrNull(offsets[6]);
+  object.diasGestacion = reader.readLongOrNull(offsets[7]);
+  object.documentosUrls = reader.readStringList(offsets[8]) ?? [];
   object.estado =
-      _AnimalestadoValueEnumMap[reader.readStringOrNull(offsets[8])] ??
+      _AnimalestadoValueEnumMap[reader.readStringOrNull(offsets[9])] ??
           EstadoAnimal.activo;
   object.estadoReproductivo = _AnimalestadoReproductivoValueEnumMap[
-      reader.readStringOrNull(offsets[9])];
+      reader.readStringOrNull(offsets[10])];
   object.estadoSalud =
-      _AnimalestadoSaludValueEnumMap[reader.readStringOrNull(offsets[10])] ??
+      _AnimalestadoSaludValueEnumMap[reader.readStringOrNull(offsets[11])] ??
           EstadoSalud.sano;
   object.estadoSync =
-      _AnimalestadoSyncValueEnumMap[reader.readStringOrNull(offsets[11])] ??
+      _AnimalestadoSyncValueEnumMap[reader.readStringOrNull(offsets[12])] ??
           EstadoSync.pendiente;
-  object.etiquetas = reader.readStringList(offsets[12]) ?? [];
-  object.fechaCompra = reader.readDateTimeOrNull(offsets[13]);
-  object.fechaCreacion = reader.readDateTime(offsets[14]);
-  object.fechaNacimiento = reader.readDateTime(offsets[15]);
-  object.fechaProximoCelo = reader.readDateTimeOrNull(offsets[16]);
-  object.fechaProximoParto = reader.readDateTimeOrNull(offsets[17]);
-  object.fechaUbicacion = reader.readDateTimeOrNull(offsets[18]);
-  object.fechaUltimaRevision = reader.readDateTimeOrNull(offsets[19]);
-  object.fechaUltimoParto = reader.readDateTimeOrNull(offsets[20]);
-  object.fechaUltimoPesaje = reader.readDateTimeOrNull(offsets[21]);
-  object.fechaUltimoServicio = reader.readDateTimeOrNull(offsets[22]);
-  object.fotoPerfilUrl = reader.readStringOrNull(offsets[23]);
-  object.fotoUrl = reader.readStringOrNull(offsets[24]);
-  object.fotosUrls = reader.readStringList(offsets[25]) ?? [];
-  object.frecuenciaCardiaca = reader.readLongOrNull(offsets[26]);
-  object.frecuenciaRespiratoria = reader.readLongOrNull(offsets[27]);
-  object.gananciaPromedioDiaria = reader.readDoubleOrNull(offsets[28]);
-  object.generacion = reader.readLongOrNull(offsets[29]);
-  object.gestante = reader.readBool(offsets[30]);
-  object.hashDatos = reader.readStringOrNull(offsets[31]);
-  object.historialModificaciones = reader.readStringList(offsets[32]) ?? [];
+  object.etiquetas = reader.readStringList(offsets[13]) ?? [];
+  object.fechaCompra = reader.readDateTimeOrNull(offsets[14]);
+  object.fechaCreacion = reader.readDateTime(offsets[15]);
+  object.fechaNacimiento = reader.readDateTime(offsets[16]);
+  object.fechaProximoCelo = reader.readDateTimeOrNull(offsets[17]);
+  object.fechaProximoParto = reader.readDateTimeOrNull(offsets[18]);
+  object.fechaUbicacion = reader.readDateTimeOrNull(offsets[19]);
+  object.fechaUltimaRevision = reader.readDateTimeOrNull(offsets[20]);
+  object.fechaUltimoParto = reader.readDateTimeOrNull(offsets[21]);
+  object.fechaUltimoPesaje = reader.readDateTimeOrNull(offsets[22]);
+  object.fechaUltimoServicio = reader.readDateTimeOrNull(offsets[23]);
+  object.fotoPerfilUrl = reader.readStringOrNull(offsets[24]);
+  object.fotoUrl = reader.readStringOrNull(offsets[25]);
+  object.fotosUrls = reader.readStringList(offsets[26]) ?? [];
+  object.frecuenciaCardiaca = reader.readLongOrNull(offsets[27]);
+  object.frecuenciaRespiratoria = reader.readLongOrNull(offsets[28]);
+  object.gananciaPromedioDiaria = reader.readDoubleOrNull(offsets[29]);
+  object.generacion = reader.readLongOrNull(offsets[30]);
+  object.gestante = reader.readBool(offsets[31]);
+  object.hashDatos = reader.readStringOrNull(offsets[32]);
+  object.historialModificaciones = reader.readStringList(offsets[33]) ?? [];
   object.id = id;
-  object.idAreteNFC = reader.readStringOrNull(offsets[33]);
-  object.idAreteVisual = reader.readStringOrNull(offsets[34]);
-  object.ingresoGeneradoTotal = reader.readDoubleOrNull(offsets[35]);
-  object.latitud = reader.readDoubleOrNull(offsets[36]);
-  object.longitud = reader.readDoubleOrNull(offsets[37]);
-  object.nfcChipId = reader.readStringOrNull(offsets[38]);
-  object.nombre = reader.readString(offsets[39]);
-  object.notas = reader.readStringOrNull(offsets[40]);
-  object.numeroCrias = reader.readLong(offsets[41]);
-  object.numeroHerrado = reader.readStringOrNull(offsets[42]);
-  object.numeroPartos = reader.readLong(offsets[43]);
-  object.pesoActual = reader.readDoubleOrNull(offsets[44]);
-  object.pesoNacimiento = reader.readDoubleOrNull(offsets[45]);
-  object.produccionLecheTotal = reader.readDoubleOrNull(offsets[46]);
-  object.programaNutricional = reader.readStringOrNull(offsets[47]);
-  object.promedioLecheDiario = reader.readDoubleOrNull(offsets[48]);
-  object.raza = reader.readString(offsets[49]);
-  object.razaMadre = reader.readStringOrNull(offsets[50]);
-  object.razaPadre = reader.readStringOrNull(offsets[51]);
-  object.registroGenealogico = reader.readStringOrNull(offsets[52]);
-  object.senasParticulares = reader.readStringOrNull(offsets[53]);
-  object.serverId = reader.readStringOrNull(offsets[54]);
-  object.sexo = _AnimalsexoValueEnumMap[reader.readStringOrNull(offsets[55])] ??
+  object.idAreteNFC = reader.readStringOrNull(offsets[34]);
+  object.idAreteVisual = reader.readStringOrNull(offsets[35]);
+  object.ingresoGeneradoTotal = reader.readDoubleOrNull(offsets[36]);
+  object.latitud = reader.readDoubleOrNull(offsets[37]);
+  object.longitud = reader.readDoubleOrNull(offsets[38]);
+  object.nfcChipId = reader.readStringOrNull(offsets[39]);
+  object.nombre = reader.readString(offsets[40]);
+  object.notas = reader.readStringOrNull(offsets[41]);
+  object.numeroCrias = reader.readLong(offsets[42]);
+  object.numeroHerrado = reader.readStringOrNull(offsets[43]);
+  object.numeroPartos = reader.readLong(offsets[44]);
+  object.pesoActual = reader.readDoubleOrNull(offsets[45]);
+  object.pesoNacimiento = reader.readDoubleOrNull(offsets[46]);
+  object.produccionLecheTotal = reader.readDoubleOrNull(offsets[47]);
+  object.programaNutricional = reader.readStringOrNull(offsets[48]);
+  object.promedioLecheDiario = reader.readDoubleOrNull(offsets[49]);
+  object.raza = reader.readString(offsets[50]);
+  object.razaMadre = reader.readStringOrNull(offsets[51]);
+  object.razaPadre = reader.readStringOrNull(offsets[52]);
+  object.registroGenealogico = reader.readStringOrNull(offsets[53]);
+  object.senasParticulares = reader.readStringOrNull(offsets[54]);
+  object.serverId = reader.readStringOrNull(offsets[55]);
+  object.sexo = _AnimalsexoValueEnumMap[reader.readStringOrNull(offsets[56])] ??
       Sexo.macho;
   object.siniigaId = reader.readObjectOrNull<SinigaId>(
-    offsets[56],
+    offsets[57],
     SinigaIdSchema.deserialize,
     allOffsets,
   );
-  object.suplementos = reader.readStringList(offsets[57]) ?? [];
-  object.temperaturaActual = reader.readDoubleOrNull(offsets[58]);
-  object.tipoAlimentacion = reader.readStringOrNull(offsets[59]);
-  object.toroUltimoServicio = reader.readStringOrNull(offsets[60]);
-  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[61]);
-  object.usuarioCreacion = reader.readStringOrNull(offsets[62]);
-  object.usuarioModificacion = reader.readStringOrNull(offsets[63]);
-  object.valorCompra = reader.readDoubleOrNull(offsets[64]);
-  object.valorEstimado = reader.readDoubleOrNull(offsets[65]);
-  object.vendedor = reader.readStringOrNull(offsets[66]);
-  object.versionLocal = reader.readLong(offsets[67]);
-  object.veterinarioUltimaRevision = reader.readStringOrNull(offsets[68]);
-  object.videosUrls = reader.readStringList(offsets[69]) ?? [];
-  object.zonaActual = reader.readStringOrNull(offsets[70]);
+  object.suplementos = reader.readStringList(offsets[58]) ?? [];
+  object.temperaturaActual = reader.readDoubleOrNull(offsets[59]);
+  object.tipoAlimentacion = reader.readStringOrNull(offsets[60]);
+  object.toroUltimoServicio = reader.readStringOrNull(offsets[61]);
+  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[62]);
+  object.usuarioCreacion = reader.readStringOrNull(offsets[63]);
+  object.usuarioModificacion = reader.readStringOrNull(offsets[64]);
+  object.valorCompra = reader.readDoubleOrNull(offsets[65]);
+  object.valorEstimado = reader.readDoubleOrNull(offsets[66]);
+  object.vendedor = reader.readStringOrNull(offsets[67]);
+  object.versionLocal = reader.readLong(offsets[68]);
+  object.veterinarioUltimaRevision = reader.readStringOrNull(offsets[69]);
+  object.videosUrls = reader.readStringList(offsets[70]) ?? [];
+  object.zonaActual = reader.readStringOrNull(offsets[71]);
   return object;
 }
 
@@ -885,31 +898,31 @@ P _animalDeserializeProp<P>(
     case 5:
       return (reader.readDoubleOrNull(offset)) as P;
     case 6:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 8:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 9:
       return (_AnimalestadoValueEnumMap[reader.readStringOrNull(offset)] ??
           EstadoAnimal.activo) as P;
-    case 9:
+    case 10:
       return (_AnimalestadoReproductivoValueEnumMap[
           reader.readStringOrNull(offset)]) as P;
-    case 10:
+    case 11:
       return (_AnimalestadoSaludValueEnumMap[reader.readStringOrNull(offset)] ??
           EstadoSalud.sano) as P;
-    case 11:
+    case 12:
       return (_AnimalestadoSyncValueEnumMap[reader.readStringOrNull(offset)] ??
           EstadoSync.pendiente) as P;
-    case 12:
-      return (reader.readStringList(offset) ?? []) as P;
     case 13:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 14:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 15:
       return (reader.readDateTime(offset)) as P;
     case 16:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 17:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 18:
@@ -923,61 +936,61 @@ P _animalDeserializeProp<P>(
     case 22:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 23:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 24:
       return (reader.readStringOrNull(offset)) as P;
     case 25:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 26:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 27:
       return (reader.readLongOrNull(offset)) as P;
     case 28:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 29:
       return (reader.readLongOrNull(offset)) as P;
+    case 29:
+      return (reader.readDoubleOrNull(offset)) as P;
     case 30:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 31:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 32:
-      return (reader.readStringList(offset) ?? []) as P;
-    case 33:
       return (reader.readStringOrNull(offset)) as P;
+    case 33:
+      return (reader.readStringList(offset) ?? []) as P;
     case 34:
       return (reader.readStringOrNull(offset)) as P;
     case 35:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 36:
       return (reader.readDoubleOrNull(offset)) as P;
     case 37:
       return (reader.readDoubleOrNull(offset)) as P;
     case 38:
-      return (reader.readStringOrNull(offset)) as P;
-    case 39:
-      return (reader.readString(offset)) as P;
-    case 40:
-      return (reader.readStringOrNull(offset)) as P;
-    case 41:
-      return (reader.readLong(offset)) as P;
-    case 42:
-      return (reader.readStringOrNull(offset)) as P;
-    case 43:
-      return (reader.readLong(offset)) as P;
-    case 44:
       return (reader.readDoubleOrNull(offset)) as P;
+    case 39:
+      return (reader.readStringOrNull(offset)) as P;
+    case 40:
+      return (reader.readString(offset)) as P;
+    case 41:
+      return (reader.readStringOrNull(offset)) as P;
+    case 42:
+      return (reader.readLong(offset)) as P;
+    case 43:
+      return (reader.readStringOrNull(offset)) as P;
+    case 44:
+      return (reader.readLong(offset)) as P;
     case 45:
       return (reader.readDoubleOrNull(offset)) as P;
     case 46:
       return (reader.readDoubleOrNull(offset)) as P;
     case 47:
-      return (reader.readStringOrNull(offset)) as P;
-    case 48:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 49:
-      return (reader.readString(offset)) as P;
-    case 50:
+    case 48:
       return (reader.readStringOrNull(offset)) as P;
+    case 49:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 50:
+      return (reader.readString(offset)) as P;
     case 51:
       return (reader.readStringOrNull(offset)) as P;
     case 52:
@@ -987,41 +1000,43 @@ P _animalDeserializeProp<P>(
     case 54:
       return (reader.readStringOrNull(offset)) as P;
     case 55:
+      return (reader.readStringOrNull(offset)) as P;
+    case 56:
       return (_AnimalsexoValueEnumMap[reader.readStringOrNull(offset)] ??
           Sexo.macho) as P;
-    case 56:
+    case 57:
       return (reader.readObjectOrNull<SinigaId>(
         offset,
         SinigaIdSchema.deserialize,
         allOffsets,
       )) as P;
-    case 57:
-      return (reader.readStringList(offset) ?? []) as P;
     case 58:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 59:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 60:
       return (reader.readStringOrNull(offset)) as P;
     case 61:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 62:
       return (reader.readStringOrNull(offset)) as P;
+    case 62:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 63:
       return (reader.readStringOrNull(offset)) as P;
     case 64:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 65:
       return (reader.readDoubleOrNull(offset)) as P;
     case 66:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 67:
-      return (reader.readLong(offset)) as P;
-    case 68:
       return (reader.readStringOrNull(offset)) as P;
+    case 68:
+      return (reader.readLong(offset)) as P;
     case 69:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 70:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 71:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2201,6 +2216,157 @@ extension AnimalQueryFilter on QueryBuilder<Animal, Animal, QFilterCondition> {
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> descripcionSaludIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'descripcionSalud',
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition>
+      descripcionSaludIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'descripcionSalud',
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> descripcionSaludEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'descripcionSalud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition>
+      descripcionSaludGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'descripcionSalud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> descripcionSaludLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'descripcionSalud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> descripcionSaludBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'descripcionSalud',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition>
+      descripcionSaludStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'descripcionSalud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> descripcionSaludEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'descripcionSalud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> descripcionSaludContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'descripcionSalud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition> descripcionSaludMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'descripcionSalud',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition>
+      descripcionSaludIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'descripcionSalud',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterFilterCondition>
+      descripcionSaludIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'descripcionSalud',
+        value: '',
       ));
     });
   }
@@ -10046,6 +10212,18 @@ extension AnimalQuerySortBy on QueryBuilder<Animal, Animal, QSortBy> {
     });
   }
 
+  QueryBuilder<Animal, Animal, QAfterSortBy> sortByDescripcionSalud() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'descripcionSalud', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterSortBy> sortByDescripcionSaludDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'descripcionSalud', Sort.desc);
+    });
+  }
+
   QueryBuilder<Animal, Animal, QAfterSortBy> sortByDiasGestacion() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'diasGestacion', Sort.asc);
@@ -10820,6 +10998,18 @@ extension AnimalQuerySortThenBy on QueryBuilder<Animal, Animal, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Animal, Animal, QAfterSortBy> thenByDescripcionSalud() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'descripcionSalud', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Animal, Animal, QAfterSortBy> thenByDescripcionSaludDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'descripcionSalud', Sort.desc);
+    });
+  }
+
   QueryBuilder<Animal, Animal, QAfterSortBy> thenByDiasGestacion() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'diasGestacion', Sort.asc);
@@ -11574,6 +11764,14 @@ extension AnimalQueryWhereDistinct on QueryBuilder<Animal, Animal, QDistinct> {
     });
   }
 
+  QueryBuilder<Animal, Animal, QDistinct> distinctByDescripcionSalud(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'descripcionSalud',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Animal, Animal, QDistinct> distinctByDiasGestacion() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'diasGestacion');
@@ -12040,6 +12238,12 @@ extension AnimalQueryProperty on QueryBuilder<Animal, Animal, QQueryProperty> {
       costoMantenimientoMensualProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'costoMantenimientoMensual');
+    });
+  }
+
+  QueryBuilder<Animal, String?, QQueryOperations> descripcionSaludProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'descripcionSalud');
     });
   }
 

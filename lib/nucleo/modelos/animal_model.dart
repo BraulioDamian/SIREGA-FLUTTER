@@ -64,10 +64,13 @@ class Animal {
   // ===== ESTADO Y SALUD =====
   @Enumerated(EnumType.name)
   EstadoAnimal estado = EstadoAnimal.activo;
-  
+
   @Enumerated(EnumType.name)
   EstadoSalud estadoSalud = EstadoSalud.sano;
-  
+
+  // Descripción obligatoria cuando el estado es enfermo, crítico o en tratamiento
+  String? descripcionSalud;
+
   DateTime? fechaUltimaRevision;
   String? veterinarioUltimaRevision;
   double? temperaturaActual;

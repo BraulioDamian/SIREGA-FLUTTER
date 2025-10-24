@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../controllers/animal_form_controller.dart';
 
@@ -39,24 +38,10 @@ class AdditionalFieldsFormSection extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Arete Visual y Número de Herrado
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: controller.idAreteVisualController,
-                    decoration: _inputDecoration('Arete Visual', Icons.tag),
-                    textCapitalization: TextCapitalization.characters,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: controller.numeroHerradoController,
-                    decoration: _inputDecoration('Número de Herrado', Icons.format_list_numbered),
-                  ),
-                ),
-              ],
+            // Número de Herrado
+            TextFormField(
+              controller: controller.numeroHerradoController,
+              decoration: _inputDecoration('Número de Herrado', Icons.format_list_numbered),
             ),
 
             const SizedBox(height: 16),
@@ -76,35 +61,6 @@ class AdditionalFieldsFormSection extends StatelessWidget {
               decoration: _inputDecoration('Señas Particulares', Icons.description),
               maxLines: 3,
               textCapitalization: TextCapitalization.sentences,
-            ),
-
-            const SizedBox(height: 16),
-
-            // Peso al Nacer y Peso Actual
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: controller.pesoNacimientoController,
-                    decoration: _inputDecoration('Peso al Nacer (kg)', Icons.scale),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: controller.pesoActualController,
-                    decoration: _inputDecoration('Peso Actual (kg)', Icons.monitor_weight),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ],
         ),

@@ -87,6 +87,70 @@ class HealthFormSection extends StatelessWidget {
                 }
               },
             ),
+
+            // Campo condicional: Descripción de la situación de salud
+            if (controller.requiereDescripcionSalud(controller.estadoSalud)) ...[
+              const SizedBox(height: 16),
+
+              // Banner informativo
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _getHealthColor(controller.estadoSalud).withAlpha(26),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _getHealthColor(controller.estadoSalud).withAlpha(77),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      color: _getHealthColor(controller.estadoSalud),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Se requiere especificar el diagnóstico, tratamiento o situación del animal',
+                        style: TextStyle(
+                          color: _getHealthColor(controller.estadoSalud).withAlpha(230),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Campo de texto para la descripción
+              TextFormField(
+                controller: controller.descripcionSaludController,
+                decoration: _inputDecoration(
+                  'Descripción de la Situación *',
+                  Icons.medical_information_outlined,
+                ).copyWith(
+                  hintText: 'Ej: Fiebre alta, tratamiento con antibióticos...',
+                  helperText: 'Especifique diagnóstico, síntomas o tratamiento aplicado',
+                ),
+                maxLines: 3,
+                textCapitalization: TextCapitalization.sentences,
+                validator: (value) {
+                  if (controller.requiereDescripcionSalud(controller.estadoSalud)) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Debe especificar la situación de salud del animal';
+                    }
+                    if (value.trim().length < 10) {
+                      return 'La descripción debe tener al menos 10 caracteres';
+                    }
+                  }
+                  return null;
+                },
+              ),
+            ],
           ],
         ),
       ),

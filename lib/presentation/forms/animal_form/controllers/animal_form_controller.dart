@@ -97,7 +97,8 @@ class AnimalFormController extends ChangeNotifier {
   late final TextEditingController pesoNacimientoController;
   late final TextEditingController pesoActualController;
   late final TextEditingController zonaActualController;
-  
+  late final TextEditingController descripcionSaludController;
+
   // Focus Nodes
   final FocusNode nombreFocus = FocusNode();
   final FocusNode estadoFocus = FocusNode();
@@ -218,6 +219,9 @@ class AnimalFormController extends ChangeNotifier {
     );
     zonaActualController = TextEditingController(
       text: animalOriginal?.zonaActual ?? ''
+    );
+    descripcionSaludController = TextEditingController(
+      text: animalOriginal?.descripcionSalud ?? ''
     );
 
     // Si es modo edición, cargar los datos del animal
@@ -526,7 +530,19 @@ class AnimalFormController extends ChangeNotifier {
 
   void setEstadoSalud(EstadoSalud estado) {
     _estadoSalud = estado;
+    // Limpiar la descripción si el nuevo estado no la requiere
+    if (!requiereDescripcionSalud(estado)) {
+      descripcionSaludController.clear();
+    }
     notifyListeners();
+  }
+
+  /// Determina si el estado de salud requiere una descripción obligatoria
+  bool requiereDescripcionSalud(EstadoSalud? estado) {
+    if (estado == null) return false;
+    return estado == EstadoSalud.enfermo ||
+           estado == EstadoSalud.critico ||
+           estado == EstadoSalud.enTratamiento;
   }
 
   void setEstadoReproductivo(EstadoReproductivo? estado) {
@@ -577,6 +593,7 @@ class AnimalFormController extends ChangeNotifier {
       ..zonaActual = zonaActualController.text.isEmpty ? null : zonaActualController.text
       ..estado = _estadoAnimal
       ..estadoSalud = _estadoSalud
+      ..descripcionSalud = descripcionSaludController.text.isEmpty ? null : descripcionSaludController.text
       ..estadoReproductivo = _estadoReproductivo
       ..gestante = _gestante;
   }
@@ -647,6 +664,7 @@ class AnimalFormController extends ChangeNotifier {
     pesoNacimientoController.dispose();
     pesoActualController.dispose();
     zonaActualController.dispose();
+    descripcionSaludController.dispose();
 
     nombreFocus.dispose();
     estadoFocus.dispose();
