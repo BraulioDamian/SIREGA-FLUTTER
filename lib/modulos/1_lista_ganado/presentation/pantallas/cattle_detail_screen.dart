@@ -1,10 +1,10 @@
-// lib/modulos/2_detalle_animal/presentacion/pantallas/cattle_detail_screen.dart
+// lib/modulos/2_detalle_animal/presentation/pantallas/cattle_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/bloc/cattle_detail_bloc.dart';
-import 'package:sirega_app/modulos/3_registro_evento/presentacion/pantallas/add_event_screen.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/bloc/cattle_detail_bloc.dart';
+import 'package:sirega_app/modulos/3_registro_evento/presentation/pantallas/add_event_screen.dart';
 
 class CattleDetailScreen extends StatelessWidget {
   final int animalId;

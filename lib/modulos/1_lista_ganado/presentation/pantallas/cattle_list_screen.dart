@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sirega_app/modulos/1_lista_ganado/presentacion/bloc/cattle_list_bloc.dart';
-import 'package:sirega_app/modulos/1_lista_ganado/presentacion/widgets/animal_card.dart';
-import 'package:sirega_app/modulos/1_lista_ganado/presentacion/pantallas/add_animal_screen.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/pantallas/cattle_detail_screen.dart';
+import 'package:sirega_app/modulos/1_lista_ganado/presentation/bloc/cattle_list_bloc.dart';
+import 'package:sirega_app/modulos/1_lista_ganado/presentation/widgets/animal_card.dart';
+import 'package:sirega_app/modulos/1_lista_ganado/presentation/pantallas/add_animal_screen.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/cattle_detail_screen.dart';
 // Importar enums
 import 'package:sirega_app/nucleo/modelos/animal_model.dart'; // Importar Animal
 

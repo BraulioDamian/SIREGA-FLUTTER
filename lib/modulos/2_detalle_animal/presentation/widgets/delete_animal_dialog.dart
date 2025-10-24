@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/bloc/cattle_detail_bloc.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/bloc/cattle_detail_bloc.dart';
 
 class DeleteAnimalDialog extends StatefulWidget {
   final Animal animal;

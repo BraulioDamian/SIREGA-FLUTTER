@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/widgets/animated_info_card.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/widgets/health_status_widget.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/widgets/production_charts.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animated_info_card.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/health_status_widget.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/production_charts.dart';
 
 enum TabType { general, health, reproduction, production }
 

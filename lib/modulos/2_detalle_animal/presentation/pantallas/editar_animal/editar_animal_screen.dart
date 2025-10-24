@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/bloc/cattle_detail_bloc.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/bloc/cattle_detail_bloc.dart';
 import 'package:sirega_app/presentation/forms/animal_form/animal_form.dart';
 import 'package:sirega_app/presentation/forms/animal_form/controllers/animal_form_controller.dart';
 

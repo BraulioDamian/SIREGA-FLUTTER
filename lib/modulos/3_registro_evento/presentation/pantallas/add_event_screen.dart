@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
-import 'package:sirega_app/modulos/3_registro_evento/presentacion/bloc/add_event_bloc.dart';
+import 'package:sirega_app/modulos/3_registro_evento/presentation/bloc/add_event_bloc.dart';
 
 class AddEventScreen extends StatefulWidget {
   final Animal animal;

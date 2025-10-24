@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/bloc/cattle_detail_bloc.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/widgets/detail_tab_content.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/widgets/custom_sliver_header.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/widgets/delete_animal_dialog.dart';
-import 'package:sirega_app/modulos/2_detalle_animal/presentacion/pantallas/editar_animal/editar_animal_screen.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/bloc/cattle_detail_bloc.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/detail_tab_content.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/custom_sliver_header.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/delete_animal_dialog.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/editar_animal/editar_animal_screen.dart';
 import 'package:flutter/rendering.dart';
 
 class CattleDetailScreen extends StatefulWidget {

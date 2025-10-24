@@ -4,7 +4,12 @@
       "Bash(mkdir:*)",
       "Bash(tree:*)",
       "Bash(find /Users/damian/Documents/SIREGA/SIREGA-FLUTTER/lib -type f -name \"*.dart\" -exec grep -l \"AnimalForm\" {} ;)",
-      "Bash(flutter analyze lib/presentation/forms/animal_form/ lib/modulos/2_detalle_animal/presentacion/pantallas/editar_animal/editar_animal_screen.dart)"
+      "Bash(flutter analyze lib/presentation/forms/animal_form/ lib/modulos/2_detalle_animal/presentacion/pantallas/editar_animal/editar_animal_screen.dart)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(find:*)",
+      "Bash(xargs sed:*)",
+      "Bash(flutter analyze:*)"
     ],
     "deny": [],
     "ask": []

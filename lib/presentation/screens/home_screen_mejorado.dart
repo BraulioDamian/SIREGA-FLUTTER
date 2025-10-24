@@ -12,7 +12,7 @@ import 'dart:async';
 import 'package:sirega_app/presentation/widgets/home/quick_stats_bar.dart';
 import 'package:sirega_app/presentation/widgets/home/primary_action_card.dart';
 import 'package:sirega_app/presentation/widgets/home/sync_status_card.dart';
-import 'package:sirega_app/modulos/1_lista_ganado/presentacion/pantallas/cattle_list_screen.dart';
+import 'package:sirega_app/modulos/1_lista_ganado/presentation/pantallas/cattle_list_screen.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/screens/escaneo_nfc_screen.dart';
 
 

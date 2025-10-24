@@ -1,4 +1,4 @@
-// lib/modulos/3_registro_evento/presentacion/pantallas/add_event_screen.dart
+// lib/modulos/3_registro_evento/presentation/pantallas/add_event_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
