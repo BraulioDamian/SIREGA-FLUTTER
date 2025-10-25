@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
+import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
+import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
+import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animated_info_card.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/health_status_widget.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/production_charts.dart';
@@ -211,11 +216,11 @@ class DetailTabContent extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         AnimatedInfoCard(
-          title: 'Próximas Vacunas',
+          title: 'Vacunas Aplicadas',
           icon: Icons.vaccines,
           color: Colors.orange,
           delay: 200,
-          child: _buildUpcomingVaccines(context),
+          child: _buildVaccinesList(context),
         ),
       ],
     );
@@ -284,7 +289,7 @@ class DetailTabContent extends StatelessWidget {
           delay: 0,
           child: Column(
             children: [
-              const ProductionChart(type: ChartType.milk),
+              ProductionChart(type: ChartType.milk, animal: animal),
               const SizedBox(height: 20),
               _buildDetailRow(
                 context,
@@ -304,7 +309,7 @@ class DetailTabContent extends StatelessWidget {
           delay: 100,
           child: Column(
             children: [
-              const ProductionChart(type: ChartType.weight),
+              ProductionChart(type: ChartType.weight, animal: animal),
               const SizedBox(height: 20),
               _buildDetailRow(
                 context,
@@ -481,298 +486,360 @@ class DetailTabContent extends StatelessWidget {
   }
 
   Widget _buildMedicalHistory(BuildContext context) {
-    final history = [
-      {
-        'date': '15/08/2024',
-        'type': 'Vacunación',
-        'description': 'Vacuna contra fiebre aftosa',
-        'icon': Icons.vaccines,
-        'color': Colors.blue,
-      },
-      {
-        'date': '01/07/2024',
-        'type': 'Desparasitación',
-        'description': 'Tratamiento antiparasitario',
-        'icon': Icons.bug_report,
-        'color': Colors.green,
-      },
-    ];
-    
-    if (history.isEmpty) {
-      return _buildEmptyState('Sin historial médico');
-    }
-    
-    return Column(
-      children: history.map((event) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: Material(
-            color: Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () {},
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: (event['color'] as Color).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        event['icon'] as IconData,
-                        color: event['color'] as Color,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            event['type'] as String,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            event['description'] as String,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+    final isarService = RepositoryProvider.of<IsarService>(context);
+
+    return FutureBuilder<List<EventoSanitario>>(
+      future: isarService.obtenerEventosPorAnimal(animal.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return _buildEmptyState('Error al cargar historial médico');
+        }
+
+        final eventos = snapshot.data ?? [];
+
+        if (eventos.isEmpty) {
+          return _buildEmptyState('Sin historial médico');
+        }
+
+        // Ordenar por fecha descendente (más reciente primero)
+        eventos.sort((a, b) => b.fecha.compareTo(a.fecha));
+
+        return Column(
+          children: eventos.map((evento) {
+            // Determinar icono y color según el tipo
+            IconData icon;
+            Color color;
+            String tipoNombre;
+
+            switch (evento.tipo) {
+              case TipoEvento.vacuna:
+                icon = Icons.vaccines;
+                color = Colors.blue;
+                tipoNombre = 'Vacunación';
+                break;
+              case TipoEvento.desparasitante:
+                icon = Icons.bug_report;
+                color = Colors.green;
+                tipoNombre = 'Desparasitación';
+                break;
+              case TipoEvento.tratamiento:
+                icon = Icons.medication;
+                color = Colors.orange;
+                tipoNombre = 'Tratamiento';
+                break;
+              case TipoEvento.revisionVeterinaria:
+                icon = Icons.health_and_safety;
+                color = Colors.teal;
+                tipoNombre = 'Diagnóstico';
+                break;
+              case TipoEvento.castracion:
+                icon = Icons.healing;
+                color = Colors.red;
+                tipoNombre = 'Cirugía';
+                break;
+              default:
+                icon = Icons.medical_services;
+                color = Colors.grey;
+                tipoNombre = evento.tipo.name;
+            }
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Material(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  onTap: () {},
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: color.withAlpha(26),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            icon,
+                            color: color,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                tipoNombre,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                evento.nombreProducto,
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              if (evento.notas != null && evento.notas!.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  evento.notas!,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade500,
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${evento.fecha.day.toString().padLeft(2, '0')}/${evento.fecha.month.toString().padLeft(2, '0')}/${evento.fecha.year}',
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildVaccinesList(BuildContext context) {
+    final isarService = RepositoryProvider.of<IsarService>(context);
+
+    return FutureBuilder<List<EventoSanitario>>(
+      future: isarService.obtenerEventosPorAnimal(animal.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return _buildEmptyState('Error al cargar vacunas');
+        }
+
+        final eventos = snapshot.data ?? [];
+
+        // Filtrar solo vacunas
+        final vacunas = eventos.where((e) => e.tipo == TipoEvento.vacuna).toList();
+
+        if (vacunas.isEmpty) {
+          return _buildEmptyState('Sin vacunas registradas');
+        }
+
+        // Ordenar por fecha descendente
+        vacunas.sort((a, b) => b.fecha.compareTo(a.fecha));
+
+        return Column(
+          children: vacunas.map((vacuna) {
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.blue.withAlpha(26),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.blue.withAlpha(77),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withAlpha(51),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.vaccines,
+                      color: Colors.blue,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          vacuna.nombreProducto,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
                         const SizedBox(height: 2),
                         Text(
-                          event['date'] as String,
+                          'Aplicada: ${vacuna.fecha.day.toString().padLeft(2, '0')}/${vacuna.fecha.month.toString().padLeft(2, '0')}/${vacuna.fecha.year}',
                           style: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildUpcomingVaccines(BuildContext context) {
-    final vaccines = [
-      {'name': 'Brucelosis', 'date': '01/09/2024', 'daysLeft': 7},
-      {'name': 'Carbunco', 'date': '15/09/2024', 'daysLeft': 21},
-    ];
-    
-    if (vaccines.isEmpty) {
-      return _buildEmptyState('No hay vacunas programadas');
-    }
-    
-    return Column(
-      children: vaccines.map((vaccine) {
-        final daysLeft = vaccine['daysLeft'] as int;
-        final urgency = daysLeft <= 7
-            ? Colors.red
-            : daysLeft <= 14
-                ? Colors.orange
-                : Colors.green;
-        
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                urgency.withOpacity(0.1),
-                urgency.withOpacity(0.05),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: urgency.withOpacity(0.3),
-              width: 1.5,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: urgency.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.vaccines,
-                  color: urgency,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      vaccine['name'] as String,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      vaccine['date'] as String,
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: urgency,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '$daysLeft días',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
+                  const Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                    size: 24,
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
     );
   }
 
   Widget _buildOffspringHistory(BuildContext context) {
-    final offspring = [
-      {
-        'name': 'Ternero #234',
-        'birthDate': '15/03/2024',
-        'sex': 'Macho',
-        'status': 'Activo',
-      },
-      {
-        'name': 'Ternera #235',
-        'birthDate': '20/01/2023',
-        'sex': 'Hembra',
-        'status': 'Activo',
-      },
-    ];
-    
-    if (offspring.isEmpty) {
-      return _buildEmptyState('Sin crías registradas');
-    }
-    
-    return Column(
-      children: offspring.map((cria) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: Material(
-            color: Colors.brown.shade50,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () {},
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.brown.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        cria['sex'] == 'Macho' ? Icons.male : Icons.female,
-                        color: cria['sex'] == 'Macho' ? Colors.blue : Colors.pink,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            cria['name'] as String,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
+    final isarService = RepositoryProvider.of<IsarService>(context);
+
+    return FutureBuilder<List<RegistroProduccion>>(
+      future: isarService.obtenerProduccionPorAnimal(animal.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return _buildEmptyState('Error al cargar historial de partos');
+        }
+
+        final registros = snapshot.data ?? [];
+
+        // Filtrar solo los partos
+        final partos = registros.where((r) => r.tipo == 'Parto').toList();
+
+        if (partos.isEmpty) {
+          return _buildEmptyState('Sin crías registradas');
+        }
+
+        // Ordenar por fecha descendente
+        partos.sort((a, b) => b.fecha.compareTo(a.fecha));
+
+        return Column(
+          children: partos.map((parto) {
+            // Extraer el sexo de las notas si existe
+            bool esMacho = false;
+            if (parto.notas != null && parto.notas!.contains('Sexo:')) {
+              esMacho = parto.notas!.contains('Macho');
+            }
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Material(
+                color: Colors.brown.shade50,
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  onTap: () {},
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.brown.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            esMacho ? Icons.male : Icons.female,
+                            color: esMacho ? Colors.blue : Colors.pink,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                parto.idCria ?? 'Cría sin identificar',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Nacido: ${parto.fecha.day.toString().padLeft(2, '0')}/${parto.fecha.month.toString().padLeft(2, '0')}/${parto.fecha.year}',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              if (parto.pesoKg != null) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Peso al nacer: ${parto.pesoKg!.toStringAsFixed(1)} kg',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        if (parto.notas != null && parto.notas!.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.brown.withAlpha(26),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Icon(
+                              Icons.notes,
+                              color: Colors.brown,
+                              size: 16,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Nacido: ${cria['birthDate']}',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.green.withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        cria['status'] as String,
-                        style: const TextStyle(
-                          color: Colors.green,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
     );
   }
 

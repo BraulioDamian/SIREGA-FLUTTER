@@ -62,7 +62,7 @@ class BasicInfoFormSection extends StatelessWidget {
     if (isMobile) {
       return Column(
         children: [
-          _buildNombreField(controller),
+          _buildNombreField(context, controller),
           const SizedBox(height: 16),
           _buildRazaDropdown(context, controller),
           const SizedBox(height: 16),
@@ -78,7 +78,7 @@ class BasicInfoFormSection extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                _buildNombreField(controller),
+                _buildNombreField(context, controller),
                 const SizedBox(height: 16),
                 _buildSexoDropdown(context, controller),
               ],
@@ -99,15 +99,39 @@ class BasicInfoFormSection extends StatelessWidget {
     }
   }
 
-  Widget _buildNombreField(AnimalFormController controller) {
+  Widget _buildNombreField(BuildContext context, AnimalFormController controller) {
     return TextFormField(
       controller: controller.nombreController,
       focusNode: controller.nombreFocus,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: 'Nombre del Animal',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.pets),
+        prefixIcon: const Icon(Icons.pets),
         helperText: 'Nombre único identificativo',
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Theme.of(context).primaryColor,
+            width: 2,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
       ),
       textCapitalization: TextCapitalization.words,
       validator: (value) {
@@ -229,13 +253,13 @@ class BasicInfoFormSection extends StatelessWidget {
       onTap: () async {
         final picked = await showDatePicker(
           context: context,
-          initialDate: controller.fechaNacimiento ?? 
+          initialDate: controller.fechaNacimiento ??
                       DateTime.now().subtract(const Duration(days: 30)),
           firstDate: DateTime(2000),
           lastDate: DateTime.now(),
           locale: const Locale('es', 'ES'),
         );
-        
+
         if (picked != null) {
           controller.setFechaNacimiento(picked);
         }
@@ -243,12 +267,36 @@ class BasicInfoFormSection extends StatelessWidget {
       child: AbsorbPointer(
         child: TextFormField(
           controller: controller.fechaController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Fecha de Nacimiento',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.calendar_today),
-            suffixIcon: Icon(Icons.arrow_drop_down),
+            prefixIcon: const Icon(Icons.calendar_today),
+            suffixIcon: const Icon(Icons.arrow_drop_down),
             helperText: 'Toque para seleccionar',
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).primaryColor,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red, width: 2),
+            ),
           ),
           validator: (value) {
             if (controller.fechaNacimiento == null) {

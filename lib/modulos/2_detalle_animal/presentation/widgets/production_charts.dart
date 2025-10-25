@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sirega_app/nucleo/modelos/animal_model.dart';
+import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
+import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 
 enum ChartType { milk, weight }
 
 class ProductionChart extends StatefulWidget {
   final ChartType type;
+  final Animal animal;
 
   const ProductionChart({
     super.key,
     required this.type,
+    required this.animal,
   });
 
   @override
@@ -53,110 +59,221 @@ class _ProductionChartState extends State<ProductionChart>
         ? 'Últimos 30 días'
         : 'Últimos 6 meses';
 
-    return Container(
-      height: 250,
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Encabezado
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800,
-                      ),
+    final isarService = RepositoryProvider.of<IsarService>(context);
+
+    return FutureBuilder<List<RegistroProduccion>>(
+      future: isarService.obtenerProduccionPorAnimal(widget.animal.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            height: 250,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: color.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        final registros = snapshot.data ?? [];
+
+        // Filtrar registros según el tipo de gráfico
+        final registrosFiltrados = registros.where((r) {
+          if (widget.type == ChartType.milk) {
+            return r.tipo == 'Producción de Leche';
+          } else {
+            return r.tipo == 'Pesaje' || r.pesoKg != null;
+          }
+        }).toList();
+
+        // Ordenar por fecha
+        registrosFiltrados.sort((a, b) => a.fecha.compareTo(b.fecha));
+
+        // Extraer datos para el gráfico
+        final data = registrosFiltrados.map((r) {
+          if (widget.type == ChartType.milk) {
+            return r.litrosPorDia ?? 0.0;
+          } else {
+            return r.pesoKg ?? 0.0;
+          }
+        }).where((value) => value > 0).toList();
+
+        // Si no hay datos suficientes, mostrar estado vacío
+        if (data.isEmpty || data.length < 2) {
+          return Container(
+            height: 250,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: color.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    widget.type == ChartType.milk
+                        ? Icons.opacity
+                        : Icons.monitor_weight,
+                    size: 48,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    widget.type == ChartType.milk
+                        ? 'Sin datos de producción de leche'
+                        : 'Sin datos de pesaje',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
                     ),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Registra al menos 2 mediciones',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Calcular estadísticas
+        final minValue = data.reduce(math.min);
+        final maxValue = data.reduce(math.max);
+        final avgValue = data.reduce((a, b) => a + b) / data.length;
+
+        // Calcular tendencia (comparar último valor con promedio)
+        final lastValue = data.last;
+        final trend = lastValue - avgValue;
+        final trendPercent = (trend / avgValue * 100).abs();
+
+        return Container(
+          height: 250,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: color.withOpacity(0.2),
+              width: 1,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Encabezado
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        Text(
+                          '${data.length} registros',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            trend >= 0 ? Icons.trending_up : Icons.trending_down,
+                            color: trend >= 0 ? Colors.green : Colors.red,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            widget.type == ChartType.milk
+                                ? '${trend >= 0 ? '+' : ''}${trendPercent.toStringAsFixed(1)}%'
+                                : '${trend >= 0 ? '+' : ''}${trend.toStringAsFixed(1)}kg',
+                            style: TextStyle(
+                              color: trend >= 0 ? Colors.green : Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        widget.type == ChartType.milk
-                            ? Icons.trending_up
-                            : Icons.show_chart,
-                        color: color,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        widget.type == ChartType.milk ? '+5%' : '+12kg',
-                        style: TextStyle(
+                const SizedBox(height: 20),
+                // Gráfico
+                Expanded(
+                  child: AnimatedBuilder(
+                    animation: _animation,
+                    builder: (context, child) {
+                      return CustomPaint(
+                        size: Size.infinite,
+                        painter: ChartPainter(
                           color: color,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                          progress: _animation.value,
+                          type: widget.type,
+                          data: data,
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
+                ),
+                const SizedBox(height: 16),
+                // Leyenda con datos reales
+                _buildLegendWithData(
+                  color,
+                  minValue,
+                  avgValue,
+                  maxValue,
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            // Gráfico
-            Expanded(
-              child: AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return CustomPaint(
-                    size: Size.infinite,
-                    painter: ChartPainter(
-                      color: color,
-                      progress: _animation.value,
-                      type: widget.type,
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Leyenda
-            _buildLegend(color),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildLegend(Color color) {
+  Widget _buildLegendWithData(Color color, double min, double avg, double max) {
+    final suffix = widget.type == ChartType.milk ? 'L' : 'kg';
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildLegendItem('Min', widget.type == ChartType.milk ? '15L' : '450kg', color.withOpacity(0.5)),
-        _buildLegendItem('Promedio', widget.type == ChartType.milk ? '22L' : '475kg', color),
-        _buildLegendItem('Max', widget.type == ChartType.milk ? '28L' : '500kg', color.withOpacity(0.8)),
+        _buildLegendItem('Min', '${min.toStringAsFixed(1)}$suffix', color.withOpacity(0.5)),
+        _buildLegendItem('Promedio', '${avg.toStringAsFixed(1)}$suffix', color),
+        _buildLegendItem('Max', '${max.toStringAsFixed(1)}$suffix', color.withOpacity(0.8)),
       ],
     );
   }
@@ -197,11 +314,13 @@ class ChartPainter extends CustomPainter {
   final Color color;
   final double progress;
   final ChartType type;
+  final List<double> data;
 
   ChartPainter({
     required this.color,
     required this.progress,
     required this.type,
+    required this.data,
   });
 
   @override
@@ -237,8 +356,7 @@ class ChartPainter extends CustomPainter {
       );
     }
 
-    // Generar datos de ejemplo
-    final data = _generateData();
+    // Usar los datos reales pasados como parámetro
     final maxValue = data.reduce(math.max);
     final minValue = data.reduce(math.min);
     final points = <Offset>[];
@@ -389,16 +507,8 @@ class ChartPainter extends CustomPainter {
     }
   }
 
-  List<double> _generateData() {
-    if (type == ChartType.milk) {
-      return [18, 20, 19, 22, 21, 23, 25, 24, 26, 28, 27, 25];
-    } else {
-      return [450, 455, 460, 458, 465, 470, 475, 480, 485, 490, 495, 500];
-    }
-  }
-
   @override
   bool shouldRepaint(ChartPainter oldDelegate) {
-    return oldDelegate.progress != progress;
+    return oldDelegate.progress != progress || oldDelegate.data != data;
   }
 }

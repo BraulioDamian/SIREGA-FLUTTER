@@ -124,6 +124,23 @@ class AnimalFormController extends ChangeNotifier {
   EstadoSalud _estadoSalud = EstadoSalud.sano;
   EstadoReproductivo? _estadoReproductivo;
   bool _gestante = false;
+
+  // Datos de vacunas
+  List<String> _vacunasAplicadas = [];
+  List<String> _vacunasPersonalizadas = [];
+  Map<String, DateTime> _fechasVacunas = {};
+
+  // Datos de eventos médicos
+  List<Map<String, dynamic>> _eventosMedicos = [];
+
+  // Datos de partos/crías
+  List<Map<String, dynamic>> _registrosPartos = [];
+
+  // Datos de pesajes
+  List<Map<String, dynamic>> _registrosPesajes = [];
+
+  // Datos de producción de leche
+  List<Map<String, dynamic>> _registrosProduccionLeche = [];
   
   // Validación SINIGA
   SinigaId? _sinigaId;
@@ -162,6 +179,15 @@ class AnimalFormController extends ChangeNotifier {
   EstadoSalud get estadoSalud => _estadoSalud;
   EstadoReproductivo? get estadoReproductivo => _estadoReproductivo;
   bool get gestante => _gestante;
+
+  // Getters para vacunas y eventos médicos
+  List<String> get vacunasAplicadas => _vacunasAplicadas;
+  List<String> get vacunasPersonalizadas => _vacunasPersonalizadas;
+  Map<String, DateTime> get fechasVacunas => _fechasVacunas;
+  List<Map<String, dynamic>> get eventosMedicos => _eventosMedicos;
+  List<Map<String, dynamic>> get registrosPartos => _registrosPartos;
+  List<Map<String, dynamic>> get registrosPesajes => _registrosPesajes;
+  List<Map<String, dynamic>> get registrosProduccionLeche => _registrosProduccionLeche;
   
   // Validación general del formulario
   bool get isFormValid => 
@@ -555,6 +581,93 @@ class AnimalFormController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Métodos para manejo de vacunas
+  void agregarVacuna(String nombre) {
+    if (!_vacunasAplicadas.contains(nombre)) {
+      _vacunasAplicadas.add(nombre);
+      notifyListeners();
+    }
+  }
+
+  void removerVacuna(String nombre) {
+    _vacunasAplicadas.remove(nombre);
+    _fechasVacunas.remove(nombre);
+    notifyListeners();
+  }
+
+  void setFechaVacuna(String nombre, DateTime fecha) {
+    _fechasVacunas[nombre] = fecha;
+    notifyListeners();
+  }
+
+  void agregarVacunaPersonalizada(String nombre) {
+    if (!_vacunasPersonalizadas.contains(nombre)) {
+      _vacunasPersonalizadas.add(nombre);
+      notifyListeners();
+    }
+  }
+
+  void eliminarVacunaPersonalizada(String nombre) {
+    _vacunasPersonalizadas.remove(nombre);
+    // También remover de vacunas aplicadas si estaba seleccionada
+    if (_vacunasAplicadas.contains(nombre)) {
+      removerVacuna(nombre);
+    }
+    notifyListeners();
+  }
+
+  // Métodos para manejo de eventos médicos
+  void agregarEventoMedico(Map<String, dynamic> evento) {
+    _eventosMedicos.add(evento);
+    notifyListeners();
+  }
+
+  void eliminarEventoMedico(int index) {
+    if (index >= 0 && index < _eventosMedicos.length) {
+      _eventosMedicos.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  // Métodos para manejo de partos/crías
+  void agregarRegistroParto(Map<String, dynamic> parto) {
+    _registrosPartos.add(parto);
+    notifyListeners();
+  }
+
+  void eliminarRegistroParto(int index) {
+    if (index >= 0 && index < _registrosPartos.length) {
+      _registrosPartos.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  // Métodos para pesajes
+  void agregarRegistroPesaje(Map<String, dynamic> pesaje) {
+    _registrosPesajes.add(pesaje);
+    notifyListeners();
+  }
+
+  void eliminarRegistroPesaje(int index) {
+    if (index >= 0 && index < _registrosPesajes.length) {
+      _registrosPesajes.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  // Métodos para producción de leche
+  void agregarRegistroProduccionLeche(Map<String, dynamic> produccion) {
+    _registrosProduccionLeche.add(produccion);
+    notifyListeners();
+  }
+
+  void eliminarRegistroProduccionLeche(int index) {
+    if (index >= 0 && index < _registrosProduccionLeche.length) {
+      _registrosProduccionLeche.removeAt(index);
+      notifyListeners();
+    }
+  }
+
   String _getSexoDisplayName(Sexo sexo) {
     switch (sexo) {
       case Sexo.macho:
@@ -624,7 +737,7 @@ class AnimalFormController extends ChangeNotifier {
     numeroController.clear();
     fechaController.clear();
     nfcController.clear();
-    
+
     razaDisplayController.clear();
     sexoDisplayController.clear();
     estadoDisplayController.clear();
@@ -638,7 +751,14 @@ class AnimalFormController extends ChangeNotifier {
     _sinigaIsValid = false;
     _sinigaValidationMessage = null;
     _nfcId = null;
-    
+
+    // Limpiar vacunas, eventos y partos
+    _vacunasAplicadas.clear();
+    _vacunasPersonalizadas.clear();
+    _fechasVacunas.clear();
+    _eventosMedicos.clear();
+    _registrosPartos.clear();
+
     notifyListeners();
   }
   

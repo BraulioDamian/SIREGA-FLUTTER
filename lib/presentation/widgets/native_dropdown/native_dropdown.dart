@@ -307,39 +307,55 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
             onTap: widget.readOnly && widget.enabled ? _toggleDropdown : null,
             decoration: InputDecoration(
               labelText: widget.labelText,
-              border: const OutlineInputBorder(),
+              filled: true,
+              fillColor: widget.enabled ? Colors.white : Colors.grey.shade100,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+              ),
+              enabledBorder: _isOpen
+                  ? OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: theme.primaryColor,
+                        width: 2,
+                      ),
+                    )
+                  : OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                    ),
               focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
                   color: theme.primaryColor,
                   width: 2,
                 ),
               ),
-              enabledBorder: _isOpen
-                  ? OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: theme.primaryColor.withAlpha((255 * 0.5).round()),
-                        width: 2,
-                      ),
-                    )
-                  : null,
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.red, width: 1),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
+              ),
               prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
-              suffixIcon: GestureDetector(
-                onTap: widget.enabled ? _toggleDropdown : null,
-                child: AnimatedRotation(
+              suffixIcon: IconButton(
+                onPressed: widget.enabled ? _toggleDropdown : null,
+                icon: AnimatedRotation(
                   duration: const Duration(milliseconds: 300),
                   turns: _isOpen ? 0.5 : 0,
                   curve: Curves.easeInOut,
                   child: Icon(
                     Icons.arrow_drop_down,
-                    color: widget.enabled 
+                    color: widget.enabled
                         ? (_isOpen ? theme.primaryColor : null)
                         : Colors.grey,
                   ),
                 ),
               ),
               enabled: widget.enabled,
-              fillColor: widget.enabled ? null : Colors.grey.shade100,
-              filled: !widget.enabled,
             ),
           ),
         ),
@@ -809,45 +825,61 @@ class _NativeSearchableDropdownState<T extends Object> extends State<NativeSearc
             validator: widget.validator,
             decoration: InputDecoration(
               labelText: widget.labelText,
-              border: const OutlineInputBorder(),
+              filled: true,
+              fillColor: widget.enabled ? Colors.white : Colors.grey.shade100,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+              ),
+              enabledBorder: _isOpen
+                  ? OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: theme.primaryColor,
+                        width: 2,
+                      ),
+                    )
+                  : OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                    ),
               focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
                   color: theme.primaryColor,
                   width: 2,
                 ),
               ),
-              enabledBorder: _isOpen
-                  ? OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: theme.primaryColor.withAlpha((255 * 0.5).round()),
-                        width: 2,
-                      ),
-                    )
-                  : null,
-              prefixIcon: widget.prefixIcon != null 
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.red, width: 1),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
+              ),
+              prefixIcon: widget.prefixIcon != null
                   ? AnimatedRotation(
                       duration: const Duration(milliseconds: 300),
                       turns: _isOpen ? 0.1 : 0,
                       child: Icon(widget.prefixIcon),
                     )
                   : null,
-              suffixIcon: GestureDetector(
-                onTap: widget.enabled ? _toggleDropdown : null,
-                child: AnimatedRotation(
+              suffixIcon: IconButton(
+                onPressed: widget.enabled ? _toggleDropdown : null,
+                icon: AnimatedRotation(
                   duration: const Duration(milliseconds: 350),
                   turns: _isOpen ? 0.5 : 0,
                   curve: Curves.easeInOutBack,
                   child: Icon(
                     Icons.arrow_drop_down,
-                    color: widget.enabled 
+                    color: widget.enabled
                         ? (_isOpen ? theme.primaryColor : null)
                         : Colors.grey,
                   ),
                 ),
               ),
               enabled: widget.enabled,
-              fillColor: widget.enabled ? null : Colors.grey.shade100,
-              filled: !widget.enabled,
             ),
           ),
         ),

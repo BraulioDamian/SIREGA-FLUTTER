@@ -296,15 +296,13 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        _isPermanentDelete 
+                        _isPermanentDelete
                           ? 'Animal eliminado permanentemente'
                           : 'Animal marcado como inactivo',
                       ),
                       backgroundColor: _isPermanentDelete ? Colors.red : Colors.orange,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      behavior: SnackBarBehavior.fixed,
+                      duration: const Duration(seconds: 2),
                     ),
                   );
                 },

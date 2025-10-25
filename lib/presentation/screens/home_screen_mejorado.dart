@@ -87,9 +87,16 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
           totalAnimales = animales.length;
           animalesActivos =
               animales.where((a) => a.estado == EstadoAnimal.activo).length;
-          // Placeholder data
-          alertasSanitarias = 3;
-          registrosPendientesSync = 12;
+
+          // Calcular alertas sanitarias reales basadas en el estado de salud
+          alertasSanitarias = animales.where((animal) {
+            return animal.estadoSalud == EstadoSalud.critico ||
+                   animal.estadoSalud == EstadoSalud.enfermo ||
+                   animal.estadoSalud == EstadoSalud.enTratamiento;
+          }).length;
+
+          // Por ahora no hay sistema de sincronización, así que es 0
+          registrosPendientesSync = 0;
         });
       }
     } catch (e) {
@@ -180,6 +187,30 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
     return 'Buenas Noches';
   }
 
+  String _formatearTiempoTranscurrido(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inSeconds < 60) {
+      return 'hace ${difference.inSeconds} seg';
+    } else if (difference.inMinutes < 60) {
+      return 'hace ${difference.inMinutes} min';
+    } else if (difference.inHours < 24) {
+      return 'hace ${difference.inHours} h';
+    } else if (difference.inDays < 7) {
+      return 'hace ${difference.inDays} día${difference.inDays > 1 ? 's' : ''}';
+    } else if (difference.inDays < 30) {
+      final weeks = (difference.inDays / 7).floor();
+      return 'hace $weeks semana${weeks > 1 ? 's' : ''}';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return 'hace $months mes${months > 1 ? 'es' : ''}';
+    } else {
+      final years = (difference.inDays / 365).floor();
+      return 'hace $years año${years > 1 ? 's' : ''}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -200,7 +231,7 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
                 ultimaSync: ultimaSync,
                 syncAnimationController: _syncAnimationController,
                 onSyncPressed: _sincronizarDatos,
-                formatearTiempo: (dt) => 'hace 5 min', // Placeholder
+                formatearTiempo: _formatearTiempoTranscurrido,
               ),
               const SizedBox(height: 20),
               QuickStatsBar(

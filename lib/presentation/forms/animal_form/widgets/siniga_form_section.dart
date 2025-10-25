@@ -108,10 +108,18 @@ class SinigaFormSection extends StatelessWidget {
   Widget _buildEspecieField(AnimalFormController controller) {
     return TextFormField(
       controller: controller.especieController,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: 'Especie',
         helperText: '00 = Bovinos',
-        border: OutlineInputBorder(),
+        filled: true,
+        fillColor: Colors.grey.shade100,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+        ),
         counterText: '',
       ),
       maxLength: 2,
@@ -125,14 +133,16 @@ class SinigaFormSection extends StatelessWidget {
   }
 
   Widget _buildEstadoField(AnimalFormController controller, BuildContext context) {
-    final bool isValid = controller.estadoController.text.length == 2 && 
+    final bool isValid = controller.estadoController.text.length == 2 &&
                          controller.estadoSeleccionado != null;
-    
+
     return TextFormField(
       controller: controller.estadoController,
       focusNode: controller.estadoFocus,
       decoration: InputDecoration(
         labelText: 'Estado',
+        filled: true,
+        fillColor: Colors.white,
         helperText: isValid
             ? '✓ ${controller.estadoSeleccionado?.nombre ?? ''}'
             : 'Código 01-32',
@@ -141,30 +151,40 @@ class SinigaFormSection extends StatelessWidget {
           fontWeight: isValid ? FontWeight.bold : null,
           fontSize: 11,
         ),
-        errorText: controller.estadoController.text.isNotEmpty && 
-                  !isValid && 
+        errorText: controller.estadoController.text.isNotEmpty &&
+                  !isValid &&
                   controller.estadoController.text.length == 2
             ? 'Código inválido'
             : null,
         border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: isValid ? Colors.green : Colors.grey,
+            color: isValid ? Colors.green : Colors.grey.shade300,
+            width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
             color: isValid ? Colors.green : Theme.of(context).primaryColor,
             width: 2,
           ),
         ),
-        enabledBorder: isValid 
-            ? OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.green.shade300,
-                  width: 1.5,
-                ),
-              )
-            : null,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isValid ? Colors.green.shade300 : Colors.grey.shade300,
+            width: isValid ? 1.5 : 1,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
         counterText: '',
       ),
       maxLength: 2,
@@ -201,12 +221,14 @@ class SinigaFormSection extends StatelessWidget {
 
   Widget _buildNumeroField(AnimalFormController controller, BuildContext context) {
     final bool isValid = controller.numeroController.text.length == 8;
-    
+
     return TextFormField(
       controller: controller.numeroController,
       focusNode: controller.numeroFocus,
       decoration: InputDecoration(
         labelText: 'Número Nacional',
+        filled: true,
+        fillColor: Colors.white,
         helperText: isValid
             ? '✓ Completo'
             : '8 dígitos únicos',
@@ -215,24 +237,34 @@ class SinigaFormSection extends StatelessWidget {
           fontWeight: isValid ? FontWeight.bold : null,
         ),
         border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: isValid ? Colors.green : Colors.grey,
+            color: isValid ? Colors.green : Colors.grey.shade300,
+            width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
             color: isValid ? Colors.green : Theme.of(context).primaryColor,
             width: 2,
           ),
         ),
-        enabledBorder: isValid 
-            ? OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.green.shade300,
-                  width: 1.5,
-                ),
-              )
-            : null,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isValid ? Colors.green.shade300 : Colors.grey.shade300,
+            width: isValid ? 1.5 : 1,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
         counterText: '',
       ),
       maxLength: 8,

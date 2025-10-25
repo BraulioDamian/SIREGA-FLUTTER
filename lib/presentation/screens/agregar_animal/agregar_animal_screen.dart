@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
+import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
+import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/presentation/forms/animal_form/controllers/animal_form_controller.dart';
 import 'package:sirega_app/presentation/forms/animal_form/widgets/image_picker_section.dart';
 import 'package:sirega_app/presentation/forms/animal_form/widgets/siniga_form_section.dart';
@@ -11,6 +15,9 @@ import 'package:sirega_app/presentation/forms/animal_form/widgets/health_form_se
 import 'package:sirega_app/presentation/forms/animal_form/widgets/reproduction_form_section.dart';
 import 'package:sirega_app/presentation/forms/animal_form/widgets/location_form_section.dart';
 import 'package:sirega_app/presentation/forms/animal_form/widgets/production_form_section.dart';
+import 'package:sirega_app/presentation/forms/animal_form/widgets/vaccines_form_section.dart';
+import 'package:sirega_app/presentation/forms/animal_form/widgets/medical_events_form_section.dart';
+import 'package:sirega_app/presentation/forms/animal_form/widgets/offspring_form_section.dart';
 import 'package:provider/provider.dart';
 
 /// Pantalla mejorada para agregar un nuevo animal
@@ -44,14 +51,10 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
     _formController.addListener(_actualizarEstadoTabs);
 
     // Escuchar cambios de tab para actualizar la UI
-    _tabController.addListener(() {
-      if (mounted) {
-        setState(() {}); // Rebuilds para actualizar los tabs
-      }
-    });
+    _tabController.addListener(_onTabChanged);
 
-    // Ocultar tutorial de swipe después de 4 segundos
-    Future.delayed(const Duration(seconds: 4), () {
+    // Ocultar tutorial de swipe después de 3 segundos
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         setState(() {
           _mostrarTutorialSwipe = false;
@@ -60,11 +63,23 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
     });
   }
 
+  void _onTabChanged() {
+    // Solo actualizar si el widget sigue montado
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void dispose() {
+    // Remover listeners ANTES de hacer dispose de los controllers
+    _tabController.removeListener(_onTabChanged);
     _formController.removeListener(_actualizarEstadoTabs);
-    _formController.dispose();
+
+    // Ahora es seguro hacer dispose
     _tabController.dispose();
+    _formController.dispose();
+
     super.dispose();
   }
 
@@ -112,20 +127,20 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
           foregroundColor: Colors.white,
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(48),
-            child: TabBar(
-              controller: _tabController,
-              indicatorColor: Colors.white,
-              indicatorWeight: 3,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white70,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              tabs: [
-                _buildAdaptiveTab(0, 'General', Icons.info, isRequired: true),
-                _buildAdaptiveTab(1, 'Salud', Icons.favorite, isRequired: false),
-                _buildAdaptiveTab(2, 'Reproducción', Icons.child_care, isRequired: false),
-                _buildAdaptiveTab(3, 'Producción', Icons.show_chart, isRequired: false),
-              ],
+            child: Container(
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.white, width: 3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  _buildDynamicTab(0, 'General', Icons.info),
+                  _buildDynamicTab(1, 'Salud', Icons.favorite),
+                  _buildDynamicTab(2, 'Reproducción', Icons.child_care),
+                  _buildDynamicTab(3, 'Producción', Icons.show_chart),
+                ],
+              ),
             ),
           ),
         ),
@@ -174,95 +189,134 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
     );
   }
 
-  Widget _buildAdaptiveTab(
-    int index,
-    String label,
-    IconData icon,
-    {required bool isRequired}
-  ) {
-    // Determinar si este tab está activo
-    final isActive = _tabController.index == index;
+  /// Widget de tab dinámico con efecto acordeón sincronizado con el swipe
+  Widget _buildDynamicTab(int index, String label, IconData icon) {
+    return AnimatedBuilder(
+      animation: _tabController.animation!,
+      builder: (context, child) {
+        // Calcular qué tan "activo" está este tab basado en la animación
+        final animationValue = _tabController.animation!.value;
+        final distance = (animationValue - index).abs();
+        final activation = (1.0 - distance.clamp(0.0, 1.0));
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      // El tab activo es más ancho, los inactivos son más pequeños
-      width: isActive ? null : 70,
-      constraints: BoxConstraints(
-        minWidth: isActive ? 120 : 70,
-        maxWidth: isActive ? 200 : 70,
-      ),
-      child: Tab(
-        child: isActive
-            ? Row(
-                mainAxisSize: MainAxisSize.max,
+        // Usar flex con números más grandes para transiciones más suaves
+        final flexValue = (100 + (activation * 200)).round();
+
+        return Expanded(
+          flex: flexValue,
+          child: GestureDetector(
+            onTap: () {
+              if (mounted && _tabController.index != index) {
+                _tabController.animateTo(index);
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+              padding: EdgeInsets.symmetric(
+                horizontal: 8 + (activation * 4),
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha((activation * 26).round()),
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: activation > 0.3
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withAlpha((activation * 20).round()),
+                          blurRadius: 4 * activation,
+                          offset: Offset(0, 2 * activation),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 22),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      label,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                  Transform.scale(
+                    scale: 1.0 + (activation * 0.1),
+                    child: Icon(
+                      icon,
+                      size: 22,
+                      color: Color.lerp(
+                        Colors.white.withAlpha(179),
+                        Colors.white,
+                        activation,
                       ),
                     ),
                   ),
-                  if (isRequired)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 2),
-                      child: Text(
-                        '*',
-                        style: TextStyle(
-                          color: Colors.orange,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                  ClipRect(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: activation,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Opacity(
+                          opacity: activation,
+                          child: Text(
+                            label,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            overflow: TextOverflow.visible,
+                            maxLines: 1,
+                            softWrap: false,
+                          ),
                         ),
                       ),
                     ),
-                ],
-              )
-            : Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Icon(icon, size: 20),
-                  if (isRequired)
-                    Positioned(
-                      right: -4,
-                      top: -4,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.orange,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
+                  ),
                 ],
               ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildProgressIndicator() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.white,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: _generalCompleto ? Colors.green.withAlpha(13) : Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: _generalCompleto
+                ? Colors.green.withAlpha(51)
+                : Colors.grey.withAlpha(26),
+            width: 1,
+          ),
+        ),
+      ),
       child: Row(
         children: [
-          Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
-          const SizedBox(width: 8),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Icon(
+              _generalCompleto ? Icons.check_circle : Icons.info_outline,
+              key: ValueKey(_generalCompleto),
+              size: 18,
+              color: _generalCompleto ? Colors.green : Colors.grey[600],
+            ),
+          ),
+          const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              _generalCompleto
-                  ? 'Campos requeridos completados. Puedes agregar más información en las otras pestañas.'
-                  : 'Complete los campos requeridos en la pestaña General',
+            child: AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 300),
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[700],
+                color: _generalCompleto ? Colors.green.shade700 : Colors.grey[700],
+                fontWeight: _generalCompleto ? FontWeight.w500 : FontWeight.normal,
+                height: 1.3,
+              ),
+              child: Text(
+                _generalCompleto
+                    ? 'Campos requeridos completados. Puedes agregar más información en las otras pestañas.'
+                    : 'Complete los campos requeridos en la pestaña General',
               ),
             ),
           ),
@@ -321,7 +375,7 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
       padding: const EdgeInsets.all(16),
       children: [
         _buildInfoBanner(
-          'La información de salud es opcional. Puede registrarla ahora o agregarla después.',
+          'Registre el estado de salud, vacunas y eventos médicos del animal. Esta información es opcional.',
           Colors.blue,
         ),
         const SizedBox(height: 16),
@@ -330,6 +384,20 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
           'Estado de Salud',
           Icons.favorite,
           const HealthFormSection(),
+        ),
+        const SizedBox(height: 16),
+
+        _buildSectionCard(
+          'Vacunas',
+          Icons.vaccines,
+          const VaccinesFormSection(),
+        ),
+        const SizedBox(height: 16),
+
+        _buildSectionCard(
+          'Eventos Médicos',
+          Icons.medical_services,
+          const MedicalEventsFormSection(),
         ),
         const SizedBox(height: 80),
       ],
@@ -341,7 +409,7 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
       padding: const EdgeInsets.all(16),
       children: [
         _buildInfoBanner(
-          'La información reproductiva es opcional. Puede registrarla ahora o agregarla después.',
+          'Registre el estado reproductivo e historial de partos del animal. Esta información es opcional.',
           Colors.pink,
         ),
         const SizedBox(height: 16),
@@ -350,6 +418,13 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
           'Estado Reproductivo',
           Icons.child_care,
           const ReproductionFormSection(),
+        ),
+        const SizedBox(height: 16),
+
+        _buildSectionCard(
+          'Historial de Partos',
+          Icons.pregnant_woman,
+          const OffspringFormSection(),
         ),
         const SizedBox(height: 16),
 
@@ -381,22 +456,49 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
 
   Widget _buildInfoBanner(String message, Color color) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withAlpha(26), // withOpacity(0.1)
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withAlpha(51)), // withOpacity(0.2)
+        gradient: LinearGradient(
+          colors: [
+            color.withAlpha(15),
+            color.withAlpha(25),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withAlpha(40),
+          width: 1.5,
+        ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, color: color, size: 20),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color.withAlpha(30),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.info_rounded,
+              color: color,
+              size: 16,
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: color.withAlpha(230), // withOpacity(0.9)
-                fontSize: 13,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                message,
+                style: TextStyle(
+                  color: color.withAlpha(230),
+                  fontSize: 13,
+                  height: 1.4,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
@@ -490,41 +592,8 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
             height: 50,
             width: 120,
             child: ClipRect(
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 1500),
-                curve: Curves.easeInOut,
-                builder: (context, value, child) {
-                  final double offsetX = 12 - (value * 24);
-                  return Transform.translate(
-                    offset: Offset(offsetX, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.chevron_left,
-                          color: Theme.of(context).primaryColor,
-                          size: 38,
-                        ),
-                        Icon(
-                          Icons.chevron_left,
-                          color: Theme.of(context).primaryColor.withAlpha(179),
-                          size: 38,
-                        ),
-                        Icon(
-                          Icons.chevron_left,
-                          color: Theme.of(context).primaryColor.withAlpha(128),
-                          size: 38,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                onEnd: () {
-                  if (mounted && _mostrarTutorialSwipe) {
-                    setState(() {});
-                  }
-                },
+              child: _SwipeAnimation(
+                primaryColor: Theme.of(context).primaryColor,
               ),
             ),
           ),
@@ -624,6 +693,24 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
       // Guardar en la base de datos
       await isarService.guardarAnimal(nuevoAnimal);
 
+      // Guardar vacunas como eventos sanitarios
+      await _guardarVacunas(isarService, nuevoAnimal);
+
+      // Guardar eventos médicos
+      await _guardarEventosMedicos(isarService, nuevoAnimal);
+
+      // Guardar historial de partos
+      await _guardarHistorialPartos(isarService, nuevoAnimal);
+
+      // Guardar pesajes
+      await _guardarPesajes(isarService, nuevoAnimal);
+
+      // Guardar producción de leche
+      await _guardarProduccionLeche(isarService, nuevoAnimal);
+
+      // Actualizar campos calculados del animal basados en los registros
+      await _actualizarCamposCalculados(isarService, nuevoAnimal);
+
       if (mounted) {
         _mostrarMensaje('Animal registrado exitosamente', esError: false);
         // Regresar a la pantalla anterior con resultado exitoso
@@ -634,6 +721,151 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
         _mostrarMensaje('Error al guardar: $e', esError: true);
       }
     }
+  }
+
+  /// Guarda las vacunas como eventos sanitarios en la base de datos
+  Future<void> _guardarVacunas(IsarService isarService, dynamic animal) async {
+    for (final nombreVacuna in _formController.vacunasAplicadas) {
+      final evento = EventoSanitario()
+        ..tipo = TipoEvento.vacuna
+        ..fecha = _formController.fechasVacunas[nombreVacuna] ?? DateTime.now()
+        ..nombreProducto = nombreVacuna
+        ..notas = null
+        ..prioridad = Prioridad.media;
+
+      await isarService.guardarEvento(evento, animal);
+    }
+  }
+
+  /// Guarda los eventos médicos en la base de datos
+  Future<void> _guardarEventosMedicos(IsarService isarService, dynamic animal) async {
+    for (final eventoData in _formController.eventosMedicos) {
+      final tipoStr = eventoData['tipo'] as String;
+
+      // Convertir el string del tipo a enum
+      TipoEvento tipo;
+      switch (tipoStr) {
+        case 'desparasitacion':
+          tipo = TipoEvento.desparasitante;
+          break;
+        case 'tratamiento':
+          tipo = TipoEvento.tratamiento;
+          break;
+        case 'diagnostico':
+          tipo = TipoEvento.revisionVeterinaria;
+          break;
+        case 'cirugia':
+          tipo = TipoEvento.castracion; // Usamos castracion como proxy para cirugía
+          break;
+        default:
+          tipo = TipoEvento.tratamiento;
+      }
+
+      final evento = EventoSanitario()
+        ..tipo = tipo
+        ..fecha = eventoData['fecha'] as DateTime
+        ..nombreProducto = eventoData['producto'] as String
+        ..notas = eventoData['notas'] as String?
+        ..prioridad = Prioridad.media;
+
+      await isarService.guardarEvento(evento, animal);
+    }
+  }
+
+  /// Guarda el historial de partos como registros de producción
+  Future<void> _guardarHistorialPartos(IsarService isarService, dynamic animal) async {
+    for (final partoData in _formController.registrosPartos) {
+      final sexoCria = partoData['sexoCria'] as Sexo?;
+      final notasOriginales = partoData['notas'] as String?;
+
+      // Construir notas incluyendo el sexo si existe
+      String? notasCompletas = notasOriginales;
+      if (sexoCria != null) {
+        final sexoStr = sexoCria == Sexo.macho ? 'Macho' : 'Hembra';
+        notasCompletas = notasOriginales != null
+            ? 'Sexo: $sexoStr. $notasOriginales'
+            : 'Sexo: $sexoStr';
+      }
+
+      final registro = RegistroProduccion()
+        ..tipo = 'Parto'
+        ..fecha = partoData['fecha'] as DateTime
+        ..idCria = partoData['idCria'] as String?
+        ..pesoKg = partoData['pesoKg'] as double?
+        ..notas = notasCompletas;
+
+      await isarService.guardarRegistroProduccion(registro, animal);
+    }
+  }
+
+  /// Guarda los pesajes como registros de producción
+  Future<void> _guardarPesajes(IsarService isarService, dynamic animal) async {
+    for (final pesajeData in _formController.registrosPesajes) {
+      final registro = RegistroProduccion()
+        ..tipo = 'Pesaje'
+        ..fecha = pesajeData['fecha'] as DateTime
+        ..pesoKg = pesajeData['peso'] as double
+        ..notas = pesajeData['notas'] as String?;
+
+      await isarService.guardarRegistroProduccion(registro, animal);
+    }
+  }
+
+  /// Guarda la producción de leche como registros de producción
+  Future<void> _guardarProduccionLeche(IsarService isarService, dynamic animal) async {
+    for (final produccionData in _formController.registrosProduccionLeche) {
+      final registro = RegistroProduccion()
+        ..tipo = 'Producción de Leche'
+        ..fecha = produccionData['fecha'] as DateTime
+        ..litrosPorDia = produccionData['litros'] as double
+        ..notas = produccionData['notas'] as String?;
+
+      await isarService.guardarRegistroProduccion(registro, animal);
+    }
+  }
+
+  /// Actualiza los campos calculados del animal basados en los registros de producción
+  Future<void> _actualizarCamposCalculados(IsarService isarService, Animal animal) async {
+    // Obtener todos los registros de producción del animal
+    final registros = await isarService.obtenerProduccionPorAnimal(animal.id);
+
+    // Filtrar pesajes y producción de leche
+    final pesajes = registros.where((r) => r.tipo == 'Pesaje').toList();
+    final produccionLeche = registros.where((r) => r.tipo == 'Producción de Leche').toList();
+
+    // Actualizar último pesaje
+    if (pesajes.isNotEmpty) {
+      // Ordenar por fecha descendente para obtener el más reciente
+      pesajes.sort((a, b) => b.fecha.compareTo(a.fecha));
+      final ultimoPesaje = pesajes.first;
+
+      animal.pesoActual = ultimoPesaje.pesoKg;
+      animal.fechaUltimoPesaje = ultimoPesaje.fecha;
+    }
+
+    // Calcular promedio de leche diario y total
+    if (produccionLeche.isNotEmpty) {
+      double totalLeche = 0;
+      for (final registro in produccionLeche) {
+        totalLeche += registro.litrosPorDia ?? 0;
+      }
+
+      animal.produccionLecheTotal = totalLeche;
+      animal.promedioLecheDiario = totalLeche / produccionLeche.length;
+    }
+
+    // Actualizar número de partos
+    final partos = registros.where((r) => r.tipo == 'Parto').toList();
+    if (partos.isNotEmpty) {
+      animal.numeroPartos = partos.length;
+
+      // Actualizar fecha último parto
+      partos.sort((a, b) => b.fecha.compareTo(a.fecha));
+      animal.fechaUltimoParto = partos.first.fecha;
+    }
+
+    // Guardar el animal con los campos actualizados
+    await isarService.guardarAnimal(animal);
   }
 
   void _mostrarMensaje(String mensaje, {required bool esError}) {
@@ -656,15 +888,81 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
             ],
           ),
           backgroundColor: esError ? Colors.red : Colors.green,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          behavior: SnackBarBehavior.fixed,
+          duration: const Duration(seconds: 2),
         ),
       );
     } catch (e) {
       debugPrint('No se pudo mostrar mensaje: $mensaje');
     }
+  }
+}
+
+/// Widget separado para la animación de swipe
+/// Maneja su propio lifecycle para evitar problemas con el widget padre
+class _SwipeAnimation extends StatefulWidget {
+  final Color primaryColor;
+
+  const _SwipeAnimation({required this.primaryColor});
+
+  @override
+  State<_SwipeAnimation> createState() => _SwipeAnimationState();
+}
+
+class _SwipeAnimationState extends State<_SwipeAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        final double offsetX = 12 - (_animation.value * 24);
+        return Transform.translate(
+          offset: Offset(offsetX, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.chevron_left,
+                color: widget.primaryColor,
+                size: 38,
+              ),
+              Icon(
+                Icons.chevron_left,
+                color: widget.primaryColor.withAlpha(179),
+                size: 38,
+              ),
+              Icon(
+                Icons.chevron_left,
+                color: widget.primaryColor.withAlpha(128),
+                size: 38,
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

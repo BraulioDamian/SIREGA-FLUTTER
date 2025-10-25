@@ -165,10 +165,8 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text(state.message),
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      behavior: SnackBarBehavior.fixed,
+                      duration: const Duration(seconds: 2),
                     ),
                   );
                 }
@@ -180,6 +178,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               Navigator.of(context).pop(); // Pop after successful deactivation
             }
             if (state is NavigateToEditScreen) {
+              final bloc = context.read<CattleDetailBloc>();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -188,7 +187,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               ).then((result) {
                 if (result != null && result is Animal) {
                   // Recargar los detalles del animal actualizado
-                  context.read<CattleDetailBloc>().add(LoadCattleDetail(result.id));
+                  bloc.add(LoadCattleDetail(result.id));
                 }
               });
             }
@@ -565,6 +564,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             fontSize: 14,
           ),
           labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           tabs: [
             _buildTab(Icons.info_outline_rounded, 'General'),
             _buildTab(Icons.favorite_outline_rounded, 'Salud'),
@@ -580,7 +580,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     return Tab(
       height: 48,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -840,14 +840,14 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
 
 class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   final TabBar _tabBar;
-  
+
   _SliverTabBarDelegate(this._tabBar);
 
   @override
-  double get minExtent => _tabBar.preferredSize.height;
-  
+  double get minExtent => _tabBar.preferredSize.height + 24; // +24 para el padding vertical (12 + 12)
+
   @override
-  double get maxExtent => _tabBar.preferredSize.height;
+  double get maxExtent => _tabBar.preferredSize.height + 24;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
