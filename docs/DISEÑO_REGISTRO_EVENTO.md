@@ -1,15 +1,27 @@
-# 📋 Diseño: Registro de Eventos Masivo
+# 📋 Diseño: Registro de Evento
 
 ## 🎯 Objetivo
 Permitir el registro rápido y eficiente de eventos sanitarios (vacunaciones, desparasitaciones, tratamientos) para uno o múltiples animales de forma intuitiva.
 
 ---
 
+## 📝 Nota de Arquitectura (Refactorización)
+
+Anteriormente, el proyecto contaba con dos módulos separados: `3_registro_evento` y `5_registro_evento_masivo`. Para simplificar la estructura y evitar duplicación, se han unificado en un solo módulo.
+
+-   **Ubicación Actual:** Toda la funcionalidad de registro de eventos (tanto para uno como para múltiples animales) se encuentra ahora en `lib/modulos/3_registro_evento/`.
+-   **Nombre del Módulo:** El módulo se llama `3_registro_evento`.
+-   **Servicio:** El servicio para guardar los datos ha sido renombrado a `RegistroEventoService` y se encuentra en `aplicacion/registro_evento_service.dart` dentro del módulo.
+
+Este documento ahora describe el flujo unificado para el registro de cualquier tipo de evento.
+
+---
+
 ## 🔄 Flujo Principal Propuesto
 
-### **Opción 1: Inicio desde el Menú Principal**
+### **Opción 1: Inicio desde la Pantalla Principal**
 ```
-Home Screen → FAB "+" → "Registrar Evento"
+Pantalla Principal → Sección "Acciones Principales" → "Registrar Evento"
 ```
 
 ### **Opción 2: Inicio desde Detalle de Animal**
@@ -66,7 +78,7 @@ Detalle Animal → FAB "Registrar Evento" (naranja)
 
 ## 📱 PANTALLA 2: Datos del Evento
 
-### **Layout:**
+### **Layout Mejorado (con Dropdown Inteligente):**
 ```
 ┌─────────────────────────────────────┐
 │ ← Vacunación                        │
@@ -76,18 +88,34 @@ Detalle Animal → FAB "Registrar Evento" (naranja)
 │                                     │
 │ ┌─────────────────────────────┐    │
 │ │ Producto/Vacuna *           │    │
-│ │ [Dropdown: BOBACT 8 ▼]      │    │
+│ │ [Complejo Respiratorio ▼]   │    │
 │ └─────────────────────────────┘    │
+│  ┌────────────────────────────┐    │
+│  │ 🔍 Buscar producto...      │    │
+│  ├────────────────────────────┤    │
+│  │ --- Sugerencias ---        │    │
+│  │ ✅ Complejo Respiratorio   │    │
+│  │    (IBR, DVB, PI3, VRSB)    │    │
+│  │                              │    │
+│  │ ☐ Clostridial 8 vías       │    │
+│  │ ☐ Rabia Paralítica (Derriengue)│    │
+│  │ ☐ Brucelosis Cepa RB51     │    │
+│  │                              │    │
+│  │ --- Refuerzos ---          │    │
+│  │ ☐ Refuerzo Anual Complejo  │    │
+│  ├────────────────────────────┤    │
+│  │ ➕ Registrar nuevo producto │    │
+│  └────────────────────────────┘    │
 │                                     │
 │ ┌─────────────────────────────┐    │
 │ │ Fecha de Aplicación *       │    │
 │ │ [📅 25/10/2025]             │    │
 │ └─────────────────────────────┘    │
 │                                     │
-│ ┌─────────────────────────────┐    │
-│ │ Dosis (ml)                  │    │
-│ │ [5.0]                       │    │
-│ └─────────────────────────────┘    │
+│ ┌───────────┐ ┌───────────┐   │    │
+│ │ Dosis *   │ │ Unidad    │   │    │
+│ │ [ 5.0 ]   │ │ [ ml ▼]   │   │    │
+│ └───────────┘ └───────────┘   │    │
 │                                     │
 │ ┌─────────────────────────────┐    │
 │ │ Veterinario                 │    │
@@ -97,7 +125,6 @@ Detalle Animal → FAB "Registrar Evento" (naranja)
 │ ┌─────────────────────────────┐    │
 │ │ Notas                       │    │
 │ │ [Opcional...]               │    │
-│ │                             │    │
 │ └─────────────────────────────┘    │
 │                                     │
 │        [Continuar ➜]               │
@@ -106,9 +133,13 @@ Detalle Animal → FAB "Registrar Evento" (naranja)
 ```
 
 **Características:**
-- Formulario simple y directo
-- Campos contextuales según tipo de evento
-- Validación en tiempo real
+- **Dropdown Inteligente:**
+  - **Búsqueda Rápida:** Filtra la lista mientras escribes.
+  - **Sugerencias:** Muestra las vacunas más comunes para ganado.
+  - **Categorías:** Separa vacunas primarias de refuerzos.
+  - **Personalización:** Permite agregar un nuevo producto si no está en la lista.
+- **Campos Claros:** Dosis y unidad están separados para mayor claridad.
+- **Validación en tiempo real.**
 - Al presionar "Continuar" → PANTALLA 3
 
 ---

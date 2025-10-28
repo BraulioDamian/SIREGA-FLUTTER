@@ -24,4 +24,9 @@ class NfcRepositoryImpl implements NfcRepository {
     final nfcId = await _nfcService.readNfcTag();
     return await _dbService.findAnimalByNfcId(nfcId);
   }
+
+  @override
+  Future<void> finishScan() async {
+    await _nfcService.finishScan();
+  }
 }

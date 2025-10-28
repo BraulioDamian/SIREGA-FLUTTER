@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/modulos/3_registro_evento/presentation/pantallas/seleccionar_tipo_evento_screen.dart';
 import 'package:sirega_app/presentation/screens/agregar_animal/agregar_animal_screen.dart';
 
 import 'package:sirega_app/nucleo/modelos/enums.dart';
@@ -163,13 +164,10 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
     ).then((_) => _cargarDatos());
   }
 
-  void _registrarEvento() {
-    // TODO: Navigate to event registration screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Función no implementada'),
-        behavior: SnackBarBehavior.fixed,
-      ),
+void _registrarEvento() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SeleccionarTipoEventoScreen()),
     );
   }
 

@@ -44,7 +44,7 @@ class CattleDetailScreen extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       child: ListTile(
                         leading: CircleAvatar(backgroundColor: colorPrioridad, child: const Icon(Icons.vaccines, color: Colors.white)),
-                        title: Text(evento.nombreProducto),
+                        title: Text(evento.nombreProducto ?? 'Sin nombre'),
                         subtitle: Text('Fecha: ${evento.fecha.toLocal().toString().substring(0, 10)}'),
                         trailing: Text(evento.prioridad.name, style: TextStyle(color: colorPrioridad, fontWeight: FontWeight.bold)),
                       ),

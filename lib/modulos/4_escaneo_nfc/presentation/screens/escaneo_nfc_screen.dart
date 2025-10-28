@@ -9,6 +9,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/esp32_service.dar
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/nfc_service.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/connect_to_esp32_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/disconnect_from_esp32_use_case.dart';
+import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/finish_nfc_scan_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/open_wifi_settings_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/find_animal_by_uid_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/scan_nfc_use_case.dart';
@@ -21,20 +22,17 @@ class EscaneoNfcScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Esto normalmente se haría con un inyector de dependencias como GetIt o Provider
+    // Esto normally se haría con un inyector de dependencias como GetIt o Provider
     final isarService = IsarService();
     final animalDbService = AnimalDatabaseService(isarService);
+    final nfcRepository = NfcRepositoryImpl(NfcService(), animalDbService);
 
     return MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (context) => NfcScannerBloc(
-            ScanNfcUseCase(
-              NfcRepositoryImpl(
-                NfcService(),
-                animalDbService,
-              ),
-            ),
+            ScanNfcUseCase(nfcRepository),
+            FinishNfcScanUseCase(nfcRepository),
           ),
         ),
         BlocProvider(

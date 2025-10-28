@@ -81,7 +81,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   ..tipo = _productoSeleccionado?.tipo ?? TipoEvento.tratamiento
                   ..fecha = DateTime.now()
                   ..nombreProducto = nombreFinalProducto
-                  ..dosis = _dosisController.text
+                  ..dosis = double.tryParse(_dosisController.text)
                   ..notas = _notasController.text;
                 isarService.guardarEvento(nuevoEvento, widget.animal);
                 Navigator.pop(context);

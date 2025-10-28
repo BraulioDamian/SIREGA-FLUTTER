@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentation/bloc/cattle_list_bloc.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentation/widgets/animal_card.dart';
-import 'package:sirega_app/modulos/1_lista_ganado/presentation/pantallas/add_animal_screen.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/cattle_detail_screen.dart';
 // Importar enums
 import 'package:sirega_app/nucleo/modelos/animal_model.dart'; // Importar Animal
@@ -83,19 +82,6 @@ class _CattleListScreenState extends State<CattleListScreen> with SingleTickerPr
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddAnimalScreen()),
-          ).then((_) {
-            if (context.mounted) {
-              context.read<CattleListBloc>().add(LoadCattle());
-            }
-          });
-        },
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
@@ -111,9 +97,6 @@ class _CattleListScreenState extends State<CattleListScreen> with SingleTickerPr
               'No hay animales en esta categoría',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 8),
-            if (_tabController.index == 0) // Solo mostrar en la pestaña de Activos
-              const Text('Toca + para agregar tu primer animal'),
           ],
         ),
       );

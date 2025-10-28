@@ -16,11 +16,12 @@ class Esp32Connected extends Esp32ScannerState {}
 
 class Esp32AnimalFound extends Esp32ScannerState {
   final Animal animal;
+  final int timestamp;
 
-  const Esp32AnimalFound(this.animal);
+  Esp32AnimalFound(this.animal) : timestamp = DateTime.now().millisecondsSinceEpoch;
 
   @override
-  List<Object> get props => [animal];
+  List<Object> get props => [animal, timestamp];
 }
 
 class Esp32UidReceived extends Esp32ScannerState {

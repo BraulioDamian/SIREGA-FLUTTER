@@ -14,11 +14,12 @@ class NfcScanning extends NfcScannerState {}
 
 class NfcAnimalFound extends NfcScannerState {
   final Animal animal;
+  final int timestamp;
 
-  const NfcAnimalFound(this.animal);
+  NfcAnimalFound(this.animal) : timestamp = DateTime.now().millisecondsSinceEpoch;
 
   @override
-  List<Object> get props => [animal];
+  List<Object> get props => [animal, timestamp];
 }
 
 class NfcScanSuccess extends NfcScannerState {

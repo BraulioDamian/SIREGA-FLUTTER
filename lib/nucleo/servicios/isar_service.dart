@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
+import 'package:sirega_app/nucleo/modelos/lote_evento_model.dart';
 import 'package:sirega_app/nucleo/modelos/producto_catalogo_model.dart';
 import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
 import 'package:sirega_app/nucleo/modelos/herd_model.dart';
@@ -26,6 +27,7 @@ class IsarService {
         SyncQueueSchema,
         ConfiguracionLocalSchema,
         AlertaSchema,
+        LoteEventoSchema,
       ],
       directory: dir.path,
       inspector: true,

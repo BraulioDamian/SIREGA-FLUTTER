@@ -12,14 +12,13 @@ class NfcService {
   }
 
   Future<String> readNfcTag() async {
-    try {
-      final tag = await FlutterNfcKit.poll(
-        timeout: const Duration(seconds: 15),
-      );
-      return tag.id;
-    } finally {
-      await FlutterNfcKit.finish();
-    }
+    final tag = await FlutterNfcKit.poll(
+      timeout: const Duration(seconds: 15),
+    );
+    return tag.id;
+  }
+
+  Future<void> finishScan() async {
+    await FlutterNfcKit.finish();
   }
 }
-

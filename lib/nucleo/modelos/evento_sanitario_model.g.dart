@@ -20,44 +20,74 @@ const EventoSanitarioSchema = CollectionSchema(
     r'dosis': PropertySchema(
       id: 0,
       name: r'dosis',
-      type: IsarType.string,
+      type: IsarType.double,
     ),
     r'fecha': PropertySchema(
       id: 1,
       name: r'fecha',
       type: IsarType.dateTime,
     ),
-    r'nombreProducto': PropertySchema(
+    r'fechaCreacion': PropertySchema(
       id: 2,
+      name: r'fechaCreacion',
+      type: IsarType.dateTime,
+    ),
+    r'fechaProximaAplicacion': PropertySchema(
+      id: 3,
+      name: r'fechaProximaAplicacion',
+      type: IsarType.dateTime,
+    ),
+    r'loteId': PropertySchema(
+      id: 4,
+      name: r'loteId',
+      type: IsarType.string,
+    ),
+    r'nombreProducto': PropertySchema(
+      id: 5,
       name: r'nombreProducto',
       type: IsarType.string,
     ),
     r'notas': PropertySchema(
-      id: 3,
+      id: 6,
       name: r'notas',
       type: IsarType.string,
     ),
     r'prioridad': PropertySchema(
-      id: 4,
+      id: 7,
       name: r'prioridad',
       type: IsarType.string,
       enumMap: _EventoSanitarioprioridadEnumValueMap,
     ),
     r'serverId': PropertySchema(
-      id: 5,
+      id: 8,
       name: r'serverId',
       type: IsarType.string,
     ),
     r'tipo': PropertySchema(
-      id: 6,
+      id: 9,
       name: r'tipo',
       type: IsarType.string,
       enumMap: _EventoSanitariotipoEnumValueMap,
     ),
+    r'totalAnimalesLote': PropertySchema(
+      id: 10,
+      name: r'totalAnimalesLote',
+      type: IsarType.long,
+    ),
     r'ultimaActualizacion': PropertySchema(
-      id: 7,
+      id: 11,
       name: r'ultimaActualizacion',
       type: IsarType.dateTime,
+    ),
+    r'unidadDosis': PropertySchema(
+      id: 12,
+      name: r'unidadDosis',
+      type: IsarType.string,
+    ),
+    r'veterinario': PropertySchema(
+      id: 13,
+      name: r'veterinario',
+      type: IsarType.string,
     )
   },
   estimateSize: _eventoSanitarioEstimateSize,
@@ -102,12 +132,17 @@ int _eventoSanitarioEstimateSize(
 ) {
   var bytesCount = offsets.last;
   {
-    final value = object.dosis;
+    final value = object.loteId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
   }
-  bytesCount += 3 + object.nombreProducto.length * 3;
+  {
+    final value = object.nombreProducto;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   {
     final value = object.notas;
     if (value != null) {
@@ -122,6 +157,18 @@ int _eventoSanitarioEstimateSize(
     }
   }
   bytesCount += 3 + object.tipo.name.length * 3;
+  {
+    final value = object.unidadDosis;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.veterinario;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -131,14 +178,20 @@ void _eventoSanitarioSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.dosis);
+  writer.writeDouble(offsets[0], object.dosis);
   writer.writeDateTime(offsets[1], object.fecha);
-  writer.writeString(offsets[2], object.nombreProducto);
-  writer.writeString(offsets[3], object.notas);
-  writer.writeString(offsets[4], object.prioridad.name);
-  writer.writeString(offsets[5], object.serverId);
-  writer.writeString(offsets[6], object.tipo.name);
-  writer.writeDateTime(offsets[7], object.ultimaActualizacion);
+  writer.writeDateTime(offsets[2], object.fechaCreacion);
+  writer.writeDateTime(offsets[3], object.fechaProximaAplicacion);
+  writer.writeString(offsets[4], object.loteId);
+  writer.writeString(offsets[5], object.nombreProducto);
+  writer.writeString(offsets[6], object.notas);
+  writer.writeString(offsets[7], object.prioridad.name);
+  writer.writeString(offsets[8], object.serverId);
+  writer.writeString(offsets[9], object.tipo.name);
+  writer.writeLong(offsets[10], object.totalAnimalesLote);
+  writer.writeDateTime(offsets[11], object.ultimaActualizacion);
+  writer.writeString(offsets[12], object.unidadDosis);
+  writer.writeString(offsets[13], object.veterinario);
 }
 
 EventoSanitario _eventoSanitarioDeserialize(
@@ -148,19 +201,25 @@ EventoSanitario _eventoSanitarioDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = EventoSanitario();
-  object.dosis = reader.readStringOrNull(offsets[0]);
+  object.dosis = reader.readDoubleOrNull(offsets[0]);
   object.fecha = reader.readDateTime(offsets[1]);
+  object.fechaCreacion = reader.readDateTime(offsets[2]);
+  object.fechaProximaAplicacion = reader.readDateTimeOrNull(offsets[3]);
   object.id = id;
-  object.nombreProducto = reader.readString(offsets[2]);
-  object.notas = reader.readStringOrNull(offsets[3]);
+  object.loteId = reader.readStringOrNull(offsets[4]);
+  object.nombreProducto = reader.readStringOrNull(offsets[5]);
+  object.notas = reader.readStringOrNull(offsets[6]);
   object.prioridad = _EventoSanitarioprioridadValueEnumMap[
-          reader.readStringOrNull(offsets[4])] ??
+          reader.readStringOrNull(offsets[7])] ??
       Prioridad.baja;
-  object.serverId = reader.readStringOrNull(offsets[5]);
+  object.serverId = reader.readStringOrNull(offsets[8]);
   object.tipo =
-      _EventoSanitariotipoValueEnumMap[reader.readStringOrNull(offsets[6])] ??
+      _EventoSanitariotipoValueEnumMap[reader.readStringOrNull(offsets[9])] ??
           TipoEvento.vacuna;
-  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[7]);
+  object.totalAnimalesLote = reader.readLongOrNull(offsets[10]);
+  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[11]);
+  object.unidadDosis = reader.readStringOrNull(offsets[12]);
+  object.veterinario = reader.readStringOrNull(offsets[13]);
   return object;
 }
 
@@ -172,25 +231,37 @@ P _eventoSanitarioDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 1:
       return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 4:
-      return (_EventoSanitarioprioridadValueEnumMap[
-              reader.readStringOrNull(offset)] ??
-          Prioridad.baja) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 5:
       return (reader.readStringOrNull(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (_EventoSanitarioprioridadValueEnumMap[
+              reader.readStringOrNull(offset)] ??
+          Prioridad.baja) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
       return (_EventoSanitariotipoValueEnumMap[
               reader.readStringOrNull(offset)] ??
           TipoEvento.vacuna) as P;
-    case 7:
+    case 10:
+      return (reader.readLongOrNull(offset)) as P;
+    case 11:
       return (reader.readDateTimeOrNull(offset)) as P;
+    case 12:
+      return (reader.readStringOrNull(offset)) as P;
+    case 13:
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -434,57 +505,57 @@ extension EventoSanitarioQueryFilter
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
       dosisEqualTo(
-    String? value, {
-    bool caseSensitive = true,
+    double? value, {
+    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'dosis',
         value: value,
-        caseSensitive: caseSensitive,
+        epsilon: epsilon,
       ));
     });
   }
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
       dosisGreaterThan(
-    String? value, {
+    double? value, {
     bool include = false,
-    bool caseSensitive = true,
+    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'dosis',
         value: value,
-        caseSensitive: caseSensitive,
+        epsilon: epsilon,
       ));
     });
   }
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
       dosisLessThan(
-    String? value, {
+    double? value, {
     bool include = false,
-    bool caseSensitive = true,
+    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'dosis',
         value: value,
-        caseSensitive: caseSensitive,
+        epsilon: epsilon,
       ));
     });
   }
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
       dosisBetween(
-    String? lower,
-    String? upper, {
+    double? lower,
+    double? upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    bool caseSensitive = true,
+    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -493,77 +564,7 @@ extension EventoSanitarioQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
-      dosisStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'dosis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
-      dosisEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'dosis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
-      dosisContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'dosis',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
-      dosisMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'dosis',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
-      dosisIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'dosis',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
-      dosisIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'dosis',
-        value: '',
+        epsilon: epsilon,
       ));
     });
   }
@@ -616,6 +617,136 @@ extension EventoSanitarioQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'fecha',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      fechaCreacionEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fechaCreacion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      fechaCreacionGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'fechaCreacion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      fechaCreacionLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'fechaCreacion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      fechaCreacionBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'fechaCreacion',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      fechaProximaAplicacionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'fechaProximaAplicacion',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      fechaProximaAplicacionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'fechaProximaAplicacion',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      fechaProximaAplicacionEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fechaProximaAplicacion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      fechaProximaAplicacionGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'fechaProximaAplicacion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      fechaProximaAplicacionLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'fechaProximaAplicacion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      fechaProximaAplicacionBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'fechaProximaAplicacion',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -681,8 +812,180 @@ extension EventoSanitarioQueryFilter
   }
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
-      nombreProductoEqualTo(
+      loteIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'loteId',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'loteId',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'loteId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'loteId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'loteId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'loteId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdStartsWith(
     String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'loteId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'loteId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'loteId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'loteId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'loteId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      loteIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'loteId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      nombreProductoIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'nombreProducto',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      nombreProductoIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'nombreProducto',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      nombreProductoEqualTo(
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -696,7 +999,7 @@ extension EventoSanitarioQueryFilter
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
       nombreProductoGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -712,7 +1015,7 @@ extension EventoSanitarioQueryFilter
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
       nombreProductoLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -728,8 +1031,8 @@ extension EventoSanitarioQueryFilter
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
       nombreProductoBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -1397,6 +1700,80 @@ extension EventoSanitarioQueryFilter
   }
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      totalAnimalesLoteIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'totalAnimalesLote',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      totalAnimalesLoteIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'totalAnimalesLote',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      totalAnimalesLoteEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'totalAnimalesLote',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      totalAnimalesLoteGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'totalAnimalesLote',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      totalAnimalesLoteLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'totalAnimalesLote',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      totalAnimalesLoteBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'totalAnimalesLote',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
       ultimaActualizacionIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1469,6 +1846,314 @@ extension EventoSanitarioQueryFilter
       ));
     });
   }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'unidadDosis',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'unidadDosis',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'unidadDosis',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'unidadDosis',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'unidadDosis',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'unidadDosis',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'unidadDosis',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'unidadDosis',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'unidadDosis',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'unidadDosis',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'unidadDosis',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      unidadDosisIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'unidadDosis',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'veterinario',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'veterinario',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'veterinario',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'veterinario',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'veterinario',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'veterinario',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'veterinario',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'veterinario',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'veterinario',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'veterinario',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'veterinario',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      veterinarioIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'veterinario',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension EventoSanitarioQueryObject
@@ -1516,6 +2201,47 @@ extension EventoSanitarioQuerySortBy
       sortByFechaDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'fecha', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByFechaCreacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fechaCreacion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByFechaCreacionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fechaCreacion', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByFechaProximaAplicacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fechaProximaAplicacion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByFechaProximaAplicacionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fechaProximaAplicacion', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy> sortByLoteId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'loteId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByLoteIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'loteId', Sort.desc);
     });
   }
 
@@ -1588,6 +2314,20 @@ extension EventoSanitarioQuerySortBy
   }
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByTotalAnimalesLote() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalAnimalesLote', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByTotalAnimalesLoteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalAnimalesLote', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
       sortByUltimaActualizacion() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'ultimaActualizacion', Sort.asc);
@@ -1598,6 +2338,34 @@ extension EventoSanitarioQuerySortBy
       sortByUltimaActualizacionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'ultimaActualizacion', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByUnidadDosis() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'unidadDosis', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByUnidadDosisDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'unidadDosis', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByVeterinario() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'veterinario', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByVeterinarioDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'veterinario', Sort.desc);
     });
   }
 }
@@ -1630,6 +2398,34 @@ extension EventoSanitarioQuerySortThenBy
     });
   }
 
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByFechaCreacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fechaCreacion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByFechaCreacionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fechaCreacion', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByFechaProximaAplicacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fechaProximaAplicacion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByFechaProximaAplicacionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fechaProximaAplicacion', Sort.desc);
+    });
+  }
+
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -1639,6 +2435,19 @@ extension EventoSanitarioQuerySortThenBy
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy> thenByLoteId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'loteId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByLoteIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'loteId', Sort.desc);
     });
   }
 
@@ -1711,6 +2520,20 @@ extension EventoSanitarioQuerySortThenBy
   }
 
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByTotalAnimalesLote() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalAnimalesLote', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByTotalAnimalesLoteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalAnimalesLote', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
       thenByUltimaActualizacion() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'ultimaActualizacion', Sort.asc);
@@ -1723,20 +2546,68 @@ extension EventoSanitarioQuerySortThenBy
       return query.addSortBy(r'ultimaActualizacion', Sort.desc);
     });
   }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByUnidadDosis() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'unidadDosis', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByUnidadDosisDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'unidadDosis', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByVeterinario() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'veterinario', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByVeterinarioDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'veterinario', Sort.desc);
+    });
+  }
 }
 
 extension EventoSanitarioQueryWhereDistinct
     on QueryBuilder<EventoSanitario, EventoSanitario, QDistinct> {
-  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct> distinctByDosis(
-      {bool caseSensitive = true}) {
+  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct> distinctByDosis() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'dosis', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'dosis');
     });
   }
 
   QueryBuilder<EventoSanitario, EventoSanitario, QDistinct> distinctByFecha() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'fecha');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct>
+      distinctByFechaCreacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'fechaCreacion');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct>
+      distinctByFechaProximaAplicacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'fechaProximaAplicacion');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct> distinctByLoteId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'loteId', caseSensitive: caseSensitive);
     });
   }
 
@@ -1777,9 +2648,30 @@ extension EventoSanitarioQueryWhereDistinct
   }
 
   QueryBuilder<EventoSanitario, EventoSanitario, QDistinct>
+      distinctByTotalAnimalesLote() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'totalAnimalesLote');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct>
       distinctByUltimaActualizacion() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'ultimaActualizacion');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct>
+      distinctByUnidadDosis({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'unidadDosis', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct>
+      distinctByVeterinario({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'veterinario', caseSensitive: caseSensitive);
     });
   }
 }
@@ -1792,7 +2684,7 @@ extension EventoSanitarioQueryProperty
     });
   }
 
-  QueryBuilder<EventoSanitario, String?, QQueryOperations> dosisProperty() {
+  QueryBuilder<EventoSanitario, double?, QQueryOperations> dosisProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'dosis');
     });
@@ -1804,7 +2696,27 @@ extension EventoSanitarioQueryProperty
     });
   }
 
-  QueryBuilder<EventoSanitario, String, QQueryOperations>
+  QueryBuilder<EventoSanitario, DateTime, QQueryOperations>
+      fechaCreacionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'fechaCreacion');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, DateTime?, QQueryOperations>
+      fechaProximaAplicacionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'fechaProximaAplicacion');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, String?, QQueryOperations> loteIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'loteId');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, String?, QQueryOperations>
       nombreProductoProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'nombreProducto');
@@ -1836,10 +2748,31 @@ extension EventoSanitarioQueryProperty
     });
   }
 
+  QueryBuilder<EventoSanitario, int?, QQueryOperations>
+      totalAnimalesLoteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'totalAnimalesLote');
+    });
+  }
+
   QueryBuilder<EventoSanitario, DateTime?, QQueryOperations>
       ultimaActualizacionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'ultimaActualizacion');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, String?, QQueryOperations>
+      unidadDosisProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'unidadDosis');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, String?, QQueryOperations>
+      veterinarioProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'veterinario');
     });
   }
 }

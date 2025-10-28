@@ -585,7 +585,7 @@ class DetailTabContent extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                evento.nombreProducto,
+                                evento.nombreProducto ?? 'N/A',
                                 style: TextStyle(
                                   color: Colors.grey.shade600,
                                   fontSize: 13,
@@ -693,7 +693,7 @@ class DetailTabContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          vacuna.nombreProducto,
+                          vacuna.nombreProducto ?? 'N/A',
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
