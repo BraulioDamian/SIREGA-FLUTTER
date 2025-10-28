@@ -22,33 +22,39 @@ const HerdSchema = CollectionSchema(
       name: r'estado',
       type: IsarType.string,
     ),
-    r'municipio': PropertySchema(
+    r'estadoSync': PropertySchema(
       id: 1,
+      name: r'estadoSync',
+      type: IsarType.string,
+      enumMap: _HerdestadoSyncEnumValueMap,
+    ),
+    r'municipio': PropertySchema(
+      id: 2,
       name: r'municipio',
       type: IsarType.string,
     ),
     r'nombre': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'nombre',
       type: IsarType.string,
     ),
     r'ownerUid': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'ownerUid',
       type: IsarType.string,
     ),
     r'serverId': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'serverId',
       type: IsarType.string,
     ),
     r'totalCattleCount': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'totalCattleCount',
       type: IsarType.long,
     ),
     r'ultimaActualizacion': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'ultimaActualizacion',
       type: IsarType.dateTime,
     )
@@ -96,6 +102,7 @@ int _herdEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.estado.length * 3;
+  bytesCount += 3 + object.estadoSync.name.length * 3;
   bytesCount += 3 + object.municipio.length * 3;
   bytesCount += 3 + object.nombre.length * 3;
   bytesCount += 3 + object.ownerUid.length * 3;
@@ -115,12 +122,13 @@ void _herdSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.estado);
-  writer.writeString(offsets[1], object.municipio);
-  writer.writeString(offsets[2], object.nombre);
-  writer.writeString(offsets[3], object.ownerUid);
-  writer.writeString(offsets[4], object.serverId);
-  writer.writeLong(offsets[5], object.totalCattleCount);
-  writer.writeDateTime(offsets[6], object.ultimaActualizacion);
+  writer.writeString(offsets[1], object.estadoSync.name);
+  writer.writeString(offsets[2], object.municipio);
+  writer.writeString(offsets[3], object.nombre);
+  writer.writeString(offsets[4], object.ownerUid);
+  writer.writeString(offsets[5], object.serverId);
+  writer.writeLong(offsets[6], object.totalCattleCount);
+  writer.writeDateTime(offsets[7], object.ultimaActualizacion);
 }
 
 Herd _herdDeserialize(
@@ -131,13 +139,16 @@ Herd _herdDeserialize(
 ) {
   final object = Herd();
   object.estado = reader.readString(offsets[0]);
+  object.estadoSync =
+      _HerdestadoSyncValueEnumMap[reader.readStringOrNull(offsets[1])] ??
+          EstadoSync.pendiente;
   object.id = id;
-  object.municipio = reader.readString(offsets[1]);
-  object.nombre = reader.readString(offsets[2]);
-  object.ownerUid = reader.readString(offsets[3]);
-  object.serverId = reader.readStringOrNull(offsets[4]);
-  object.totalCattleCount = reader.readLong(offsets[5]);
-  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[6]);
+  object.municipio = reader.readString(offsets[2]);
+  object.nombre = reader.readString(offsets[3]);
+  object.ownerUid = reader.readString(offsets[4]);
+  object.serverId = reader.readStringOrNull(offsets[5]);
+  object.totalCattleCount = reader.readLong(offsets[6]);
+  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[7]);
   return object;
 }
 
@@ -151,21 +162,41 @@ P _herdDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (_HerdestadoSyncValueEnumMap[reader.readStringOrNull(offset)] ??
+          EstadoSync.pendiente) as P;
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
       return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readLong(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
+      return (reader.readLong(offset)) as P;
+    case 7:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
+
+const _HerdestadoSyncEnumValueMap = {
+  r'pendiente': r'pendiente',
+  r'enProceso': r'enProceso',
+  r'completado': r'completado',
+  r'error': r'error',
+  r'conflicto': r'conflicto',
+  r'cancelado': r'cancelado',
+};
+const _HerdestadoSyncValueEnumMap = {
+  r'pendiente': EstadoSync.pendiente,
+  r'enProceso': EstadoSync.enProceso,
+  r'completado': EstadoSync.completado,
+  r'error': EstadoSync.error,
+  r'conflicto': EstadoSync.conflicto,
+  r'cancelado': EstadoSync.cancelado,
+};
 
 Id _herdGetId(Herd object) {
   return object.id;
@@ -444,6 +475,136 @@ extension HerdQueryFilter on QueryBuilder<Herd, Herd, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'estado',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterFilterCondition> estadoSyncEqualTo(
+    EstadoSync value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterFilterCondition> estadoSyncGreaterThan(
+    EstadoSync value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterFilterCondition> estadoSyncLessThan(
+    EstadoSync value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterFilterCondition> estadoSyncBetween(
+    EstadoSync lower,
+    EstadoSync upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'estadoSync',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterFilterCondition> estadoSyncStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterFilterCondition> estadoSyncEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterFilterCondition> estadoSyncContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterFilterCondition> estadoSyncMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'estadoSync',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterFilterCondition> estadoSyncIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'estadoSync',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterFilterCondition> estadoSyncIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'estadoSync',
         value: '',
       ));
     });
@@ -1231,6 +1392,18 @@ extension HerdQuerySortBy on QueryBuilder<Herd, Herd, QSortBy> {
     });
   }
 
+  QueryBuilder<Herd, Herd, QAfterSortBy> sortByEstadoSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterSortBy> sortByEstadoSyncDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.desc);
+    });
+  }
+
   QueryBuilder<Herd, Herd, QAfterSortBy> sortByMunicipio() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'municipio', Sort.asc);
@@ -1314,6 +1487,18 @@ extension HerdQuerySortThenBy on QueryBuilder<Herd, Herd, QSortThenBy> {
   QueryBuilder<Herd, Herd, QAfterSortBy> thenByEstadoDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'estado', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterSortBy> thenByEstadoSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Herd, Herd, QAfterSortBy> thenByEstadoSyncDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.desc);
     });
   }
 
@@ -1410,6 +1595,13 @@ extension HerdQueryWhereDistinct on QueryBuilder<Herd, Herd, QDistinct> {
     });
   }
 
+  QueryBuilder<Herd, Herd, QDistinct> distinctByEstadoSync(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'estadoSync', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Herd, Herd, QDistinct> distinctByMunicipio(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1461,6 +1653,12 @@ extension HerdQueryProperty on QueryBuilder<Herd, Herd, QQueryProperty> {
   QueryBuilder<Herd, String, QQueryOperations> estadoProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'estado');
+    });
+  }
+
+  QueryBuilder<Herd, EstadoSync, QQueryOperations> estadoSyncProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'estadoSync');
     });
   }
 

@@ -30,8 +30,12 @@ class EventoSanitario {
   Prioridad prioridad = Prioridad.media;
 
   DateTime fechaCreacion = DateTime.now();
-  
+
+  // ===== SINCRONIZACIÓN =====
   @Index()
   String? serverId;
   DateTime? ultimaActualizacion;
+
+  @Enumerated(EnumType.name)
+  EstadoSync estadoSync = EstadoSync.pendiente;
 }

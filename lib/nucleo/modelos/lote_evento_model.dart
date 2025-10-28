@@ -19,4 +19,12 @@ class LoteEvento {
   List<int> animalesIds = [];
 
   DateTime fechaCreacion = DateTime.now();
+
+  // ===== SINCRONIZACIÓN =====
+  @Index()
+  String? serverId;
+  DateTime? ultimaActualizacion;
+
+  @Enumerated(EnumType.name)
+  EstadoSync estadoSync = EstadoSync.pendiente;
 }

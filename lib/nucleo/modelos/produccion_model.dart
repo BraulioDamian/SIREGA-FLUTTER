@@ -1,5 +1,6 @@
 import 'package:isar/isar.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
+import 'package:sirega_app/nucleo/modelos/enums.dart';
 
 part 'produccion_model.g.dart';
 
@@ -14,7 +15,12 @@ class RegistroProduccion {
   double? litrosPorDia; // para Producción de Leche
   String? notas;
   final animal = IsarLink<Animal>();
+
+  // ===== SINCRONIZACIÓN =====
   @Index()
   String? serverId;
   DateTime? ultimaActualizacion;
+
+  @Enumerated(EnumType.name)
+  EstadoSync estadoSync = EstadoSync.pendiente;
 }

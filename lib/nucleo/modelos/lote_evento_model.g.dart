@@ -27,31 +27,47 @@ const LoteEventoSchema = CollectionSchema(
       name: r'cantidadAnimales',
       type: IsarType.long,
     ),
-    r'fecha': PropertySchema(
+    r'estadoSync': PropertySchema(
       id: 2,
+      name: r'estadoSync',
+      type: IsarType.string,
+      enumMap: _LoteEventoestadoSyncEnumValueMap,
+    ),
+    r'fecha': PropertySchema(
+      id: 3,
       name: r'fecha',
       type: IsarType.dateTime,
     ),
     r'fechaCreacion': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'fechaCreacion',
       type: IsarType.dateTime,
     ),
     r'loteId': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'loteId',
       type: IsarType.string,
     ),
     r'nombreProducto': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'nombreProducto',
       type: IsarType.string,
     ),
+    r'serverId': PropertySchema(
+      id: 7,
+      name: r'serverId',
+      type: IsarType.string,
+    ),
     r'tipo': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'tipo',
       type: IsarType.string,
       enumMap: _LoteEventotipoEnumValueMap,
+    ),
+    r'ultimaActualizacion': PropertySchema(
+      id: 9,
+      name: r'ultimaActualizacion',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _loteEventoEstimateSize,
@@ -59,7 +75,21 @@ const LoteEventoSchema = CollectionSchema(
   deserialize: _loteEventoDeserialize,
   deserializeProp: _loteEventoDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'serverId': IndexSchema(
+      id: -7950187970872907662,
+      name: r'serverId',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'serverId',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _loteEventoGetId,
@@ -75,9 +105,16 @@ int _loteEventoEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.animalesIds.length * 8;
+  bytesCount += 3 + object.estadoSync.name.length * 3;
   bytesCount += 3 + object.loteId.length * 3;
   {
     final value = object.nombreProducto;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.serverId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -94,11 +131,14 @@ void _loteEventoSerialize(
 ) {
   writer.writeLongList(offsets[0], object.animalesIds);
   writer.writeLong(offsets[1], object.cantidadAnimales);
-  writer.writeDateTime(offsets[2], object.fecha);
-  writer.writeDateTime(offsets[3], object.fechaCreacion);
-  writer.writeString(offsets[4], object.loteId);
-  writer.writeString(offsets[5], object.nombreProducto);
-  writer.writeString(offsets[6], object.tipo.name);
+  writer.writeString(offsets[2], object.estadoSync.name);
+  writer.writeDateTime(offsets[3], object.fecha);
+  writer.writeDateTime(offsets[4], object.fechaCreacion);
+  writer.writeString(offsets[5], object.loteId);
+  writer.writeString(offsets[6], object.nombreProducto);
+  writer.writeString(offsets[7], object.serverId);
+  writer.writeString(offsets[8], object.tipo.name);
+  writer.writeDateTime(offsets[9], object.ultimaActualizacion);
 }
 
 LoteEvento _loteEventoDeserialize(
@@ -110,14 +150,19 @@ LoteEvento _loteEventoDeserialize(
   final object = LoteEvento();
   object.animalesIds = reader.readLongList(offsets[0]) ?? [];
   object.cantidadAnimales = reader.readLong(offsets[1]);
-  object.fecha = reader.readDateTime(offsets[2]);
-  object.fechaCreacion = reader.readDateTime(offsets[3]);
+  object.estadoSync =
+      _LoteEventoestadoSyncValueEnumMap[reader.readStringOrNull(offsets[2])] ??
+          EstadoSync.pendiente;
+  object.fecha = reader.readDateTime(offsets[3]);
+  object.fechaCreacion = reader.readDateTime(offsets[4]);
   object.id = id;
-  object.loteId = reader.readString(offsets[4]);
-  object.nombreProducto = reader.readStringOrNull(offsets[5]);
+  object.loteId = reader.readString(offsets[5]);
+  object.nombreProducto = reader.readStringOrNull(offsets[6]);
+  object.serverId = reader.readStringOrNull(offsets[7]);
   object.tipo =
-      _LoteEventotipoValueEnumMap[reader.readStringOrNull(offsets[6])] ??
+      _LoteEventotipoValueEnumMap[reader.readStringOrNull(offsets[8])] ??
           TipoEvento.vacuna;
+  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[9]);
   return object;
 }
 
@@ -133,21 +178,45 @@ P _loteEventoDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readDateTime(offset)) as P;
+      return (_LoteEventoestadoSyncValueEnumMap[
+              reader.readStringOrNull(offset)] ??
+          EstadoSync.pendiente) as P;
     case 3:
       return (reader.readDateTime(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
       return (_LoteEventotipoValueEnumMap[reader.readStringOrNull(offset)] ??
           TipoEvento.vacuna) as P;
+    case 9:
+      return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
+const _LoteEventoestadoSyncEnumValueMap = {
+  r'pendiente': r'pendiente',
+  r'enProceso': r'enProceso',
+  r'completado': r'completado',
+  r'error': r'error',
+  r'conflicto': r'conflicto',
+  r'cancelado': r'cancelado',
+};
+const _LoteEventoestadoSyncValueEnumMap = {
+  r'pendiente': EstadoSync.pendiente,
+  r'enProceso': EstadoSync.enProceso,
+  r'completado': EstadoSync.completado,
+  r'error': EstadoSync.error,
+  r'conflicto': EstadoSync.conflicto,
+  r'cancelado': EstadoSync.cancelado,
+};
 const _LoteEventotipoEnumValueMap = {
   r'vacuna': r'vacuna',
   r'desparasitante': r'desparasitante',
@@ -274,6 +343,71 @@ extension LoteEventoQueryWhere
         upper: upperId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterWhereClause> serverIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'serverId',
+        value: [null],
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterWhereClause> serverIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'serverId',
+        lower: [null],
+        includeLower: false,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterWhereClause> serverIdEqualTo(
+      String? serverId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'serverId',
+        value: [serverId],
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterWhereClause> serverIdNotEqualTo(
+      String? serverId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'serverId',
+              lower: [],
+              upper: [serverId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'serverId',
+              lower: [serverId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'serverId',
+              lower: [serverId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'serverId',
+              lower: [],
+              upper: [serverId],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
@@ -477,6 +611,141 @@ extension LoteEventoQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> estadoSyncEqualTo(
+    EstadoSync value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      estadoSyncGreaterThan(
+    EstadoSync value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      estadoSyncLessThan(
+    EstadoSync value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> estadoSyncBetween(
+    EstadoSync lower,
+    EstadoSync upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'estadoSync',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      estadoSyncStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      estadoSyncEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      estadoSyncContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> estadoSyncMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'estadoSync',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      estadoSyncIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'estadoSync',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      estadoSyncIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'estadoSync',
+        value: '',
       ));
     });
   }
@@ -928,6 +1197,157 @@ extension LoteEventoQueryFilter
     });
   }
 
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> serverIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'serverId',
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      serverIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'serverId',
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> serverIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'serverId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      serverIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'serverId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> serverIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'serverId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> serverIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'serverId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      serverIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'serverId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> serverIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'serverId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> serverIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'serverId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> serverIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'serverId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      serverIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'serverId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      serverIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'serverId',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition> tipoEqualTo(
     TipoEvento value, {
     bool caseSensitive = true,
@@ -1057,6 +1477,80 @@ extension LoteEventoQueryFilter
       ));
     });
   }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      ultimaActualizacionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'ultimaActualizacion',
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      ultimaActualizacionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'ultimaActualizacion',
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      ultimaActualizacionEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'ultimaActualizacion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      ultimaActualizacionGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'ultimaActualizacion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      ultimaActualizacionLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'ultimaActualizacion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterFilterCondition>
+      ultimaActualizacionBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'ultimaActualizacion',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension LoteEventoQueryObject
@@ -1077,6 +1571,18 @@ extension LoteEventoQuerySortBy
       sortByCantidadAnimalesDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'cantidadAnimales', Sort.desc);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> sortByEstadoSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> sortByEstadoSyncDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.desc);
     });
   }
 
@@ -1129,6 +1635,18 @@ extension LoteEventoQuerySortBy
     });
   }
 
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> sortByServerId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'serverId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> sortByServerIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'serverId', Sort.desc);
+    });
+  }
+
   QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> sortByTipo() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'tipo', Sort.asc);
@@ -1138,6 +1656,20 @@ extension LoteEventoQuerySortBy
   QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> sortByTipoDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'tipo', Sort.desc);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy>
+      sortByUltimaActualizacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ultimaActualizacion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy>
+      sortByUltimaActualizacionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ultimaActualizacion', Sort.desc);
     });
   }
 }
@@ -1154,6 +1686,18 @@ extension LoteEventoQuerySortThenBy
       thenByCantidadAnimalesDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'cantidadAnimales', Sort.desc);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> thenByEstadoSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> thenByEstadoSyncDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.desc);
     });
   }
 
@@ -1218,6 +1762,18 @@ extension LoteEventoQuerySortThenBy
     });
   }
 
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> thenByServerId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'serverId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> thenByServerIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'serverId', Sort.desc);
+    });
+  }
+
   QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> thenByTipo() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'tipo', Sort.asc);
@@ -1227,6 +1783,20 @@ extension LoteEventoQuerySortThenBy
   QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy> thenByTipoDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'tipo', Sort.desc);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy>
+      thenByUltimaActualizacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ultimaActualizacion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QAfterSortBy>
+      thenByUltimaActualizacionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ultimaActualizacion', Sort.desc);
     });
   }
 }
@@ -1242,6 +1812,13 @@ extension LoteEventoQueryWhereDistinct
   QueryBuilder<LoteEvento, LoteEvento, QDistinct> distinctByCantidadAnimales() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'cantidadAnimales');
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QDistinct> distinctByEstadoSync(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'estadoSync', caseSensitive: caseSensitive);
     });
   }
 
@@ -1272,10 +1849,24 @@ extension LoteEventoQueryWhereDistinct
     });
   }
 
+  QueryBuilder<LoteEvento, LoteEvento, QDistinct> distinctByServerId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'serverId', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<LoteEvento, LoteEvento, QDistinct> distinctByTipo(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'tipo', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<LoteEvento, LoteEvento, QDistinct>
+      distinctByUltimaActualizacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'ultimaActualizacion');
     });
   }
 }
@@ -1297,6 +1888,12 @@ extension LoteEventoQueryProperty
   QueryBuilder<LoteEvento, int, QQueryOperations> cantidadAnimalesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'cantidadAnimales');
+    });
+  }
+
+  QueryBuilder<LoteEvento, EstadoSync, QQueryOperations> estadoSyncProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'estadoSync');
     });
   }
 
@@ -1324,9 +1921,22 @@ extension LoteEventoQueryProperty
     });
   }
 
+  QueryBuilder<LoteEvento, String?, QQueryOperations> serverIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'serverId');
+    });
+  }
+
   QueryBuilder<LoteEvento, TipoEvento, QQueryOperations> tipoProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'tipo');
+    });
+  }
+
+  QueryBuilder<LoteEvento, DateTime?, QQueryOperations>
+      ultimaActualizacionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'ultimaActualizacion');
     });
   }
 }

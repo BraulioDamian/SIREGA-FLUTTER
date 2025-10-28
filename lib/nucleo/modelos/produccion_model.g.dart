@@ -18,43 +18,49 @@ const RegistroProduccionSchema = CollectionSchema(
   name: r'RegistroProduccion',
   id: -819501691636569775,
   properties: {
-    r'fecha': PropertySchema(
+    r'estadoSync': PropertySchema(
       id: 0,
+      name: r'estadoSync',
+      type: IsarType.string,
+      enumMap: _RegistroProduccionestadoSyncEnumValueMap,
+    ),
+    r'fecha': PropertySchema(
+      id: 1,
       name: r'fecha',
       type: IsarType.dateTime,
     ),
     r'idCria': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'idCria',
       type: IsarType.string,
     ),
     r'litrosPorDia': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'litrosPorDia',
       type: IsarType.double,
     ),
     r'notas': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'notas',
       type: IsarType.string,
     ),
     r'pesoKg': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'pesoKg',
       type: IsarType.double,
     ),
     r'serverId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'serverId',
       type: IsarType.string,
     ),
     r'tipo': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'tipo',
       type: IsarType.string,
     ),
     r'ultimaActualizacion': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'ultimaActualizacion',
       type: IsarType.dateTime,
     )
@@ -100,6 +106,7 @@ int _registroProduccionEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.estadoSync.name.length * 3;
   {
     final value = object.idCria;
     if (value != null) {
@@ -128,14 +135,15 @@ void _registroProduccionSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDateTime(offsets[0], object.fecha);
-  writer.writeString(offsets[1], object.idCria);
-  writer.writeDouble(offsets[2], object.litrosPorDia);
-  writer.writeString(offsets[3], object.notas);
-  writer.writeDouble(offsets[4], object.pesoKg);
-  writer.writeString(offsets[5], object.serverId);
-  writer.writeString(offsets[6], object.tipo);
-  writer.writeDateTime(offsets[7], object.ultimaActualizacion);
+  writer.writeString(offsets[0], object.estadoSync.name);
+  writer.writeDateTime(offsets[1], object.fecha);
+  writer.writeString(offsets[2], object.idCria);
+  writer.writeDouble(offsets[3], object.litrosPorDia);
+  writer.writeString(offsets[4], object.notas);
+  writer.writeDouble(offsets[5], object.pesoKg);
+  writer.writeString(offsets[6], object.serverId);
+  writer.writeString(offsets[7], object.tipo);
+  writer.writeDateTime(offsets[8], object.ultimaActualizacion);
 }
 
 RegistroProduccion _registroProduccionDeserialize(
@@ -145,15 +153,18 @@ RegistroProduccion _registroProduccionDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = RegistroProduccion();
-  object.fecha = reader.readDateTime(offsets[0]);
+  object.estadoSync = _RegistroProduccionestadoSyncValueEnumMap[
+          reader.readStringOrNull(offsets[0])] ??
+      EstadoSync.pendiente;
+  object.fecha = reader.readDateTime(offsets[1]);
   object.id = id;
-  object.idCria = reader.readStringOrNull(offsets[1]);
-  object.litrosPorDia = reader.readDoubleOrNull(offsets[2]);
-  object.notas = reader.readStringOrNull(offsets[3]);
-  object.pesoKg = reader.readDoubleOrNull(offsets[4]);
-  object.serverId = reader.readStringOrNull(offsets[5]);
-  object.tipo = reader.readString(offsets[6]);
-  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[7]);
+  object.idCria = reader.readStringOrNull(offsets[2]);
+  object.litrosPorDia = reader.readDoubleOrNull(offsets[3]);
+  object.notas = reader.readStringOrNull(offsets[4]);
+  object.pesoKg = reader.readDoubleOrNull(offsets[5]);
+  object.serverId = reader.readStringOrNull(offsets[6]);
+  object.tipo = reader.readString(offsets[7]);
+  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[8]);
   return object;
 }
 
@@ -165,25 +176,46 @@ P _registroProduccionDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTime(offset)) as P;
+      return (_RegistroProduccionestadoSyncValueEnumMap[
+              reader.readStringOrNull(offset)] ??
+          EstadoSync.pendiente) as P;
     case 1:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
-    case 4:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 5:
+    case 4:
       return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readDoubleOrNull(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
+      return (reader.readString(offset)) as P;
+    case 8:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
+
+const _RegistroProduccionestadoSyncEnumValueMap = {
+  r'pendiente': r'pendiente',
+  r'enProceso': r'enProceso',
+  r'completado': r'completado',
+  r'error': r'error',
+  r'conflicto': r'conflicto',
+  r'cancelado': r'cancelado',
+};
+const _RegistroProduccionestadoSyncValueEnumMap = {
+  r'pendiente': EstadoSync.pendiente,
+  r'enProceso': EstadoSync.enProceso,
+  r'completado': EstadoSync.completado,
+  r'error': EstadoSync.error,
+  r'conflicto': EstadoSync.conflicto,
+  r'cancelado': EstadoSync.cancelado,
+};
 
 Id _registroProduccionGetId(RegistroProduccion object) {
   return object.id;
@@ -349,6 +381,142 @@ extension RegistroProduccionQueryWhere
 
 extension RegistroProduccionQueryFilter
     on QueryBuilder<RegistroProduccion, RegistroProduccion, QFilterCondition> {
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      estadoSyncEqualTo(
+    EstadoSync value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      estadoSyncGreaterThan(
+    EstadoSync value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      estadoSyncLessThan(
+    EstadoSync value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      estadoSyncBetween(
+    EstadoSync lower,
+    EstadoSync upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'estadoSync',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      estadoSyncStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      estadoSyncEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      estadoSyncContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'estadoSync',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      estadoSyncMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'estadoSync',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      estadoSyncIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'estadoSync',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      estadoSyncIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'estadoSync',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
       fechaEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -1325,6 +1493,20 @@ extension RegistroProduccionQueryLinks
 extension RegistroProduccionQuerySortBy
     on QueryBuilder<RegistroProduccion, RegistroProduccion, QSortBy> {
   QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
+      sortByEstadoSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
+      sortByEstadoSyncDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.desc);
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
       sortByFecha() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'fecha', Sort.asc);
@@ -1439,6 +1621,20 @@ extension RegistroProduccionQuerySortBy
 
 extension RegistroProduccionQuerySortThenBy
     on QueryBuilder<RegistroProduccion, RegistroProduccion, QSortThenBy> {
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
+      thenByEstadoSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
+      thenByEstadoSyncDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'estadoSync', Sort.desc);
+    });
+  }
+
   QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
       thenByFecha() {
     return QueryBuilder.apply(this, (query) {
@@ -1569,6 +1765,13 @@ extension RegistroProduccionQuerySortThenBy
 extension RegistroProduccionQueryWhereDistinct
     on QueryBuilder<RegistroProduccion, RegistroProduccion, QDistinct> {
   QueryBuilder<RegistroProduccion, RegistroProduccion, QDistinct>
+      distinctByEstadoSync({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'estadoSync', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QDistinct>
       distinctByFecha() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'fecha');
@@ -1630,6 +1833,13 @@ extension RegistroProduccionQueryProperty
   QueryBuilder<RegistroProduccion, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, EstadoSync, QQueryOperations>
+      estadoSyncProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'estadoSync');
     });
   }
 
