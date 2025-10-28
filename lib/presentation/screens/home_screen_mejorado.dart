@@ -2,9 +2,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:sirega_app/nucleo/servicios/firebase_sync_service.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/nucleo/servicios/auth_service.dart';
 import 'package:sirega_app/modulos/3_registro_evento/presentation/pantallas/seleccionar_tipo_evento_screen.dart';
 import 'package:sirega_app/presentation/screens/agregar_animal/agregar_animal_screen.dart';
+import 'package:sirega_app/debug/sync_debug_screen_simple.dart';
+import 'package:sirega_app/presentation/screens/profile_screen.dart';
+import 'package:sirega_app/presentation/animations/circular_reveal_clipper.dart';
 
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'dart:async';
@@ -39,6 +45,7 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
   DateTime? ultimaSync;
 
   IsarService? isarService;
+  FirebaseSyncService? _syncService;
   bool _isDataInitialized = false;
 
   @override
@@ -67,6 +74,7 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
     super.didChangeDependencies();
     if (!_isDataInitialized) {
       isarService = RepositoryProvider.of<IsarService>(context);
+      _syncService = RepositoryProvider.of<FirebaseSyncService>(context);
       _cargarDatos();
       _isDataInitialized = true;
     }
@@ -80,9 +88,10 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
   }
 
   Future<void> _cargarDatos() async {
-    if (isarService == null) return;
+    if (isarService == null || _syncService == null) return;
     try {
       final animales = await isarService!.obtenerTodosLosAnimales();
+      final pendientes = await _syncService!.getPendingCount();
       if (mounted) {
         setState(() {
           totalAnimales = animales.length;
@@ -96,8 +105,7 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
                    animal.estadoSalud == EstadoSalud.enTratamiento;
           }).length;
 
-          // Por ahora no hay sistema de sincronización, así que es 0
-          registrosPendientesSync = 0;
+          registrosPendientesSync = pendientes;
         });
       }
     } catch (e) {
@@ -106,17 +114,17 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
   }
 
   Future<void> _sincronizarDatos() async {
-    if (sincronizando) return;
+    if (sincronizando || _syncService == null) return;
 
     setState(() => sincronizando = true);
     _syncAnimationController.repeat();
 
     try {
-      await Future.delayed(const Duration(seconds: 3));
+      await _syncService!.syncPendingChanges();
+      await _cargarDatos(); // Recargar datos para reflejar cambios
       if (mounted) {
         setState(() {
           ultimaSync = DateTime.now();
-          registrosPendientesSync = 0;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -289,7 +297,21 @@ void _registrarEvento() {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(icon: const Icon(Icons.home), onPressed: () {}),
-            IconButton(icon: const Icon(Icons.settings), onPressed: () {}),
+            IconButton(
+              icon: const Icon(Icons.bug_report),
+              tooltip: 'Debug',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SyncDebugScreenSimple(
+                      syncService: _syncService!,
+                      authService: RepositoryProvider.of<AuthService>(context),
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -317,8 +339,47 @@ void _registrarEvento() {
             ),
           ],
         ),
-        const CircleAvatar(
-          child: Icon(Icons.person),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const ProfileScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  // Animación tipo "gota" que sale del avatar
+                  return AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      return ClipPath(
+                        clipper: CircularRevealClipper(
+                          fraction: animation.value,
+                          // Posición aproximada del avatar (esquina superior derecha)
+                          centerOffset: Offset(
+                            MediaQuery.of(context).size.width - 40,
+                            80, // Ajusta esto si el avatar está más arriba/abajo
+                          ),
+                          minRadius: 25.0, // Radio inicial (tamaño del avatar)
+                        ),
+                        child: child,
+                      );
+                    },
+                    child: child,
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 600),
+                reverseTransitionDuration: const Duration(milliseconds: 400),
+              ),
+            );
+          },
+          child: Hero(
+            tag: 'profile_avatar',
+            child: CircleAvatar(
+              backgroundColor: Theme.of(context).primaryColor,
+              child: const Icon(Icons.person, color: Colors.white),
+            ),
+          ),
         ),
       ],
     );

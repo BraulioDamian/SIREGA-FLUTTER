@@ -8,6 +8,7 @@ import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animated_info_card.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/health_status_widget.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/production_charts.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/medical_event_card.dart';
 
 enum TabType { general, health, reproduction, production }
 
@@ -509,124 +510,15 @@ class DetailTabContent extends StatelessWidget {
         eventos.sort((a, b) => b.fecha.compareTo(a.fecha));
 
         return Column(
-          children: eventos.map((evento) {
-            // Determinar icono y color según el tipo
-            IconData icon;
-            Color color;
-            String tipoNombre;
+          children: eventos.asMap().entries.map((entry) {
+            final index = entry.key;
+            final evento = entry.value;
+            final isLast = index == eventos.length - 1;
 
-            switch (evento.tipo) {
-              case TipoEvento.vacuna:
-                icon = Icons.vaccines;
-                color = Colors.blue;
-                tipoNombre = 'Vacunación';
-                break;
-              case TipoEvento.desparasitante:
-                icon = Icons.bug_report;
-                color = Colors.green;
-                tipoNombre = 'Desparasitación';
-                break;
-              case TipoEvento.tratamiento:
-                icon = Icons.medication;
-                color = Colors.orange;
-                tipoNombre = 'Tratamiento';
-                break;
-              case TipoEvento.revisionVeterinaria:
-                icon = Icons.health_and_safety;
-                color = Colors.teal;
-                tipoNombre = 'Diagnóstico';
-                break;
-              case TipoEvento.castracion:
-                icon = Icons.healing;
-                color = Colors.red;
-                tipoNombre = 'Cirugía';
-                break;
-              default:
-                icon = Icons.medical_services;
-                color = Colors.grey;
-                tipoNombre = evento.tipo.name;
-            }
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: Material(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  onTap: () {},
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: color.withAlpha(26),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            icon,
-                            color: color,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                tipoNombre,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                evento.nombreProducto ?? 'N/A',
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              if (evento.notas != null && evento.notas!.isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  evento.notas!,
-                                  style: TextStyle(
-                                    color: Colors.grey.shade500,
-                                    fontSize: 12,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${evento.fecha.day.toString().padLeft(2, '0')}/${evento.fecha.month.toString().padLeft(2, '0')}/${evento.fecha.year}',
-                              style: TextStyle(
-                                color: Colors.grey.shade500,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+            return MedicalEventCard(
+              evento: evento,
+              index: index,
+              isLast: isLast,
             );
           }).toList(),
         );
@@ -661,62 +553,15 @@ class DetailTabContent extends StatelessWidget {
         vacunas.sort((a, b) => b.fecha.compareTo(a.fecha));
 
         return Column(
-          children: vacunas.map((vacuna) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.blue.withAlpha(26),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.blue.withAlpha(77),
-                  width: 1.5,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withAlpha(51),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.vaccines,
-                      color: Colors.blue,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          vacuna.nombreProducto ?? 'N/A',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Aplicada: ${vacuna.fecha.day.toString().padLeft(2, '0')}/${vacuna.fecha.month.toString().padLeft(2, '0')}/${vacuna.fecha.year}',
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(
-                    Icons.check_circle,
-                    color: Colors.green,
-                    size: 24,
-                  ),
-                ],
-              ),
+          children: vacunas.asMap().entries.map((entry) {
+            final index = entry.key;
+            final vacuna = entry.value;
+            final isLast = index == vacunas.length - 1;
+
+            return MedicalEventCard(
+              evento: vacuna,
+              index: index,
+              isLast: isLast,
             );
           }).toList(),
         );

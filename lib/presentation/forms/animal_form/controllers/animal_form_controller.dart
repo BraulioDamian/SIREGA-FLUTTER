@@ -126,21 +126,21 @@ class AnimalFormController extends ChangeNotifier {
   bool _gestante = false;
 
   // Datos de vacunas
-  List<String> _vacunasAplicadas = [];
-  List<String> _vacunasPersonalizadas = [];
-  Map<String, DateTime> _fechasVacunas = {};
+  final List<String> _vacunasAplicadas = [];
+  final List<String> _vacunasPersonalizadas = [];
+  final Map<String, DateTime> _fechasVacunas = {};
 
   // Datos de eventos médicos
-  List<Map<String, dynamic>> _eventosMedicos = [];
+  final List<Map<String, dynamic>> _eventosMedicos = [];
 
   // Datos de partos/crías
-  List<Map<String, dynamic>> _registrosPartos = [];
+  final List<Map<String, dynamic>> _registrosPartos = [];
 
   // Datos de pesajes
-  List<Map<String, dynamic>> _registrosPesajes = [];
+  final List<Map<String, dynamic>> _registrosPesajes = [];
 
   // Datos de producción de leche
-  List<Map<String, dynamic>> _registrosProduccionLeche = [];
+  final List<Map<String, dynamic>> _registrosProduccionLeche = [];
   
   // Validación SINIGA
   SinigaId? _sinigaId;

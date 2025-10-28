@@ -28,7 +28,7 @@ Future<void> main() async {
   // 3. Crear servicios
   final authService = AuthService();
   final isarService = IsarService();
-  final syncService = FirebaseSyncService(isarService);
+  final syncService = FirebaseSyncService();
   final connectionService = ConnectionService();
 
   // 4. Inicializar ConnectionService y configurar auto-sync

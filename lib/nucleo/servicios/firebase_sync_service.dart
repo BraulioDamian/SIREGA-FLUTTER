@@ -1,4 +1,3 @@
-// lib/nucleo/servicios/firebase_sync_service.dart
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +8,7 @@ import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
 import 'package:sirega_app/nucleo/modelos/herd_model.dart';
 import 'package:sirega_app/nucleo/modelos/lote_evento_model.dart';
 import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
+import 'package:sirega_app/nucleo/modelos/siniga_model.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 
 /// Servicio de sincronización bidireccional Isar ↔ Firestore
@@ -16,7 +16,6 @@ import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 class FirebaseSyncService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final IsarService _isarService;
 
   // Listeners de Firestore
   StreamSubscription? _animalsListener;
@@ -35,7 +34,7 @@ class FirebaseSyncService {
   Function(String error)? onSyncError;
   Function(int pending)? onPendingCountChanged;
 
-  FirebaseSyncService(this._isarService);
+  FirebaseSyncService();
 
   /// Usuario actual
   String? get userId => _auth.currentUser?.uid;
@@ -135,6 +134,112 @@ class FirebaseSyncService {
         .count();
 
     return animals + events + productions + herds + batchEvents;
+  }
+
+  /// Eliminar TODOS los datos del usuario de Firestore
+  /// ADVERTENCIA: Esta acción NO se puede deshacer
+  /// Los datos locales (Isar) NO se verán afectados
+  Future<void> deleteAllUserDataFromFirestore() async {
+    if (!isAuthenticated) {
+      throw Exception('No hay usuario autenticado');
+    }
+
+    final batch = _firestore.batch();
+
+    try {
+      // Eliminar todos los animales
+      final animalsSnapshot = await _firestore
+          .collection('users/$userId/cattle')
+          .get();
+      for (final doc in animalsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Eliminar todos los eventos sanitarios
+      final eventsSnapshot = await _firestore
+          .collection('users/$userId/events')
+          .get();
+      for (final doc in eventsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Eliminar todos los registros de producción
+      final productionsSnapshot = await _firestore
+          .collection('users/$userId/productions')
+          .get();
+      for (final doc in productionsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Eliminar todos los hatos
+      final herdsSnapshot = await _firestore
+          .collection('users/$userId/herds')
+          .get();
+      for (final doc in herdsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Eliminar todos los eventos masivos
+      final batchEventsSnapshot = await _firestore
+          .collection('users/$userId/batch_events')
+          .get();
+      for (final doc in batchEventsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Ejecutar batch delete
+      await batch.commit();
+
+      // Marcar todos los registros locales como pendientes para re-sincronizar si quieren
+      await _markAllAsPending();
+    } catch (e) {
+      throw Exception('Error al eliminar datos de Firestore: $e');
+    }
+  }
+
+  /// Marcar todos los registros locales como pendientes
+  Future<void> _markAllAsPending() async {
+    await IsarService.isar.writeTxn(() async {
+      // Animales
+      final animals = await IsarService.isar.animals.where().findAll();
+      for (final animal in animals) {
+        animal.estadoSync = EstadoSync.pendiente;
+        animal.serverId = null; // Limpiar serverId para que se cree uno nuevo
+        await IsarService.isar.animals.put(animal);
+      }
+
+      // Eventos
+      final events = await IsarService.isar.eventoSanitarios.where().findAll();
+      for (final event in events) {
+        event.estadoSync = EstadoSync.pendiente;
+        event.serverId = null;
+        await IsarService.isar.eventoSanitarios.put(event);
+      }
+
+      // Producción
+      final productions = await IsarService.isar.registroProduccions.where().findAll();
+      for (final prod in productions) {
+        prod.estadoSync = EstadoSync.pendiente;
+        prod.serverId = null;
+        await IsarService.isar.registroProduccions.put(prod);
+      }
+
+      // Hatos
+      final herds = await IsarService.isar.herds.where().findAll();
+      for (final herd in herds) {
+        herd.estadoSync = EstadoSync.pendiente;
+        herd.serverId = null;
+        await IsarService.isar.herds.put(herd);
+      }
+
+      // Eventos masivos
+      final batchEvents = await IsarService.isar.loteEventos.where().findAll();
+      for (final be in batchEvents) {
+        be.estadoSync = EstadoSync.pendiente;
+        be.serverId = null;
+        await IsarService.isar.loteEventos.put(be);
+      }
+    });
   }
 
   // ========== DESCARGAS (Nube → Local) ==========
@@ -470,6 +575,22 @@ class FirebaseSyncService {
   // ========== CONVERSIONES (Model → Map) ==========
 
   Map<String, dynamic> _animalToMap(Animal animal) {
+    // Construir siniigaId solo si tiene datos válidos
+    Map<String, dynamic>? siniigaData;
+    if (animal.siniigaId != null) {
+      final siniga = animal.siniigaId!;
+      // Solo crear el mapa si al menos tiene especie, estadoClave y numeroNacional
+      if (siniga.especie != null &&
+          siniga.estadoClave != null &&
+          siniga.numeroNacional != null) {
+        siniigaData = {
+          'especie': siniga.especie,
+          'estadoClave': siniga.estadoClave,
+          'numeroNacional': siniga.numeroNacional,
+        };
+      }
+    }
+
     return {
       'nombre': animal.nombre,
       'sexo': animal.sexo.name,
@@ -479,6 +600,7 @@ class FirebaseSyncService {
       'nfcChipId': animal.nfcChipId,
       'idAreteVisual': animal.idAreteVisual,
       'numeroHerrado': animal.numeroHerrado,
+      'siniigaId': siniigaData,
       'pesoNacimiento': animal.pesoNacimiento,
       'colorPelaje': animal.colorPelaje,
       'estado': animal.estado.name,
@@ -578,6 +700,13 @@ class FirebaseSyncService {
     animal.nfcChipId = data['nfcChipId'];
     animal.idAreteVisual = data['idAreteVisual'];
     animal.numeroHerrado = data['numeroHerrado'];
+    if (data['siniigaId'] != null) {
+      animal.siniigaId = SinigaId(
+        especie: data['siniigaId']['especie'],
+        estadoClave: data['siniigaId']['estadoClave'],
+        numeroNacional: data['siniigaId']['numeroNacional'],
+      );
+    }
     animal.pesoNacimiento = data['pesoNacimiento'];
     animal.colorPelaje = data['colorPelaje'];
     animal.estado = EstadoAnimal.values.byName(data['estado'] ?? 'activo');

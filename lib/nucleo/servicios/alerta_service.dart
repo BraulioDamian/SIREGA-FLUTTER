@@ -4,7 +4,7 @@ import 'package:isar/isar.dart';
 import 'package:sirega_app/nucleo/modelos/alerta.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
-import 'package:sirega_app/nucleo/modelos/enums_completo.dart';
+import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/modelos/configuracion_local.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 

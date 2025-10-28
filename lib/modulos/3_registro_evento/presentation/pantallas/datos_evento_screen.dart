@@ -249,7 +249,7 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedUnit,
+                      initialValue: _selectedUnit,
                       items: ['ml', 'mg', 'unidades', 'gotas']
                           .map((label) => DropdownMenuItem(
                                 value: label,
@@ -344,11 +344,11 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
                       );
                     }
                   },
-                  child: const Text('Continuar ➜'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     textStyle: const TextStyle(fontSize: 16),
                   ),
+                  child: const Text('Continuar ➜'),
                 ),
               ),
             ],

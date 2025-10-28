@@ -85,11 +85,11 @@ class ConfirmacionEventoScreen extends StatelessWidget {
                     );
                   }
                 },
-                child: const Text('Guardar ✓'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   textStyle: const TextStyle(fontSize: 16),
                 ),
+                child: const Text('Guardar ✓'),
               ),
             ),
           ],

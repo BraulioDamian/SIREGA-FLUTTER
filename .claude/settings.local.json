@@ -15,7 +15,9 @@
       "Bash(export PATH=\"$PATH\":\"$HOME/.pub-cache/bin\")",
       "Bash(flutterfire --version:*)",
       "Bash(flutterfire configure:*)",
-      "Bash(flutter pub get:*)"
+      "Bash(flutter pub get:*)",
+      "Bash(nc:*)",
+      "Bash(flutter run:*)"
     ],
     "deny": [],
     "ask": []

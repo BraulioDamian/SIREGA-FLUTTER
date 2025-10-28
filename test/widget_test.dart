@@ -7,13 +7,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:sirega_app/main.dart';
+import 'package:sirega_app/nucleo/servicios/auth_service.dart';
+import 'package:sirega_app/nucleo/servicios/connection_service.dart';
+import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/nucleo/servicios/firebase_sync_service.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(
+      authService: AuthService(),
+      connectionService: ConnectionService(),
+      isarService: IsarService(),
+      syncService: FirebaseSyncService(),
+    ));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

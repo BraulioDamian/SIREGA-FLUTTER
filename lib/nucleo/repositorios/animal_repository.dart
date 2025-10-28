@@ -19,10 +19,11 @@ class AnimalRepository {
   /// Busca un animal por su ID de arete visual
   Future<Animal?> buscarPorAreteVisual(String areteVisual) async {
     final animales = await _isarService.obtenerTodosLosAnimales();
-    return animales.firstWhere(
-      (animal) => animal.idAreteVisual == areteVisual,
-      orElse: () => null as Animal,
-    );
+    try {
+      return animales.firstWhere((animal) => animal.idAreteVisual == areteVisual);
+    } catch (e) {
+      return null;
+    }
   }
   
   /// Busca un animal por su ID interno
