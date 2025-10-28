@@ -175,7 +175,7 @@ void applyDtoToHerd(Herd h, HerdDto d) {
 HealthRecordDto eventoToDto(EventoSanitario e) => HealthRecordDto(
   eventType: tipoEventoToRemote(e.tipo),
   productName: e.nombreProducto ?? '',
-  dose: e.dosis ?? '',
+  dose: e.dosis?.toString() ?? '',
   vetInCharge: e.veterinario ?? '',
   notes: e.notas,
   eventDate: e.fecha,
@@ -184,7 +184,7 @@ HealthRecordDto eventoToDto(EventoSanitario e) => HealthRecordDto(
 void applyDtoToEvento(EventoSanitario e, HealthRecordDto d) {
   e.tipo = tipoEventoFromRemote(d.eventType) ?? TipoEvento.tratamiento;
   e.nombreProducto = d.productName;
-  e.dosis = d.dose;
+  e.dosis = double.tryParse(d.dose);
   e.veterinario = d.vetInCharge;
   e.notas = d.notes;
   e.fecha = d.eventDate.toLocal();
