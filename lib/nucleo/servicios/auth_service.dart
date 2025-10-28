@@ -1,5 +1,6 @@
 // lib/nucleo/servicios/auth_service.dart
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 /// Servicio para manejar autenticación con Firebase
 /// Funciona offline después del login inicial
@@ -65,6 +66,36 @@ class AuthService {
     }
   }
 
+  /// Login con Google
+  /// Requiere conexión a internet
+  Future<UserCredential> signInWithGoogle() async {
+    try {
+      // Iniciar el flujo de autenticación de Google
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      if (googleUser == null) {
+        // El usuario canceló el inicio de sesión
+        throw Exception('Inicio de sesión cancelado');
+      }
+
+      // Obtener los detalles de autenticación
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Crear una nueva credencial
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Iniciar sesión con la credencial
+      return await _auth.signInWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw 'Error al iniciar sesión con Google: $e';
+    }
+  }
+
   /// Login anónimo (para pruebas)
   /// Requiere conexión a internet
   Future<UserCredential> loginAnonymously() async {
@@ -77,6 +108,7 @@ class AuthService {
 
   /// Cerrar sesión
   Future<void> logout() async {
+    await GoogleSignIn().signOut(); // Cerrar sesión de Google también
     await _auth.signOut();
   }
 

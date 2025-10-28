@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "674880280826",
+    "project_id": "db-ganado-31dd3",
+    "storage_bucket": "db-ganado-31dd3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:674880280826:android:22f948c90270847e825143",
+        "android_client_info": {
+          "package_name": "com.example.sirega_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEJ6IcFqkdox9-oHfC-ahTY1GbQehf68A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

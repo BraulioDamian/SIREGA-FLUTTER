@@ -28,6 +28,8 @@ class AuthRegisterRequested extends AuthEvent {
   });
 }
 
+class AuthGoogleLoginRequested extends AuthEvent {}
+
 class AuthLogoutRequested extends AuthEvent {}
 
 class AuthUserChanged extends AuthEvent {
@@ -78,6 +80,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onCheckRequested);
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthRegisterRequested>(_onRegisterRequested);
+    on<AuthGoogleLoginRequested>(_onGoogleLoginRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthUserChanged>(_onUserChanged);
 
@@ -177,6 +180,41 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
       } else {
         emit(const AuthError('Error: Usuario nulo después del registro'));
+      }
+    } catch (e) {
+      emit(AuthError(e.toString()));
+      emit(AuthUnauthenticated());
+    }
+  }
+
+  /// Manejar login con Google
+  Future<void> _onGoogleLoginRequested(
+    AuthGoogleLoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+
+    try {
+      final userCredential = await _authService.signInWithGoogle();
+
+      final user = userCredential.user;
+      if (user != null) {
+        emit(AuthAuthenticated(user, isSyncing: true));
+
+        // Inicializar sincronización después del login con Google
+        try {
+          await _syncService?.init();
+          if (state is AuthAuthenticated) {
+            emit((state as AuthAuthenticated).copyWith(isSyncing: false));
+          }
+        } catch (e) {
+          // Error en sync pero login exitoso
+          if (state is AuthAuthenticated) {
+            emit((state as AuthAuthenticated).copyWith(isSyncing: false));
+          }
+        }
+      } else {
+        emit(const AuthError('Error: Usuario nulo después del login con Google'));
       }
     } catch (e) {
       emit(AuthError(e.toString()));

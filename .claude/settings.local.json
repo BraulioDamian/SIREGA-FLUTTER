@@ -11,7 +11,11 @@
       "Bash(xargs sed:*)",
       "Bash(flutter analyze:*)",
       "Bash(cat:*)",
-      "Bash(dart run build_runner build:*)"
+      "Bash(dart run build_runner build:*)",
+      "Bash(export PATH=\"$PATH\":\"$HOME/.pub-cache/bin\")",
+      "Bash(flutterfire --version:*)",
+      "Bash(flutterfire configure:*)",
+      "Bash(flutter pub get:*)"
     ],
     "deny": [],
     "ask": []

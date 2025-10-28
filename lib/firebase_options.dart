@@ -55,14 +55,15 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // PLACEHOLDER - Será reemplazado por flutterfire configure
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'TU_API_KEY_AQUI',
-    appId: 'TU_APP_ID_AQUI',
-    messagingSenderId: 'TU_MESSAGING_SENDER_ID',
-    projectId: 'TU_PROJECT_ID_AQUI',
-    storageBucket: 'TU_STORAGE_BUCKET_AQUI',
+    apiKey: 'AIzaSyBEJ6IcFqkdox9-oHfC-ahTY1GbQehf68A',
+    appId: '1:674880280826:android:22f948c90270847e825143',
+    messagingSenderId: '674880280826',
+    projectId: 'db-ganado-31dd3',
+    storageBucket: 'db-ganado-31dd3.firebasestorage.app',
   );
+
+  // PLACEHOLDER - Será reemplazado por flutterfire configure
 
   // PLACEHOLDER - Será reemplazado por flutterfire configure
   static const FirebaseOptions ios = FirebaseOptions(

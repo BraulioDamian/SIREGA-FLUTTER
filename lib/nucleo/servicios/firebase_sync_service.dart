@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:isar/isar.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
@@ -108,27 +109,27 @@ class FirebaseSyncService {
 
   /// Obtener cantidad de registros pendientes de sincronizar
   Future<int> getPendingCount() async {
-    final animals = await _isarService.isar.animals
+    final animals = await IsarService.isar.animals
         .filter()
         .estadoSyncEqualTo(EstadoSync.pendiente)
         .count();
 
-    final events = await _isarService.isar.eventoSanitarios
+    final events = await IsarService.isar.eventoSanitarios
         .filter()
         .estadoSyncEqualTo(EstadoSync.pendiente)
         .count();
 
-    final productions = await _isarService.isar.registroProduccions
+    final productions = await IsarService.isar.registroProduccions
         .filter()
         .estadoSyncEqualTo(EstadoSync.pendiente)
         .count();
 
-    final herds = await _isarService.isar.herds
+    final herds = await IsarService.isar.herds
         .filter()
         .estadoSyncEqualTo(EstadoSync.pendiente)
         .count();
 
-    final batchEvents = await _isarService.isar.loteEventos
+    final batchEvents = await IsarService.isar.loteEventos
         .filter()
         .estadoSyncEqualTo(EstadoSync.pendiente)
         .count();
@@ -143,7 +144,7 @@ class FirebaseSyncService {
         .collection('users/$userId/cattle')
         .get();
 
-    await _isarService.isar.writeTxn(() async {
+    await IsarService.isar.writeTxn(() async {
       for (final doc in snapshot.docs) {
         await _createOrUpdateLocalAnimal(doc.id, doc.data());
       }
@@ -155,7 +156,7 @@ class FirebaseSyncService {
         .collection('users/$userId/events')
         .get();
 
-    await _isarService.isar.writeTxn(() async {
+    await IsarService.isar.writeTxn(() async {
       for (final doc in snapshot.docs) {
         await _createOrUpdateLocalEvent(doc.id, doc.data());
       }
@@ -167,7 +168,7 @@ class FirebaseSyncService {
         .collection('users/$userId/productions')
         .get();
 
-    await _isarService.isar.writeTxn(() async {
+    await IsarService.isar.writeTxn(() async {
       for (final doc in snapshot.docs) {
         await _createOrUpdateLocalProduction(doc.id, doc.data());
       }
@@ -179,7 +180,7 @@ class FirebaseSyncService {
         .collection('users/$userId/herds')
         .get();
 
-    await _isarService.isar.writeTxn(() async {
+    await IsarService.isar.writeTxn(() async {
       for (final doc in snapshot.docs) {
         await _createOrUpdateLocalHerd(doc.id, doc.data());
       }
@@ -191,7 +192,7 @@ class FirebaseSyncService {
         .collection('users/$userId/batch_events')
         .get();
 
-    await _isarService.isar.writeTxn(() async {
+    await IsarService.isar.writeTxn(() async {
       for (final doc in snapshot.docs) {
         await _createOrUpdateLocalBatchEvent(doc.id, doc.data());
       }
@@ -201,7 +202,7 @@ class FirebaseSyncService {
   // ========== SUBIDAS (Local → Nube) ==========
 
   Future<void> _uploadPendingAnimals() async {
-    final pending = await _isarService.isar.animals
+    final pending = await IsarService.isar.animals
         .filter()
         .estadoSyncEqualTo(EstadoSync.pendiente)
         .findAll();
@@ -228,16 +229,16 @@ class FirebaseSyncService {
 
         // Marcar como sincronizado
         animal.estadoSync = EstadoSync.completado;
-        await _isarService.isar.writeTxn(() => _isarService.isar.animals.put(animal));
+        await IsarService.isar.writeTxn(() => IsarService.isar.animals.put(animal));
       } catch (e) {
         animal.estadoSync = EstadoSync.error;
-        await _isarService.isar.writeTxn(() => _isarService.isar.animals.put(animal));
+        await IsarService.isar.writeTxn(() => IsarService.isar.animals.put(animal));
       }
     }
   }
 
   Future<void> _uploadPendingEvents() async {
-    final pending = await _isarService.isar.eventoSanitarios
+    final pending = await IsarService.isar.eventoSanitarios
         .filter()
         .estadoSyncEqualTo(EstadoSync.pendiente)
         .findAll();
@@ -259,18 +260,18 @@ class FirebaseSyncService {
         }
 
         event.estadoSync = EstadoSync.completado;
-        await _isarService.isar.writeTxn(() =>
-            _isarService.isar.eventoSanitarios.put(event));
+        await IsarService.isar.writeTxn(() =>
+            IsarService.isar.eventoSanitarios.put(event));
       } catch (e) {
         event.estadoSync = EstadoSync.error;
-        await _isarService.isar.writeTxn(() =>
-            _isarService.isar.eventoSanitarios.put(event));
+        await IsarService.isar.writeTxn(() =>
+            IsarService.isar.eventoSanitarios.put(event));
       }
     }
   }
 
   Future<void> _uploadPendingProductions() async {
-    final pending = await _isarService.isar.registroProduccions
+    final pending = await IsarService.isar.registroProduccions
         .filter()
         .estadoSyncEqualTo(EstadoSync.pendiente)
         .findAll();
@@ -292,18 +293,18 @@ class FirebaseSyncService {
         }
 
         production.estadoSync = EstadoSync.completado;
-        await _isarService.isar.writeTxn(() =>
-            _isarService.isar.registroProduccions.put(production));
+        await IsarService.isar.writeTxn(() =>
+            IsarService.isar.registroProduccions.put(production));
       } catch (e) {
         production.estadoSync = EstadoSync.error;
-        await _isarService.isar.writeTxn(() =>
-            _isarService.isar.registroProduccions.put(production));
+        await IsarService.isar.writeTxn(() =>
+            IsarService.isar.registroProduccions.put(production));
       }
     }
   }
 
   Future<void> _uploadPendingHerds() async {
-    final pending = await _isarService.isar.herds
+    final pending = await IsarService.isar.herds
         .filter()
         .estadoSyncEqualTo(EstadoSync.pendiente)
         .findAll();
@@ -325,16 +326,16 @@ class FirebaseSyncService {
         }
 
         herd.estadoSync = EstadoSync.completado;
-        await _isarService.isar.writeTxn(() => _isarService.isar.herds.put(herd));
+        await IsarService.isar.writeTxn(() => IsarService.isar.herds.put(herd));
       } catch (e) {
         herd.estadoSync = EstadoSync.error;
-        await _isarService.isar.writeTxn(() => _isarService.isar.herds.put(herd));
+        await IsarService.isar.writeTxn(() => IsarService.isar.herds.put(herd));
       }
     }
   }
 
   Future<void> _uploadPendingBatchEvents() async {
-    final pending = await _isarService.isar.loteEventos
+    final pending = await IsarService.isar.loteEventos
         .filter()
         .estadoSyncEqualTo(EstadoSync.pendiente)
         .findAll();
@@ -356,12 +357,12 @@ class FirebaseSyncService {
         }
 
         batch.estadoSync = EstadoSync.completado;
-        await _isarService.isar.writeTxn(() =>
-            _isarService.isar.loteEventos.put(batch));
+        await IsarService.isar.writeTxn(() =>
+            IsarService.isar.loteEventos.put(batch));
       } catch (e) {
         batch.estadoSync = EstadoSync.error;
-        await _isarService.isar.writeTxn(() =>
-            _isarService.isar.loteEventos.put(batch));
+        await IsarService.isar.writeTxn(() =>
+            IsarService.isar.loteEventos.put(batch));
       }
     }
   }
@@ -437,31 +438,31 @@ class FirebaseSyncService {
 
   // Manejar cambio remoto de animal
   Future<void> _handleRemoteAnimalChange(DocumentSnapshot doc) async {
-    await _isarService.isar.writeTxn(() async {
+    await IsarService.isar.writeTxn(() async {
       await _createOrUpdateLocalAnimal(doc.id, doc.data() as Map<String, dynamic>);
     });
   }
 
   Future<void> _handleRemoteEventChange(DocumentSnapshot doc) async {
-    await _isarService.isar.writeTxn(() async {
+    await IsarService.isar.writeTxn(() async {
       await _createOrUpdateLocalEvent(doc.id, doc.data() as Map<String, dynamic>);
     });
   }
 
   Future<void> _handleRemoteProductionChange(DocumentSnapshot doc) async {
-    await _isarService.isar.writeTxn(() async {
+    await IsarService.isar.writeTxn(() async {
       await _createOrUpdateLocalProduction(doc.id, doc.data() as Map<String, dynamic>);
     });
   }
 
   Future<void> _handleRemoteHerdChange(DocumentSnapshot doc) async {
-    await _isarService.isar.writeTxn(() async {
+    await IsarService.isar.writeTxn(() async {
       await _createOrUpdateLocalHerd(doc.id, doc.data() as Map<String, dynamic>);
     });
   }
 
   Future<void> _handleRemoteBatchEventChange(DocumentSnapshot doc) async {
-    await _isarService.isar.writeTxn(() async {
+    await IsarService.isar.writeTxn(() async {
       await _createOrUpdateLocalBatchEvent(doc.id, doc.data() as Map<String, dynamic>);
     });
   }
@@ -552,7 +553,7 @@ class FirebaseSyncService {
 
   Future<void> _createOrUpdateLocalAnimal(String serverId, Map<String, dynamic> data) async {
     // Buscar si ya existe localmente
-    final existing = await _isarService.isar.animals
+    final existing = await IsarService.isar.animals
         .filter()
         .serverIdEqualTo(serverId)
         .findFirst();
@@ -587,11 +588,11 @@ class FirebaseSyncService {
     animal.ultimaActualizacion = remoteUpdatedAt;
     animal.estadoSync = EstadoSync.completado;
 
-    await _isarService.isar.animals.put(animal);
+    await IsarService.isar.animals.put(animal);
   }
 
   Future<void> _createOrUpdateLocalEvent(String serverId, Map<String, dynamic> data) async {
-    final existing = await _isarService.isar.eventoSanitarios
+    final existing = await IsarService.isar.eventoSanitarios
         .filter()
         .serverIdEqualTo(serverId)
         .findFirst();
@@ -621,11 +622,11 @@ class FirebaseSyncService {
     event.ultimaActualizacion = remoteUpdatedAt;
     event.estadoSync = EstadoSync.completado;
 
-    await _isarService.isar.eventoSanitarios.put(event);
+    await IsarService.isar.eventoSanitarios.put(event);
   }
 
   Future<void> _createOrUpdateLocalProduction(String serverId, Map<String, dynamic> data) async {
-    final existing = await _isarService.isar.registroProduccions
+    final existing = await IsarService.isar.registroProduccions
         .filter()
         .serverIdEqualTo(serverId)
         .findFirst();
@@ -650,11 +651,11 @@ class FirebaseSyncService {
     production.ultimaActualizacion = remoteUpdatedAt;
     production.estadoSync = EstadoSync.completado;
 
-    await _isarService.isar.registroProduccions.put(production);
+    await IsarService.isar.registroProduccions.put(production);
   }
 
   Future<void> _createOrUpdateLocalHerd(String serverId, Map<String, dynamic> data) async {
-    final existing = await _isarService.isar.herds
+    final existing = await IsarService.isar.herds
         .filter()
         .serverIdEqualTo(serverId)
         .findFirst();
@@ -678,11 +679,11 @@ class FirebaseSyncService {
     herd.ultimaActualizacion = remoteUpdatedAt;
     herd.estadoSync = EstadoSync.completado;
 
-    await _isarService.isar.herds.put(herd);
+    await IsarService.isar.herds.put(herd);
   }
 
   Future<void> _createOrUpdateLocalBatchEvent(String serverId, Map<String, dynamic> data) async {
-    final existing = await _isarService.isar.loteEventos
+    final existing = await IsarService.isar.loteEventos
         .filter()
         .serverIdEqualTo(serverId)
         .findFirst();
@@ -707,7 +708,7 @@ class FirebaseSyncService {
     batch.ultimaActualizacion = remoteUpdatedAt;
     batch.estadoSync = EstadoSync.completado;
 
-    await _isarService.isar.loteEventos.put(batch);
+    await IsarService.isar.loteEventos.put(batch);
   }
 
   /// Limpiar listeners al cerrar la app

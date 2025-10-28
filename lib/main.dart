@@ -2,37 +2,106 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:sirega_app/firebase_options.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/nucleo/servicios/auth_service.dart';
+import 'package:sirega_app/nucleo/servicios/connection_service.dart';
+import 'package:sirega_app/nucleo/servicios/firebase_sync_service.dart';
+import 'package:sirega_app/modulos/0_autenticacion/presentation/bloc/auth_bloc.dart';
+import 'package:sirega_app/modulos/0_autenticacion/presentation/widgets/auth_wrapper.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentation/bloc/cattle_list_bloc.dart';
 import 'package:sirega_app/presentation/screens/home_screen_mejorado.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 1. Inicializar Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // 2. Inicializar Isar (base de datos local)
   await IsarService.init();
   await IsarService.poblarDatosIniciales();
-  runApp(const MyApp());
+
+  // 3. Crear servicios
+  final authService = AuthService();
+  final isarService = IsarService();
+  final syncService = FirebaseSyncService(isarService);
+  final connectionService = ConnectionService();
+
+  // 4. Inicializar ConnectionService y configurar auto-sync
+  await connectionService.init();
+
+  // Cuando detecta internet, sincroniza automáticamente
+  connectionService.onConnected = () {
+    debugPrint('🌐 Conexión a internet detectada - Sincronizando...');
+    syncService.syncPendingChanges();
+  };
+
+  connectionService.onDisconnected = () {
+    debugPrint('📵 Conexión perdida - Modo offline activado');
+  };
+
+  runApp(MyApp(
+    authService: authService,
+    isarService: isarService,
+    syncService: syncService,
+    connectionService: connectionService,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthService authService;
+  final IsarService isarService;
+  final FirebaseSyncService syncService;
+  final ConnectionService connectionService;
+
+  const MyApp({
+    super.key,
+    required this.authService,
+    required this.isarService,
+    required this.syncService,
+    required this.connectionService,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider<IsarService>(
-      create: (context) => IsarService(),
-      child: BlocProvider<CattleListBloc>(
-        create: (context) => CattleListBloc(
-          isarService: RepositoryProvider.of<IsarService>(context),
-        )..add(LoadCattle()),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<IsarService>.value(value: isarService),
+        RepositoryProvider<AuthService>.value(value: authService),
+        RepositoryProvider<FirebaseSyncService>.value(value: syncService),
+        RepositoryProvider<ConnectionService>.value(value: connectionService),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          // AuthBloc: Maneja autenticación y estado del usuario
+          BlocProvider<AuthBloc>(
+            create: (context) => AuthBloc(
+              authService: authService,
+              syncService: syncService,
+            )..add(AuthCheckRequested()), // Verifica si hay sesión activa
+          ),
+          // CattleListBloc: Maneja la lista de ganado
+          BlocProvider<CattleListBloc>(
+            create: (context) => CattleListBloc(
+              isarService: isarService,
+            )..add(LoadCattle()),
+          ),
+        ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'SIREGA',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
             useMaterial3: true,
-            inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
+            inputDecorationTheme: const InputDecorationTheme(
+              border: OutlineInputBorder(),
+            ),
             snackBarTheme: const SnackBarThemeData(
-              behavior: SnackBarBehavior.fixed,
+              behavior: SnackBarBehavior.floating,
             ),
           ),
           localizationsDelegates: const [
@@ -41,10 +110,14 @@ class MyApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [
-            Locale('en', ''), // English, no country code
-            Locale('es', ''), // Spanish, no country code
+            Locale('en', ''), // English
+            Locale('es', ''), // Spanish
           ],
-          home: const HomeScreenMejorado(),
+          // AuthWrapper protege todas las rutas
+          // Solo muestra HomeScreenMejorado si el usuario está autenticado
+          home: const AuthWrapper(
+            child: HomeScreenMejorado(),
+          ),
         ),
       ),
     );
