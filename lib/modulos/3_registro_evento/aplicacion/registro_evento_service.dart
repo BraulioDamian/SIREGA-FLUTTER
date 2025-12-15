@@ -21,13 +21,22 @@ class RegistroEventoService {
     String? notas,
   }) async {
     final loteId = const Uuid().v4();
+    final ahora = DateTime.now();
 
     final animales = await isar.animals.getAll(animalesIds);
 
+    // Filtrar animales nulos
+    final animalesValidos = animales.whereType<Animal>().toList();
+
+    if (animalesValidos.isEmpty) {
+      throw Exception('No se encontraron animales válidos para registrar el evento');
+    }
+
     await isar.writeTxn(() async {
       final List<EventoSanitario> eventos = [];
-      for (final animal in animales) {
-        if (animal == null) continue;
+
+      // Crear un evento para cada animal
+      for (final animal in animalesValidos) {
         final evento = EventoSanitario()
           ..tipo = tipo
           ..fecha = fecha
@@ -37,16 +46,30 @@ class RegistroEventoService {
           ..veterinario = veterinario
           ..notas = notas
           ..loteId = loteId
-          ..totalAnimalesLote = animales.length;
-        
+          ..totalAnimalesLote = animalesValidos.length
+          ..fechaCreacion = ahora
+          ..estadoSync = EstadoSync.pendiente;
+
+        // Asignar el animal antes de guardar
+        evento.animal.value = animal;
         eventos.add(evento);
       }
+
+      // Guardar todos los eventos
       await isar.eventoSanitarios.putAll(eventos);
 
-      for(var i = 0; i < eventos.length; i++){
-        eventos[i].animal.value = animales[i];
+      // Guardar las relaciones
+      for (final evento in eventos) {
+        await evento.animal.save();
       }
-      await isar.eventoSanitarios.putAll(eventos);
+
+      // Actualizar la fecha de última revisión del animal si es una revisión veterinaria
+      if (tipo == TipoEvento.revisionVeterinaria) {
+        for (final animal in animalesValidos) {
+          animal.fechaUltimaRevision = fecha;
+        }
+        await isar.animals.putAll(animalesValidos);
+      }
 
       // Guardar registro del lote (para historial)
       final lote = LoteEvento()
@@ -54,8 +77,10 @@ class RegistroEventoService {
         ..tipo = tipo
         ..fecha = fecha
         ..nombreProducto = producto
-        ..cantidadAnimales = animales.length
-        ..animalesIds = animales.map((a) => a!.id).toList();
+        ..cantidadAnimales = animalesValidos.length
+        ..animalesIds = animalesValidos.map((a) => a.id).toList()
+        ..fechaCreacion = ahora
+        ..estadoSync = EstadoSync.pendiente;
 
       await isar.loteEventos.put(lote);
     });

@@ -128,11 +128,33 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
     );
   }
 
+  Map<String, dynamic> _getEventTypeDetails() {
+    switch (widget.tipoEvento) {
+      case TipoEvento.vacuna:
+        return {'title': 'Vacunación', 'icon': Icons.vaccines, 'color': Colors.green};
+      case TipoEvento.desparasitante:
+        return {'title': 'Desparasitación', 'icon': Icons.bug_report, 'color': Colors.orange};
+      case TipoEvento.tratamiento:
+        return {'title': 'Tratamiento', 'icon': Icons.medical_services, 'color': Colors.blue};
+      case TipoEvento.revisionVeterinaria:
+        return {'title': 'Revisión Veterinaria', 'icon': Icons.science, 'color': Colors.teal};
+      case TipoEvento.castracion:
+        return {'title': 'Castración', 'icon': Icons.cut, 'color': Colors.purple};
+      default:
+        return {'title': 'Evento', 'icon': Icons.event, 'color': Colors.grey};
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final eventDetails = _getEventTypeDetails();
+
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text('Datos de ${widget.tipoEvento.name}'),
+        title: Text('Datos de ${eventDetails['title']}'),
+        elevation: 0,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -141,16 +163,60 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text('Información del Evento', style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 20),
+              // Header Card con ícono
+              Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      colors: [
+                        eventDetails['color'].withAlpha(200),
+                        eventDetails['color'],
+                      ],
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(50),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(eventDetails['icon'], size: 32, color: Colors.white),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Información del Evento',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
               TypeAheadField<String>(
                 builder: (context, controller, focusNode) {
                   return TextFormField(
                     controller: _productoController,
                     focusNode: focusNode,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Producto *',
-                      border: OutlineInputBorder(),
+                      hintText: 'Buscar o agregar producto',
+                      prefixIcon: const Icon(Icons.inventory_2_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -205,10 +271,15 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: _fechaController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Fecha de Aplicación *',
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.calendar_today),
+                  hintText: 'Seleccionar fecha',
+                  prefixIcon: const Icon(Icons.calendar_today_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
                 readOnly: true,
                 onTap: () async {
@@ -233,9 +304,15 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _dosisController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Dosis',
-                        border: OutlineInputBorder(),
+                        hintText: '0.0',
+                        prefixIcon: const Icon(Icons.medical_information_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
                       ),
                       keyboardType: TextInputType.number,
                       validator: (value) {
@@ -263,9 +340,14 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
                           });
                         }
                       },
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Unidad',
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.straighten),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
                       ),
                     ),
                   ),
@@ -274,23 +356,38 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: _veterinarioController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Veterinario',
-                  border: OutlineInputBorder(),
+                  hintText: 'Nombre del veterinario',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
               ),
               const SizedBox(height: 20),
               TextFormField(
                 controller: _notasController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Notas',
-                  border: OutlineInputBorder(),
+                  hintText: 'Observaciones adicionales',
+                  prefixIcon: const Icon(Icons.notes_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  alignLabelWithHint: true,
                 ),
-                maxLines: 3,
+                maxLines: 4,
               ),
-              const SizedBox(height: 30),
-              Center(
-                child: ElevatedButton(
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton.icon(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
@@ -345,12 +442,21 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    textStyle: const TextStyle(fontSize: 16),
+                    backgroundColor: eventDetails['color'],
+                    foregroundColor: Colors.white,
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: const Text('Continuar ➜'),
+                  icon: const Icon(Icons.arrow_forward, size: 24),
+                  label: const Text(
+                    'Continuar',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
+              const SizedBox(height: 16),
             ],
           ),
         ),

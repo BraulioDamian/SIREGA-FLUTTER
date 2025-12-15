@@ -17,7 +17,12 @@
       "Bash(flutterfire configure:*)",
       "Bash(flutter pub get:*)",
       "Bash(nc:*)",
-      "Bash(flutter run:*)"
+      "Bash(flutter run:*)",
+      "Bash(./gradlew signingReport)",
+      "Bash(flutter clean)",
+      "Bash(./gradlew clean)",
+      "Bash(git checkout lib/modulos/3_registro_evento/presentation/pantallas/datos_evento_screen.dart)",
+      "Bash(git checkout lib/modulos/3_registro_evento/presentation/pantallas/confirmacion_evento_screen.dart)"
     ],
     "deny": [],
     "ask": []
