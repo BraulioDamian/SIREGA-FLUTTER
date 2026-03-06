@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentation/bloc/cattle_list_bloc.dart';
 import 'package:sirega_app/modulos/3_registro_evento/presentation/pantallas/seleccionar_animales_screen.dart';
+import 'package:sirega_app/modulos/3_registro_evento/presentation/widgets/chip_selector.dart';
+import 'package:sirega_app/modulos/3_registro_evento/presentation/widgets/condicion_corporal_selector.dart';
+import 'package:sirega_app/modulos/3_registro_evento/presentation/widgets/dosis_con_unidad_field.dart';
+import 'package:sirega_app/modulos/3_registro_evento/presentation/widgets/event_header_card.dart';
+import 'package:sirega_app/modulos/3_registro_evento/presentation/widgets/producto_typeahead_field.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/nfc_scanner_bloc.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/repositories/nfc_repository_impl.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/animal_database_service.dart';
@@ -19,48 +23,22 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/find_animal_by
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/open_wifi_settings_use_case.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
-const Map<TipoEvento, List<String>> _sugerenciasPorTipo = {
-  TipoEvento.vacuna: [
-    'Complejo Respiratorio (IBR, DVB, PI3, VRSB)',
-    'Clostridial 8 vías',
-    'Rabia Paralítica (Derriengue)',
-    'Brucelosis Cepa RB51',
-    'Leptospirosis',
-    'Fiebre Aftosa',
-  ],
-  TipoEvento.desparasitante: [
-    'Ivermectina',
-    'Doramectina',
-    'Fenbendazol',
-    'Albendazol',
-    'Eprinomectina (sin retiro en leche)',
-    'Baño de Inmersión (Garrapaticida)',
-    'Pour-on (Mosquicida/Garrapaticida)',
-  ],
-  TipoEvento.tratamiento: [
-    'Antibiótico (Penicilina)',
-    'Antibiótico (Oxitetraciclina)',
-    'Antiinflamatorio (Flunixin)',
-    'Suero vitaminado',
-    'Calcio',
-  ],
-  TipoEvento.revisionVeterinaria: [],
-  TipoEvento.castracion: [],
+// ──────────────────────────────────────────────────────────
+// Vías de aplicación por tipo
+// ──────────────────────────────────────────────────────────
+const Map<TipoEvento, List<String>> _viasAplicacion = {
+  TipoEvento.vacuna: ['Subcutánea', 'Intramuscular', 'Oral'],
+  TipoEvento.desparasitante: ['Inyectable', 'Oral', 'Pour-on', 'Baño de inmersión'],
+  TipoEvento.tratamiento: ['Subcutánea', 'Intramuscular', 'Intravenosa', 'Oral', 'Tópica'],
 };
 
-const Map<TipoEvento, List<String>> _refuerzosPorTipo = {
-  TipoEvento.vacuna: [
-    'Refuerzo Anual Complejo Respiratorio',
-    'Refuerzo Semestral Clostridial',
-  ],
-  TipoEvento.desparasitante: [
-    'Rotación de Desparasitante (Semestral)',
-  ],
-  TipoEvento.tratamiento: [],
-  TipoEvento.revisionVeterinaria: [],
-  TipoEvento.castracion: [],
-};
+const List<String> _metodosCastracion = [
+  'Quirúrgico (navaja)',
+  'Banda elástica (Elastrador)',
+  'Pinza Burdizzo',
+];
 
 class DatosEventoScreen extends StatefulWidget {
   final TipoEvento tipoEvento;
@@ -78,9 +56,36 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
   final _dosisController = TextEditingController();
   final _veterinarioController = TextEditingController();
   final _notasController = TextEditingController();
+  final _diagnosticoController = TextEditingController();
 
   DateTime? _selectedDate;
   String _selectedUnit = 'ml';
+  String? _selectedVia;
+  String? _selectedMetodo;
+  int? _condicionCorporal;
+
+  // ── Field visibility helpers ──
+  bool get _showProducto =>
+      widget.tipoEvento == TipoEvento.vacuna ||
+      widget.tipoEvento == TipoEvento.desparasitante ||
+      widget.tipoEvento == TipoEvento.tratamiento;
+
+  bool get _showDosis => _showProducto;
+
+  bool get _showViaAplicacion => _viasAplicacion.containsKey(widget.tipoEvento);
+
+  bool get _showDiagnostico =>
+      widget.tipoEvento == TipoEvento.tratamiento ||
+      widget.tipoEvento == TipoEvento.revisionVeterinaria;
+
+  bool get _showMetodo => widget.tipoEvento == TipoEvento.castracion;
+
+  bool get _showCondicionCorporal => widget.tipoEvento == TipoEvento.revisionVeterinaria;
+
+  bool get _veterinarioRequired =>
+      widget.tipoEvento == TipoEvento.tratamiento ||
+      widget.tipoEvento == TipoEvento.revisionVeterinaria ||
+      widget.tipoEvento == TipoEvento.castracion;
 
   @override
   void initState() {
@@ -96,6 +101,7 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
     _dosisController.dispose();
     _veterinarioController.dispose();
     _notasController.dispose();
+    _diagnosticoController.dispose();
     super.dispose();
   }
 
@@ -103,54 +109,121 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
     final newProductController = TextEditingController();
     return showDialog<String>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Nuevo Producto'),
-          content: TextField(
-            controller: newProductController,
-            decoration: const InputDecoration(hintText: 'Nombre del producto'),
-            autofocus: true,
+      builder: (context) => AlertDialog(
+        title: const Text('Nuevo Producto'),
+        content: TextField(
+          controller: newProductController,
+          decoration: const InputDecoration(hintText: 'Nombre del producto'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(newProductController.text);
-              },
-              child: const Text('Guardar'),
-            ),
-          ],
-        );
-      },
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(newProductController.text),
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
     );
   }
 
   Map<String, dynamic> _getEventTypeDetails() {
     switch (widget.tipoEvento) {
       case TipoEvento.vacuna:
-        return {'title': 'Vacunación', 'icon': Icons.vaccines, 'color': Colors.green};
+        return {
+          'title': 'Vacunación',
+          'icon': Icons.vaccines,
+          'color': AppColors.success,
+          'subtitle': 'Registra la vacuna aplicada, la dosis y la vía de administración.',
+        };
       case TipoEvento.desparasitante:
-        return {'title': 'Desparasitación', 'icon': Icons.bug_report, 'color': Colors.orange};
+        return {
+          'title': 'Desparasitación',
+          'icon': Icons.bug_report,
+          'color': AppColors.warning,
+          'subtitle': 'Registra el producto utilizado para el control de parásitos.',
+        };
       case TipoEvento.tratamiento:
-        return {'title': 'Tratamiento', 'icon': Icons.medical_services, 'color': Colors.blue};
+        return {
+          'title': 'Tratamiento',
+          'icon': Icons.medical_services,
+          'color': AppColors.info,
+          'subtitle': 'Indica el diagnóstico, medicamento y veterinario responsable.',
+        };
       case TipoEvento.revisionVeterinaria:
-        return {'title': 'Revisión Veterinaria', 'icon': Icons.science, 'color': Colors.teal};
+        return {
+          'title': 'Revisión Veterinaria',
+          'icon': Icons.health_and_safety,
+          'color': AppColors.secondary,
+          'subtitle': 'Documenta el diagnóstico, condición corporal y observaciones.',
+        };
       case TipoEvento.castracion:
-        return {'title': 'Castración', 'icon': Icons.cut, 'color': Colors.purple};
+        return {
+          'title': 'Castración',
+          'icon': Icons.content_cut,
+          'color': AppColors.error,
+          'subtitle': 'Selecciona el método utilizado y el veterinario responsable.',
+        };
       default:
-        return {'title': 'Evento', 'icon': Icons.event, 'color': Colors.grey};
+        return {
+          'title': 'Evento',
+          'icon': Icons.event,
+          'color': AppColors.textHint,
+          'subtitle': 'Completa la información del evento.',
+        };
     }
+  }
+
+  String _buildStructuredNotes() {
+    final parts = <String>[];
+    if (_selectedVia != null) parts.add('Vía: $_selectedVia');
+    if (_diagnosticoController.text.isNotEmpty) {
+      parts.add('Diagnóstico: ${_diagnosticoController.text}');
+    }
+    if (_selectedMetodo != null) parts.add('Método: $_selectedMetodo');
+    if (_condicionCorporal != null) parts.add('Condición corporal: $_condicionCorporal/5');
+    if (_notasController.text.isNotEmpty) parts.add(_notasController.text);
+    return parts.join(' | ');
+  }
+
+  InputDecoration _inputDecoration({
+    required String label,
+    String? hint,
+    required IconData icon,
+    required Color accentColor,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixIcon: Icon(icon, color: accentColor),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: AppColors.divider),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: AppColors.divider),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: accentColor, width: 2),
+      ),
+      filled: true,
+      fillColor: AppColors.surface,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final eventDetails = _getEventTypeDetails();
+    final Color accentColor = eventDetails['color'];
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('Datos de ${eventDetails['title']}'),
         elevation: 0,
@@ -163,123 +236,63 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              // Header Card con ícono
-              Card(
-                elevation: 3,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      colors: [
-                        eventDetails['color'].withAlpha(200),
-                        eventDetails['color'],
-                      ],
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(50),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(eventDetails['icon'], size: 32, color: Colors.white),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        'Información del Evento',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              // ── Header ──
+              EventHeaderCard(
+                title: eventDetails['title'],
+                subtitle: eventDetails['subtitle'],
+                icon: eventDetails['icon'],
+                accentColor: accentColor,
               ),
               const SizedBox(height: 24),
-              TypeAheadField<String>(
-                builder: (context, controller, focusNode) {
-                  return TextFormField(
-                    controller: _productoController,
-                    focusNode: focusNode,
-                    decoration: InputDecoration(
-                      labelText: 'Producto *',
-                      hintText: 'Buscar o agregar producto',
-                      prefixIcon: const Icon(Icons.inventory_2_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, ingrese un producto';
-                      }
-                      return null;
-                    },
-                  );
-                },
-                suggestionsCallback: (pattern) {
-                  final suggestions = _sugerenciasPorTipo[widget.tipoEvento] ?? [];
-                  final reinforcements = _refuerzosPorTipo[widget.tipoEvento] ?? [];
-                  final allProducts = [...suggestions, ...reinforcements];
 
-                  List<String> filtered = [];
-                  if (pattern.isEmpty) {
-                    filtered = allProducts;
-                  } else {
-                    filtered = allProducts.where((item) {
-                      return item.toLowerCase().contains(pattern.toLowerCase());
-                    }).toList();
-                  }
+              // ── Diagnóstico (Tratamiento, Revisión) ──
+              if (_showDiagnostico) ...[
+                TextFormField(
+                  controller: _diagnosticoController,
+                  decoration: _inputDecoration(
+                    label: widget.tipoEvento == TipoEvento.revisionVeterinaria
+                        ? 'Diagnóstico / Resultado *'
+                        : 'Diagnóstico / Motivo *',
+                    hint: widget.tipoEvento == TipoEvento.revisionVeterinaria
+                        ? 'Ej. Animal sano, sin hallazgos'
+                        : 'Ej. Infección respiratoria',
+                    icon: Icons.medical_information_outlined,
+                    accentColor: accentColor,
+                  ),
+                  maxLines: 2,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'El diagnóstico es obligatorio';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
 
-                  // Add "add new" option
-                  filtered.add("➕ Registrar nuevo producto");
-                  return filtered;
-                },
-                itemBuilder: (context, suggestion) {
-                  if (suggestion == "➕ Registrar nuevo producto") {
-                     return ListTile(
-                      leading: const Icon(Icons.add),
-                      title: Text(suggestion.substring(2)),
-                    );
-                  }
-                  return ListTile(
-                    title: Text(suggestion),
-                  );
-                },
-                onSelected: (suggestion) async {
-                  if (suggestion == "➕ Registrar nuevo producto") {
-                    final newProduct = await _showAddNuevoProductoDialog(context);
-                    if (newProduct != null && newProduct.isNotEmpty) {
-                      _productoController.text = newProduct;
-                    } else {
-                      _productoController.clear();
-                    }
-                  } else {
-                    _productoController.text = suggestion;
-                  }
-                },
-              ),
-              const SizedBox(height: 20),
+              // ── Producto (Vacuna, Desparasitante, Tratamiento) ──
+              if (_showProducto) ...[
+                ProductoTypeAheadField(
+                  controller: _productoController,
+                  tipoEvento: widget.tipoEvento,
+                  accentColor: accentColor,
+                  baseDecoration: _inputDecoration(
+                    label: '',
+                    icon: Icons.inventory_2_outlined,
+                    accentColor: accentColor,
+                  ),
+                  onAddNewProduct: _showAddNuevoProductoDialog,
+                  onChanged: () => setState(() {}),
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              // ── Fecha (todos) ──
               TextFormField(
                 controller: _fechaController,
-                decoration: InputDecoration(
-                  labelText: 'Fecha de Aplicación *',
-                  hintText: 'Seleccionar fecha',
-                  prefixIcon: const Icon(Icons.calendar_today_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
+                decoration: _inputDecoration(
+                  label: 'Fecha *',
+                  hint: 'Seleccionar fecha',
+                  icon: Icons.calendar_month_rounded,
+                  accentColor: accentColor,
                 ),
                 readOnly: true,
                 onTap: () async {
@@ -298,160 +311,110 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _dosisController,
-                      decoration: InputDecoration(
-                        labelText: 'Dosis',
-                        hintText: '0.0',
-                        prefixIcon: const Icon(Icons.medical_information_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty && double.tryParse(value) == null) {
-                          return 'Ingrese un número válido';
-                        }
-                        return null;
-                      },
-                    ),
+
+              // ── Método de Castración ──
+              if (_showMetodo) ...[
+                ChipSelector(
+                  label: 'Método de Castración *',
+                  icon: Icons.content_cut_rounded,
+                  options: _metodosCastracion,
+                  selected: _selectedMetodo,
+                  accentColor: accentColor,
+                  onSelected: (value) => setState(() => _selectedMetodo = value),
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              // ── Dosis + Unidad ──
+              if (_showDosis) ...[
+                DosisConUnidadField(
+                  controller: _dosisController,
+                  selectedUnit: _selectedUnit,
+                  accentColor: accentColor,
+                  onUnitChanged: (unit) => setState(() => _selectedUnit = unit),
+                  baseDecoration: _inputDecoration(
+                    label: 'Dosis',
+                    hint: '0.0',
+                    icon: Icons.science_outlined,
+                    accentColor: accentColor,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _selectedUnit,
-                      items: ['ml', 'mg', 'unidades', 'gotas']
-                          .map((label) => DropdownMenuItem(
-                                value: label,
-                                child: Text(label),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _selectedUnit = value;
-                          });
-                        }
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Unidad',
-                        prefixIcon: const Icon(Icons.straighten),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              // ── Vía de Aplicación ──
+              if (_showViaAplicacion) ...[
+                ChipSelector(
+                  label: 'Vía de Aplicación',
+                  icon: Icons.local_hospital_outlined,
+                  options: _viasAplicacion[widget.tipoEvento] ?? [],
+                  selected: _selectedVia,
+                  accentColor: accentColor,
+                  onSelected: (value) => setState(() => _selectedVia = value),
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              // ── Condición Corporal (Revisión) ──
+              if (_showCondicionCorporal) ...[
+                CondicionCorporalSelector(
+                  selected: _condicionCorporal,
+                  accentColor: accentColor,
+                  onSelected: (score) => setState(() => _condicionCorporal = score),
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              // ── Veterinario ──
               TextFormField(
                 controller: _veterinarioController,
-                decoration: InputDecoration(
-                  labelText: 'Veterinario',
-                  hintText: 'Nombre del veterinario',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
+                decoration: _inputDecoration(
+                  label: _veterinarioRequired ? 'Veterinario *' : 'Veterinario',
+                  hint: 'Ej. Dr. Juan Pérez',
+                  icon: Icons.badge_outlined,
+                  accentColor: accentColor,
                 ),
+                validator: _veterinarioRequired
+                    ? (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'El veterinario es obligatorio para este evento';
+                        }
+                        return null;
+                      }
+                    : null,
               ),
               const SizedBox(height: 20),
+
+              // ── Notas ──
               TextFormField(
                 controller: _notasController,
-                decoration: InputDecoration(
-                  labelText: 'Notas',
-                  hintText: 'Observaciones adicionales',
-                  prefixIcon: const Icon(Icons.notes_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  alignLabelWithHint: true,
-                ),
-                maxLines: 4,
+                decoration: _inputDecoration(
+                  label: 'Notas',
+                  hint: 'Observaciones adicionales',
+                  icon: Icons.notes_outlined,
+                  accentColor: accentColor,
+                ).copyWith(alignLabelWithHint: true),
+                maxLines: 3,
               ),
               const SizedBox(height: 32),
+
+              // ── Botón Continuar ──
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MultiBlocProvider(
-                            providers: [
-                              BlocProvider.value(
-                                value: BlocProvider.of<CattleListBloc>(context),
-                              ),
-                              BlocProvider(
-                                create: (context) {
-                                  final isarService = IsarService();
-                                  final animalDbService = AnimalDatabaseService(isarService);
-                                  final nfcRepository = NfcRepositoryImpl(
-                                    NfcService(),
-                                    animalDbService,
-                                  );
-                                  return NfcScannerBloc(
-                                    ScanNfcUseCase(nfcRepository),
-                                    FinishNfcScanUseCase(nfcRepository),
-                                  );
-                                },
-                              ),
-                              BlocProvider(
-                                create: (context) {
-                                  final isarService = IsarService();
-                                  final animalDbService = AnimalDatabaseService(isarService);
-                                  final esp32Repository = Esp32RepositoryImpl(Esp32Service());
-                                  return Esp32ScannerBloc(
-                                    ConnectToEsp32UseCase(esp32Repository),
-                                    DisconnectFromEsp32UseCase(esp32Repository),
-                                    FindAnimalByUidUseCase(animalDbService),
-                                    OpenWifiSettingsUseCase(esp32Repository),
-                                  );
-                                },
-                              ),
-                            ],
-                            child: SeleccionarAnimalesScreen(
-                              tipoEvento: widget.tipoEvento,
-                              producto: _productoController.text,
-                              fecha: _selectedDate!,
-                              dosis: double.tryParse(_dosisController.text),
-                              unidadDosis: _selectedUnit,
-                              veterinario: _veterinarioController.text,
-                              notas: _notasController.text,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: _onContinuar,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: eventDetails['color'],
-                    foregroundColor: Colors.white,
-                    elevation: 3,
+                    backgroundColor: accentColor,
+                    foregroundColor: AppColors.surface,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  icon: const Icon(Icons.arrow_forward, size: 24),
+                  icon: const Icon(Icons.arrow_forward_rounded, size: 24),
                   label: const Text(
-                    'Continuar',
+                    'Seleccionar Animales',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -460,6 +423,77 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _onContinuar() {
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
+
+    final eventDetails = _getEventTypeDetails();
+    final structuredNotes = _buildStructuredNotes();
+
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 300),
+        reverseTransitionDuration: const Duration(milliseconds: 250),
+        pageBuilder: (context, animation, secondaryAnimation) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(
+              value: BlocProvider.of<CattleListBloc>(context),
+            ),
+            BlocProvider(
+              create: (context) {
+                final isarService = IsarService();
+                final animalDbService = AnimalDatabaseService(isarService);
+                final nfcRepository = NfcRepositoryImpl(NfcService(), animalDbService);
+                return NfcScannerBloc(
+                  ScanNfcUseCase(nfcRepository),
+                  FinishNfcScanUseCase(nfcRepository),
+                );
+              },
+            ),
+            BlocProvider(
+              create: (context) {
+                final isarService = IsarService();
+                final animalDbService = AnimalDatabaseService(isarService);
+                final esp32Repository = Esp32RepositoryImpl(Esp32Service());
+                return Esp32ScannerBloc(
+                  ConnectToEsp32UseCase(esp32Repository),
+                  DisconnectFromEsp32UseCase(esp32Repository),
+                  FindAnimalByUidUseCase(animalDbService),
+                  OpenWifiSettingsUseCase(esp32Repository),
+                );
+              },
+            ),
+          ],
+          child: SeleccionarAnimalesScreen(
+            tipoEvento: widget.tipoEvento,
+            producto: _showProducto ? _productoController.text : eventDetails['title'],
+            fecha: _selectedDate!,
+            dosis: _showDosis ? double.tryParse(_dosisController.text) : null,
+            unidadDosis: _showDosis ? _selectedUnit : null,
+            veterinario: _veterinarioController.text,
+            notas: structuredNotes,
+          ),
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.03, 0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              )),
+              child: child,
+            ),
+          );
+        },
       ),
     );
   }

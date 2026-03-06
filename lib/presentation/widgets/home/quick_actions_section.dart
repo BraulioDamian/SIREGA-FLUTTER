@@ -1,6 +1,7 @@
 
 // lib/presentation/widgets/home/quick_actions_section.dart
 import 'package:flutter/material.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class QuickActionsSection extends StatelessWidget {
   final VoidCallback onRegisterAnimal;
@@ -27,11 +28,11 @@ class QuickActionsSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: AppColors.textPrimary.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -42,7 +43,7 @@ class QuickActionsSection extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(fontSize: 12),
+            style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -60,6 +61,7 @@ class QuickActionsSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 12),

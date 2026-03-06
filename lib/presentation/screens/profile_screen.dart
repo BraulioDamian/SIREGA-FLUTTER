@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/servicios/auth_service.dart';
 import 'package:sirega_app/nucleo/servicios/firebase_sync_service.dart';
 import 'package:sirega_app/modulos/0_autenticacion/presentation/bloc/auth_bloc.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -27,7 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Cerrar Sesión'),
           ),
         ],
@@ -60,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Eliminar Todo'),
           ),
         ],
@@ -97,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✅ Datos de Firestore eliminados'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -107,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Error: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -165,17 +166,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 8),
                   Text(
                     user?.email ?? 'No email',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'UID: ${user?.uid ?? "N/A"}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[500],
+                      color: AppColors.textHint,
                       fontFamily: 'monospace',
                     ),
                   ),
@@ -188,10 +189,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // Sección de Datos
           Text(
             'Gestión de Datos',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -199,7 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // Botón para eliminar datos de Firestore
           Card(
             child: ListTile(
-              leading: const Icon(Icons.cloud_off, color: Colors.orange),
+              leading: const Icon(Icons.cloud_off, color: AppColors.warning),
               title: const Text('Limpiar Datos de Firestore'),
               subtitle: const Text(
                 'Elimina todos tus datos de la nube (los datos locales se mantienen)',
@@ -214,28 +215,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // Sección de Cuenta
           Text(
             'Cuenta',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
 
           // Botón de cerrar sesión
           Card(
-            color: Colors.red[50],
+            color: AppColors.error.withValues(alpha: 0.05),
             child: ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
+              leading: const Icon(Icons.logout, color: AppColors.error),
               title: const Text(
                 'Cerrar Sesión',
                 style: TextStyle(
-                  color: Colors.red,
+                  color: AppColors.error,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios,
-                  size: 16, color: Colors.red),
+                  size: 16, color: AppColors.error),
               onTap: () => _confirmLogout(context),
             ),
           ),
@@ -246,22 +247,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.blue[50],
+              color: AppColors.info.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.blue[200]!),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.blue[700]),
+                    const Icon(Icons.info_outline, color: AppColors.info),
                     const SizedBox(width: 8),
-                    Text(
+                    const Text(
                       'Información',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue[700],
+                        color: AppColors.info,
                       ),
                     ),
                   ],

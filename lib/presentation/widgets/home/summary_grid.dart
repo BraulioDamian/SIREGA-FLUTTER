@@ -1,6 +1,7 @@
 // lib/presentation/widgets/home/summary_grid.dart
 import 'package:flutter/material.dart';
 import 'package:sirega_app/presentation/widgets/home/metric_card.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class SummaryGrid extends StatelessWidget {
   final int totalAnimales;
@@ -43,7 +44,7 @@ class SummaryGrid extends StatelessWidget {
               value: totalAnimales.toString(),
               subtitle: '$animalesActivos activos',
               icon: Icons.pets,
-              color: Colors.blue,
+              color: AppColors.info,
               trend: '+2',
               trendUp: true,
             ),
@@ -52,7 +53,7 @@ class SummaryGrid extends StatelessWidget {
               value: alertasSanitarias.toString(),
               subtitle: '$eventosPendientes pendientes',
               icon: Icons.warning_amber,
-              color: Colors.orange,
+              color: AppColors.warning,
               trend: '-1',
               trendUp: false,
             ),
@@ -61,7 +62,7 @@ class SummaryGrid extends StatelessWidget {
               value: '${produccionLecheHoy.toStringAsFixed(1)} L',
               subtitle: 'Leche recolectada',
               icon: Icons.water_drop,
-              color: Colors.green,
+              color: AppColors.success,
               trend: '+5%',
               trendUp: true,
             ),
@@ -72,7 +73,7 @@ class SummaryGrid extends StatelessWidget {
                   : '100%',
               subtitle: '$animalesEnfermos enfermos',
               icon: Icons.health_and_safety,
-              color: animalesEnfermos > 0 ? Colors.red : Colors.teal,
+              color: animalesEnfermos > 0 ? AppColors.error : AppColors.primary,
               trend: animalesEnfermos > 0 ? '$animalesEnfermos' : 'OK',
               trendUp: animalesEnfermos == 0,
             ),

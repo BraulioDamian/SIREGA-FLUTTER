@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class AnimatedInfoCard extends StatelessWidget {
   final String title;
@@ -30,16 +31,16 @@ class AnimatedInfoCard extends StatelessWidget {
             child: Container(
               margin: const EdgeInsets.only(bottom: 4),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: AppColors.textPrimary.withValues(alpha: 0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   ),
@@ -56,7 +57,7 @@ class AnimatedInfoCard extends StatelessWidget {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            color.withOpacity(0.9),
+                            color.withValues(alpha: 0.9),
                             color,
                           ],
                         ),
@@ -66,7 +67,7 @@ class AnimatedInfoCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
@@ -89,7 +90,7 @@ class AnimatedInfoCard extends StatelessWidget {
                           ),
                           Icon(
                             Icons.arrow_forward_ios_rounded,
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                             size: 18,
                           ),
                         ],

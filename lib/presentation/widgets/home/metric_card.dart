@@ -1,5 +1,6 @@
 // lib/presentation/widgets/home/metric_card.dart
 import 'package:flutter/material.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class MetricCard extends StatelessWidget {
   final String title;
@@ -26,11 +27,11 @@ class MetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -47,7 +48,7 @@ class MetricCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -56,7 +57,7 @@ class MetricCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: trendUp ? Colors.green[50] : Colors.red[50],
+                    color: trendUp ? AppColors.success.withValues(alpha: 0.1) : AppColors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -65,7 +66,7 @@ class MetricCard extends StatelessWidget {
                       Icon(
                         trendUp ? Icons.trending_up : Icons.trending_down,
                         size: 12,
-                        color: trendUp ? Colors.green : Colors.red,
+                        color: trendUp ? AppColors.success : AppColors.error,
                       ),
                       const SizedBox(width: 2),
                       Flexible(
@@ -73,7 +74,7 @@ class MetricCard extends StatelessWidget {
                           trend!,
                           style: TextStyle(
                             fontSize: 11,
-                            color: trendUp ? Colors.green : Colors.red,
+                            color: trendUp ? AppColors.success : AppColors.error,
                             fontWeight: FontWeight.bold,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -94,10 +95,10 @@ class MetricCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: AppColors.textPrimary,
               ),
               maxLines: 1,
             ),
@@ -108,9 +109,9 @@ class MetricCard extends StatelessWidget {
           // Título (ajustado en una línea)
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
-              color: Colors.grey[600],
+              color: AppColors.textSecondary,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -121,9 +122,9 @@ class MetricCard extends StatelessWidget {
           // Subtítulo (ajustado en una línea)
           Text(
             subtitle,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 11,
-              color: Colors.grey[500],
+              color: AppColors.textHint,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

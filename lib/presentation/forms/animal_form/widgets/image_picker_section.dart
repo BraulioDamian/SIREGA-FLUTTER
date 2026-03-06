@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../controllers/animal_form_controller.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class ImagePickerSection extends StatelessWidget {
   const ImagePickerSection({super.key});
@@ -35,9 +36,9 @@ class ImagePickerSection extends StatelessWidget {
                   height: containerSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.grey.shade200,
+                    color: AppColors.background,
                     border: Border.all(
-                      color: Theme.of(context).primaryColor.withOpacity(0.3),
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
                       width: 2,
                     ),
                     image: controller.imageFile != null
@@ -54,14 +55,14 @@ class ImagePickerSection extends StatelessWidget {
                             Icon(
                               Icons.camera_alt,
                               size: isMobile ? 32 : 40,
-                              color: Colors.grey.shade600,
+                              color: AppColors.textSecondary,
                             ),
                             SizedBox(height: isMobile ? 4 : 8),
                             Text(
                               'Agregar Foto',
                               style: TextStyle(
                                 fontSize: isMobile ? 12 : 14,
-                                color: Colors.grey.shade600,
+                                color: AppColors.textSecondary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -84,7 +85,7 @@ class ImagePickerSection extends StatelessWidget {
       builder: (BuildContext context) {
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -101,7 +102,7 @@ class ImagePickerSection extends StatelessWidget {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 20),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: AppColors.divider,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -139,7 +140,7 @@ class ImagePickerSection extends StatelessWidget {
                           context,
                           icon: Icons.delete,
                           label: 'Eliminar',
-                          color: Colors.red,
+                          color: AppColors.error,
                           onTap: () {
                             Navigator.pop(context);
                             controller.setImageFile(null);
@@ -175,7 +176,7 @@ class ImagePickerSection extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: (color ?? Theme.of(context).primaryColor).withOpacity(0.1),
+                color: (color ?? Theme.of(context).primaryColor).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -190,7 +191,7 @@ class ImagePickerSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: color ?? Colors.black87,
+                color: color ?? AppColors.textPrimary,
               ),
             ),
           ],
@@ -221,7 +222,7 @@ class ImagePickerSection extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al seleccionar imagen: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }

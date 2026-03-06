@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/bloc/cattle_detail_bloc.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class DeleteAnimalDialog extends StatefulWidget {
   final Animal animal;
@@ -35,12 +36,12 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.red.shade50,
+              color: AppColors.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.warning_rounded,
-              color: Colors.red.shade600,
+              color: AppColors.error,
               size: 24,
             ),
           ),
@@ -58,9 +59,9 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
                 ),
                 Text(
                   widget.animal.nombre,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -77,19 +78,19 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.shade50,
+                color: AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.shade200),
+                border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.orange.shade700),
+                  const Icon(Icons.info_outline, color: AppColors.warning),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
+                    child: const Text(
                       'Esta acción no se puede deshacer',
                       style: TextStyle(
-                        color: Colors.orange.shade700,
+                        color: AppColors.warning,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -100,11 +101,11 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
             const SizedBox(height: 20),
             
             // Opciones de eliminación
-            Text(
+            const Text(
               'Tipo de eliminación:',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
@@ -120,10 +121,10 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: !_isPermanentDelete ? Colors.blue.shade50 : Colors.grey.shade50,
+                  color: !_isPermanentDelete ? AppColors.info.withValues(alpha: 0.1) : AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: !_isPermanentDelete ? Colors.blue.shade300 : Colors.grey.shade300,
+                    color: !_isPermanentDelete ? AppColors.info : AppColors.divider,
                     width: !_isPermanentDelete ? 2 : 1,
                   ),
                 ),
@@ -133,7 +134,7 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
                       !_isPermanentDelete 
                         ? Icons.radio_button_checked 
                         : Icons.radio_button_unchecked,
-                      color: !_isPermanentDelete ? Colors.blue : Colors.grey,
+                      color: !_isPermanentDelete ? AppColors.info : AppColors.textHint,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -148,11 +149,11 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
+                          const Text(
                             'El animal se marcará como muerto/vendido pero se conservará en los registros históricos',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -176,10 +177,10 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _isPermanentDelete ? Colors.red.shade50 : Colors.grey.shade50,
+                  color: _isPermanentDelete ? AppColors.error.withValues(alpha: 0.1) : AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _isPermanentDelete ? Colors.red.shade300 : Colors.grey.shade300,
+                    color: _isPermanentDelete ? AppColors.error : AppColors.divider,
                     width: _isPermanentDelete ? 2 : 1,
                   ),
                 ),
@@ -189,7 +190,7 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
                       _isPermanentDelete 
                         ? Icons.radio_button_checked 
                         : Icons.radio_button_unchecked,
-                      color: _isPermanentDelete ? Colors.red : Colors.grey,
+                      color: _isPermanentDelete ? AppColors.error : AppColors.textHint,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -204,11 +205,11 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
+                          const Text(
                             'Se eliminarán todos los datos del animal de forma permanente',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -222,11 +223,11 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
             // Campo de confirmación para eliminación permanente
             if (_isPermanentDelete) ...[
               const SizedBox(height: 20),
-              Text(
+              const Text(
                 'Para confirmar, escribe "ELIMINAR":',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.red.shade700,
+                  color: AppColors.error,
                 ),
               ),
               const SizedBox(height: 8),
@@ -241,20 +242,20 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
                   hintText: 'Escribe ELIMINAR',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.red.shade300),
+                    borderSide: const BorderSide(color: AppColors.error),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.red.shade500, width: 2),
+                    borderSide: const BorderSide(color: AppColors.error, width: 2),
                   ),
-                  prefixIcon: const Icon(Icons.lock_outline, color: Colors.red),
+                  prefixIcon: const Icon(Icons.lock_outline, color: AppColors.error),
                   suffixIcon: _isConfirmed
-                      ? const Icon(Icons.check_circle, color: Colors.green)
+                      ? const Icon(Icons.check_circle, color: AppColors.success)
                       : null,
                 ),
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.red.shade700,
+                  color: AppColors.error,
                 ),
               ),
             ],
@@ -267,9 +268,9 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
             HapticFeedback.lightImpact();
             Navigator.pop(context);
           },
-          child: Text(
+          child: const Text(
             'Cancelar',
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(color: AppColors.textSecondary),
           ),
         ),
         ElevatedButton(
@@ -300,15 +301,15 @@ class _DeleteAnimalDialogState extends State<DeleteAnimalDialog> {
                           ? 'Animal eliminado permanentemente'
                           : 'Animal marcado como inactivo',
                       ),
-                      backgroundColor: _isPermanentDelete ? Colors.red : Colors.orange,
+                      backgroundColor: _isPermanentDelete ? AppColors.error : AppColors.warning,
                       behavior: SnackBarBehavior.fixed,
                       duration: const Duration(seconds: 2),
                     ),
                   );
                 },
           style: ElevatedButton.styleFrom(
-            backgroundColor: _isPermanentDelete ? Colors.red : Colors.orange,
-            foregroundColor: Colors.white,
+            backgroundColor: _isPermanentDelete ? AppColors.error : AppColors.warning,
+            foregroundColor: AppColors.surface,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),

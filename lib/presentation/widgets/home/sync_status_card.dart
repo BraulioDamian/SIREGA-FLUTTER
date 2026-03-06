@@ -1,6 +1,7 @@
 
 // lib/presentation/widgets/home/sync_status_card.dart
 import 'package:flutter/material.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class SyncStatusCard extends StatelessWidget {
   final bool sincronizando;
@@ -27,10 +28,10 @@ class SyncStatusCard extends StatelessWidget {
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: sincronizando ? Colors.blue[50] : Colors.green[50],
+        color: sincronizando ? AppColors.info.withValues(alpha: 0.1) : AppColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: sincronizando ? Colors.blue[200]! : Colors.green[200]!,
+          color: sincronizando ? AppColors.info.withValues(alpha: 0.3) : AppColors.success.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -38,7 +39,7 @@ class SyncStatusCard extends StatelessWidget {
           if (sincronizando)
             RotationTransition(
               turns: syncAnimationController,
-              child: const Icon(Icons.sync, color: Colors.blue),
+              child: const Icon(Icons.sync, color: AppColors.info),
             )
           else
             Icon(
@@ -46,7 +47,7 @@ class SyncStatusCard extends StatelessWidget {
                   ? Icons.sync_problem
                   : Icons.check_circle,
               color:
-                  registrosPendientesSync > 0 ? Colors.orange : Colors.green,
+                  registrosPendientesSync > 0 ? AppColors.warning : AppColors.success,
             ),
           const SizedBox(width: 12),
           Expanded(
@@ -64,7 +65,7 @@ class SyncStatusCard extends StatelessWidget {
                 if (ultimaSync != null)
                   Text(
                     'Última sync: ${formatearTiempo(ultimaSync!)}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
               ],
             ),

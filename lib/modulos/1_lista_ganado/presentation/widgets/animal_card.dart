@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class AnimalCard extends StatelessWidget {
   final Animal animal;
@@ -12,77 +13,77 @@ class AnimalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                Colors.grey.shade50,
+    return Material(
+      type: MaterialType.transparency,
+      child: Card(
+        elevation: 3,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.surface,
+                  Theme.of(context).colorScheme.surface,
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      _buildAnimalImage(context),
+                      const SizedBox(width: 16),
+                      Expanded(child: _buildAnimalInfo(context)),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: _buildStatusChip(context),
+                ),
               ],
             ),
-          ),
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    _buildAnimalImage(),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildAnimalInfo(context)),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: 12,
-                right: 12,
-                child: _buildStatusChip(context),
-              ),
-            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildAnimalImage() {
-    return Hero(
-      tag: 'animal_image_${animal.id}',
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: CircleAvatar(
-          radius: 45,
-          backgroundColor: Colors.grey.shade200,
-          backgroundImage: animal.fotoPerfilUrl != null && animal.fotoPerfilUrl!.isNotEmpty
-              ? FileImage(File(animal.fotoPerfilUrl!))
-              : null,
-          child: animal.fotoPerfilUrl == null || animal.fotoPerfilUrl!.isEmpty
-              ? Icon(
-                  Icons.pets,
-                  size: 45,
-                  color: Colors.grey.shade400,
-                )
-              : null,
-        ),
+  Widget _buildAnimalImage(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: CircleAvatar(
+        radius: 45,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        backgroundImage: animal.fotoPerfilUrl != null && animal.fotoPerfilUrl!.isNotEmpty
+            ? FileImage(File(animal.fotoPerfilUrl!))
+            : null,
+        child: animal.fotoPerfilUrl == null || animal.fotoPerfilUrl!.isEmpty
+            ? Icon(
+                Icons.pets,
+                size: 45,
+                color: Theme.of(context).colorScheme.outline,
+              )
+            : null,
       ),
     );
   }
@@ -118,7 +119,6 @@ class AnimalCard extends StatelessWidget {
               child: Text(
                 _getIdentificador(),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade600,
                   fontWeight: FontWeight.w500,
                 ),
                 maxLines: 1,
@@ -138,14 +138,14 @@ class AnimalCard extends StatelessWidget {
             _buildInfoChip(
               icon: animal.sexo == Sexo.macho ? Icons.male : Icons.female,
               label: animal.sexo == Sexo.macho ? 'Macho' : 'Hembra',
-              color: animal.sexo == Sexo.macho ? Colors.blue : Colors.pink,
+              color: animal.sexo == Sexo.macho ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
             ),
             
             // Raza
             _buildInfoChip(
               icon: Icons.pets,
               label: animal.raza,
-              color: Colors.green,
+              color: Theme.of(context).colorScheme.tertiary,
             ),
             
             // Edad
@@ -153,7 +153,7 @@ class AnimalCard extends StatelessWidget {
               _buildInfoChip(
                 icon: Icons.cake,
                 label: edad,
-                color: Colors.orange,
+                color: Theme.of(context).colorScheme.primaryContainer,
               ),
           ],
         ),
@@ -165,10 +165,10 @@ class AnimalCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: _getHealthColor(animal.estadoSalud).withOpacity(0.1),
+              color: _getHealthColor(animal.estadoSalud).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: _getHealthColor(animal.estadoSalud).withOpacity(0.3),
+                color: _getHealthColor(animal.estadoSalud).withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -203,7 +203,7 @@ class AnimalCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -281,17 +281,17 @@ class AnimalCard extends StatelessWidget {
   Color _getHealthColor(EstadoSalud estado) {
     switch (estado) {
       case EstadoSalud.sano:
-        return Colors.green;
+        return AppColors.success;
       case EstadoSalud.enfermo:
-        return Colors.orange;
+        return AppColors.warning;
       case EstadoSalud.critico:
-        return Colors.red;
+        return AppColors.error;
       case EstadoSalud.convaleciente:
-        return Colors.blue;
+        return AppColors.info;
       case EstadoSalud.enTratamiento:
-        return Colors.purple;
+        return AppColors.secondary;
       case EstadoSalud.enObservacion:
-        return Colors.grey;
+        return AppColors.textHint;
     }
   }
   
@@ -322,7 +322,7 @@ class AnimalCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: (statusInfo['color'] as Color).withOpacity(0.4),
+            color: (statusInfo['color'] as Color).withValues(alpha: 0.4),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -354,49 +354,49 @@ class AnimalCard extends StatelessWidget {
     switch (estado) {
       case EstadoAnimal.activo:
         return {
-          'color': Colors.green,
+          'color': AppColors.success,
           'text': 'Activo',
           'icon': Icons.check_circle,
         };
       case EstadoAnimal.vendido:
         return {
-          'color': Colors.blueGrey,
+          'color': AppColors.textSecondary,
           'text': 'Vendido',
           'icon': Icons.shopping_cart,
         };
       case EstadoAnimal.muerto:
         return {
-          'color': Colors.red,
+          'color': AppColors.error,
           'text': 'Muerto',
           'icon': Icons.dangerous,
         };
       case EstadoAnimal.enfermo:
         return {
-          'color': Colors.orange,
+          'color': AppColors.warning,
           'text': 'Enfermo',
           'icon': Icons.sick,
         };
       case EstadoAnimal.cuarentena:
         return {
-          'color': Colors.purple,
+          'color': AppColors.primaryLight,
           'text': 'Cuarentena',
           'icon': Icons.lock,
         };
       case EstadoAnimal.perdido:
         return {
-          'color': Colors.brown,
+          'color': AppColors.accent,
           'text': 'Perdido',
           'icon': Icons.search_off,
         };
       case EstadoAnimal.prestado:
         return {
-          'color': Colors.indigo,
+          'color': AppColors.info,
           'text': 'Prestado',
           'icon': Icons.handshake,
         };
       case EstadoAnimal.enTransito:
         return {
-          'color': Colors.teal,
+          'color': AppColors.secondary,
           'text': 'En Tránsito',
           'icon': Icons.local_shipping,
         };

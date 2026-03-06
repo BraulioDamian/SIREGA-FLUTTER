@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 enum ChartType { milk, weight }
 
@@ -51,7 +52,7 @@ class _ProductionChartState extends State<ProductionChart>
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.type == ChartType.milk ? Colors.blue : Colors.green;
+    final color = widget.type == ChartType.milk ? AppColors.info : AppColors.success;
     final title = widget.type == ChartType.milk
         ? 'Producción de Leche (L/día)'
         : 'Evolución del Peso (kg)';
@@ -68,10 +69,10 @@ class _ProductionChartState extends State<ProductionChart>
           return Container(
             height: 250,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.05),
+              color: color.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -109,10 +110,10 @@ class _ProductionChartState extends State<ProductionChart>
           return Container(
             height: 250,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.05),
+              color: color.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -125,24 +126,24 @@ class _ProductionChartState extends State<ProductionChart>
                         ? Icons.opacity
                         : Icons.monitor_weight,
                     size: 48,
-                    color: Colors.grey.shade400,
+                    color: AppColors.textHint,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     widget.type == ChartType.milk
                         ? 'Sin datos de producción de leche'
                         : 'Sin datos de pesaje',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Registra al menos 2 mediciones',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade500,
+                      color: AppColors.textHint,
                     ),
                   ),
                 ],
@@ -164,10 +165,10 @@ class _ProductionChartState extends State<ProductionChart>
         return Container(
           height: 250,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.05),
+            color: color.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -185,17 +186,17 @@ class _ProductionChartState extends State<ProductionChart>
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade800,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         Text(
                           '${data.length} registros',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -206,14 +207,14 @@ class _ProductionChartState extends State<ProductionChart>
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
+                        color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             trend >= 0 ? Icons.trending_up : Icons.trending_down,
-                            color: trend >= 0 ? Colors.green : Colors.red,
+                            color: trend >= 0 ? AppColors.success : AppColors.error,
                             size: 16,
                           ),
                           const SizedBox(width: 4),
@@ -222,7 +223,7 @@ class _ProductionChartState extends State<ProductionChart>
                                 ? '${trend >= 0 ? '+' : ''}${trendPercent.toStringAsFixed(1)}%'
                                 : '${trend >= 0 ? '+' : ''}${trend.toStringAsFixed(1)}kg',
                             style: TextStyle(
-                              color: trend >= 0 ? Colors.green : Colors.red,
+                              color: trend >= 0 ? AppColors.success : AppColors.error,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -271,9 +272,9 @@ class _ProductionChartState extends State<ProductionChart>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildLegendItem('Min', '${min.toStringAsFixed(1)}$suffix', color.withOpacity(0.5)),
+        _buildLegendItem('Min', '${min.toStringAsFixed(1)}$suffix', color.withValues(alpha: 0.5)),
         _buildLegendItem('Promedio', '${avg.toStringAsFixed(1)}$suffix', color),
-        _buildLegendItem('Max', '${max.toStringAsFixed(1)}$suffix', color.withOpacity(0.8)),
+        _buildLegendItem('Max', '${max.toStringAsFixed(1)}$suffix', color.withValues(alpha: 0.8)),
       ],
     );
   }
@@ -292,17 +293,17 @@ class _ProductionChartState extends State<ProductionChart>
         const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.grey.shade800,
+            color: AppColors.textPrimary,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 11,
-            color: Colors.grey.shade600,
+            color: AppColors.textSecondary,
           ),
         ),
       ],
@@ -336,13 +337,13 @@ class ChartPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          color.withOpacity(0.3),
-          color.withOpacity(0.0),
+          color.withValues(alpha: 0.3),
+          color.withValues(alpha: 0.0),
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     final gridPaint = Paint()
-      ..color = Colors.grey.withOpacity(0.2)
+      ..color = AppColors.divider
       ..strokeWidth = 0.5;
 
     // Dibujar líneas de cuadrícula
@@ -419,7 +420,7 @@ class ChartPainter extends CustomPainter {
           points[i],
           pointSize + 2,
           Paint()
-            ..color = color.withOpacity(0.2)
+            ..color = color.withValues(alpha: 0.2)
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
         );
         
@@ -428,7 +429,7 @@ class ChartPainter extends CustomPainter {
           points[i],
           pointSize,
           Paint()
-            ..color = color.withOpacity(0.3)
+            ..color = color.withValues(alpha: 0.3)
             ..style = PaintingStyle.fill,
         );
         
@@ -437,7 +438,7 @@ class ChartPainter extends CustomPainter {
           points[i],
           pointSize - 2,
           Paint()
-            ..color = Colors.white
+            ..color = AppColors.surface
             ..style = PaintingStyle.fill,
         );
         
@@ -485,7 +486,7 @@ class ChartPainter extends CustomPainter {
         canvas.drawRRect(
           boxRect,
           Paint()
-            ..color = Colors.white
+            ..color = AppColors.surface
             ..style = PaintingStyle.fill,
         );
         

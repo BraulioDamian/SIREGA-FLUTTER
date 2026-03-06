@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class HealthStatusWidget extends StatelessWidget {
   final String status;
@@ -29,13 +30,13 @@ class HealthStatusWidget extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  color.withOpacity(0.15),
-                  color.withOpacity(0.05),
+                  color.withValues(alpha: 0.15),
+                  color.withValues(alpha: 0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -53,11 +54,11 @@ class HealthStatusWidget extends StatelessWidget {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.2),
+                          color: color.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: color.withOpacity(0.3),
+                              color: color.withValues(alpha: 0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -88,8 +89,8 @@ class HealthStatusWidget extends StatelessWidget {
                 Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
                     fontSize: 14,
                   ),
                 ),
@@ -112,11 +113,11 @@ class HealthStatusWidget extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               'Nivel de Salud',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -134,7 +135,7 @@ class HealthStatusWidget extends StatelessWidget {
         Container(
           height: 8,
           decoration: BoxDecoration(
-            color: Colors.grey.shade200,
+            color: AppColors.divider,
             borderRadius: BorderRadius.circular(10),
           ),
           child: TweenAnimationBuilder<double>(
@@ -150,13 +151,13 @@ class HealthStatusWidget extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         color,
-                        color.withOpacity(0.7),
+                        color.withValues(alpha: 0.7),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: color.withOpacity(0.3),
+                        color: color.withValues(alpha: 0.3),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -174,15 +175,15 @@ class HealthStatusWidget extends StatelessWidget {
   Color _getStatusColor() {
     switch (status.toLowerCase()) {
       case 'sano':
-        return Colors.green.shade600;
+        return AppColors.success;
       case 'enfermo':
-        return Colors.orange.shade600;
+        return AppColors.warning;
       case 'critico':
-        return Colors.red.shade600;
+        return AppColors.error;
       case 'recuperacion':
-        return Colors.blue.shade600;
+        return AppColors.info;
       default:
-        return Colors.grey.shade600;
+        return AppColors.textHint;
     }
   }
 

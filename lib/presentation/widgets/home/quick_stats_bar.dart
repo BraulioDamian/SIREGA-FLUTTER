@@ -1,5 +1,6 @@
 // lib/presentation/widgets/home/quick_stats_bar.dart
 import 'package:flutter/material.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 /// Barra de estadísticas rápidas con diseño minimalista y claro
 class QuickStatsBar extends StatelessWidget {
@@ -24,11 +25,11 @@ class QuickStatsBar extends StatelessWidget {
       height: 80,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: AppColors.textPrimary.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -50,7 +51,7 @@ class QuickStatsBar extends StatelessWidget {
             child: _StatItem(
               value: animalesActivos.toString(),
               label: 'Activos',
-              color: Colors.green,
+              color: AppColors.success,
               icon: Icons.check_circle,
               onTap: onStatTap,
             ),
@@ -60,7 +61,7 @@ class QuickStatsBar extends StatelessWidget {
             child: _StatItem(
               value: alertas.toString(),
               label: 'Alertas',
-              color: alertas > 0 ? Colors.orange : Colors.grey,
+              color: alertas > 0 ? AppColors.warning : AppColors.textHint,
               icon: Icons.notifications,
               showBadge: alertas > 0,
               onTap: onStatTap,
@@ -75,7 +76,7 @@ class QuickStatsBar extends StatelessWidget {
     return Container(
       width: 1,
       height: 40,
-      color: Colors.grey.withOpacity(0.2),
+      color: AppColors.divider,
     );
   }
 }
@@ -108,7 +109,7 @@ class _StatItem extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: color.withOpacity(0.7)),
+              Icon(icon, size: 16, color: color.withValues(alpha: 0.7)),
               const SizedBox(width: 6),
               Text(
                 value,
@@ -123,8 +124,8 @@ class _StatItem extends StatelessWidget {
                 Container(
                   width: 6,
                   height: 6,
-                  decoration: BoxDecoration(
-                    color: Colors.red,
+                  decoration: const BoxDecoration(
+                    color: AppColors.error,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -134,9 +135,9 @@ class _StatItem extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 11,
-              color: Colors.grey[600],
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
             ),
           ),

@@ -1,6 +1,7 @@
 
 // lib/presentation/widgets/home/alerts_section.dart
 import 'package:flutter/material.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class AlertsSection extends StatelessWidget {
   const AlertsSection({super.key});
@@ -15,7 +16,7 @@ class AlertsSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border(left: BorderSide(color: color, width: 4)),
       ),
@@ -29,11 +30,11 @@ class AlertsSection extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                 ),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -66,6 +67,7 @@ class AlertsSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -74,7 +76,7 @@ class AlertsSection extends StatelessWidget {
           subtitle: 'Lote 5 - Fiebre aftosa',
           date: DateTime.now().add(const Duration(days: 3)),
           type: 'Vacunación',
-          color: Colors.orange,
+          color: AppColors.warning,
         ),
         const SizedBox(height: 8),
         _buildAlertCard(
@@ -82,7 +84,7 @@ class AlertsSection extends StatelessWidget {
           subtitle: 'Animal ID: 12345 - Cojera',
           date: DateTime.now().add(const Duration(days: 1)),
           type: 'Salud',
-          color: Colors.red,
+          color: AppColors.error,
         ),
       ],
     );

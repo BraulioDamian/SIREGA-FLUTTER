@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class MedicalEventCard extends StatelessWidget {
   final EventoSanitario evento;
@@ -34,7 +35,7 @@ class MedicalEventCard extends StatelessWidget {
       },
       child: Stack(
         children: [
-          // Timeline line
+                  // Timeline line
           if (!isLast)
             Positioned(
               left: 27,
@@ -87,7 +88,7 @@ class MedicalEventCard extends StatelessWidget {
                       ),
                       child: Icon(
                         eventInfo.icon,
-                        color: Colors.white,
+                        color: AppColors.surface,
                         size: 28,
                       ),
                     ),
@@ -103,14 +104,14 @@ class MedicalEventCard extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Colors.white,
+                          AppColors.surface,
                           eventInfo.color.withValues(alpha: 0.03),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
+                          color: AppColors.textPrimary.withValues(alpha: 0.04),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -204,7 +205,7 @@ class MedicalEventCard extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                  color: AppColors.textPrimary,
                                   height: 1.2,
                                 ),
                               ),
@@ -215,16 +216,16 @@ class MedicalEventCard extends StatelessWidget {
                                   padding: const EdgeInsets.only(top: 8),
                                   child: Row(
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.medical_information_outlined,
                                         size: 16,
-                                        color: Colors.grey.shade600,
+                                        color: AppColors.textSecondary,
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
                                         'Dosis: ${evento.dosis} ${evento.unidadDosis}',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade700,
+                                        style: const TextStyle(
+                                          color: AppColors.textSecondary,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -239,16 +240,16 @@ class MedicalEventCard extends StatelessWidget {
                                   padding: const EdgeInsets.only(top: 6),
                                   child: Row(
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.person_outline,
                                         size: 16,
-                                        color: Colors.grey.shade600,
+                                        color: AppColors.textSecondary,
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
                                         'Dr(a). ${evento.veterinario}',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade700,
+                                        style: const TextStyle(
+                                          color: AppColors.textSecondary,
                                           fontSize: 14,
                                           fontStyle: FontStyle.italic,
                                         ),
@@ -263,27 +264,27 @@ class MedicalEventCard extends StatelessWidget {
                                   margin: const EdgeInsets.only(top: 12),
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.grey.shade50,
+                                    color: AppColors.background,
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
-                                      color: Colors.grey.shade200,
+                                      color: AppColors.divider,
                                       width: 1,
                                     ),
                                   ),
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.notes,
                                         size: 16,
-                                        color: Colors.grey.shade600,
+                                        color: AppColors.textSecondary,
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
                                           evento.notas!,
-                                          style: TextStyle(
-                                            color: Colors.grey.shade700,
+                                          style: const TextStyle(
+                                            color: AppColors.textSecondary,
                                             fontSize: 13,
                                             height: 1.4,
                                           ),
@@ -313,37 +314,37 @@ class MedicalEventCard extends StatelessWidget {
         return EventInfo(
           name: 'VACUNA',
           icon: Icons.vaccines,
-          color: const Color(0xFF2196F3), // Blue
+          color: AppColors.info,
         );
       case TipoEvento.desparasitante:
         return EventInfo(
           name: 'DESPARASITANTE',
           icon: Icons.bug_report,
-          color: const Color(0xFF4CAF50), // Green
+          color: AppColors.success,
         );
       case TipoEvento.tratamiento:
         return EventInfo(
           name: 'TRATAMIENTO',
           icon: Icons.medication,
-          color: const Color(0xFFFF9800), // Orange
+          color: AppColors.warning,
         );
       case TipoEvento.revisionVeterinaria:
         return EventInfo(
           name: 'REVISIÓN',
           icon: Icons.health_and_safety,
-          color: const Color(0xFF009688), // Teal
+          color: AppColors.secondary,
         );
       case TipoEvento.castracion:
         return EventInfo(
           name: 'CIRUGÍA',
           icon: Icons.healing,
-          color: const Color(0xFFE91E63), // Pink
+          color: AppColors.error,
         );
       default:
         return EventInfo(
           name: tipo.name.toUpperCase(),
           icon: Icons.medical_services,
-          color: Colors.grey,
+          color: AppColors.textHint,
         );
     }
   }
@@ -528,15 +529,15 @@ class _EventDetailsSheet extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Row(
         crossAxisAlignment:
             isMultiline ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.grey.shade600, size: 20),
+          Icon(icon, color: AppColors.textSecondary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -544,8 +545,8 @@ class _EventDetailsSheet extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -554,6 +555,7 @@ class _EventDetailsSheet extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
+                    color: AppColors.textPrimary,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     height: 1.4,
@@ -573,37 +575,37 @@ class _EventDetailsSheet extends StatelessWidget {
         return EventInfo(
           name: 'VACUNA',
           icon: Icons.vaccines,
-          color: const Color(0xFF2196F3),
+          color: AppColors.info,
         );
       case TipoEvento.desparasitante:
         return EventInfo(
           name: 'DESPARASITANTE',
           icon: Icons.bug_report,
-          color: const Color(0xFF4CAF50),
+          color: AppColors.success,
         );
       case TipoEvento.tratamiento:
         return EventInfo(
           name: 'TRATAMIENTO',
           icon: Icons.medication,
-          color: const Color(0xFFFF9800),
+          color: AppColors.warning,
         );
       case TipoEvento.revisionVeterinaria:
         return EventInfo(
           name: 'REVISIÓN',
           icon: Icons.health_and_safety,
-          color: const Color(0xFF009688),
+          color: AppColors.secondary,
         );
       case TipoEvento.castracion:
         return EventInfo(
           name: 'CIRUGÍA',
           icon: Icons.healing,
-          color: const Color(0xFFE91E63),
+          color: AppColors.error,
         );
       default:
         return EventInfo(
           name: tipo.name.toUpperCase(),
           icon: Icons.medical_services,
-          color: Colors.grey,
+          color: AppColors.textHint,
         );
     }
   }

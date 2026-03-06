@@ -6,6 +6,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/nfc_scanner_state.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/scan_result_widget.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/connection_widgets.dart' as connection;
 import 'package:android_intent_plus/android_intent.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class EscannerMovilTab extends StatefulWidget {
   const EscannerMovilTab({super.key});
@@ -154,11 +155,11 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
             const SizedBox(height: 16),
             Card(
               elevation: 0,
-              color: Colors.blue.withAlpha((255 * 0.05).round()),
+              color: AppColors.info.withAlpha((255 * 0.05).round()),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: Colors.blue.withAlpha((255 * 0.2).round()),
+                  color: AppColors.info.withAlpha((255 * 0.2).round()),
                   width: 1,
                 ),
               ),
@@ -166,9 +167,9 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
                 padding: const EdgeInsets.all(12.0),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.info_outline,
-                      color: Colors.blue.shade700,
+                      color: AppColors.info,
                       size: 20,
                     ),
                     const SizedBox(width: 12),
@@ -176,7 +177,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
                       child: Text(
                         'Asegúrate de que el NFC esté activado en tu dispositivo',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.blue.shade700,
+                          color: AppColors.info,
                         ),
                       ),
                     ),
@@ -201,20 +202,20 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.orange.withAlpha((255 * 0.1).round()),
+                color: AppColors.warning.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.nfc_outlined,
                 size: 60,
-                color: Colors.orange,
+                color: AppColors.warning,
               ),
             ),
             const SizedBox(height: 24),
             Text(
               'NFC No Disponible',
               style: theme.textTheme.headlineSmall?.copyWith(
-                color: Colors.orange.shade800,
+                color: AppColors.warning,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -222,7 +223,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
             Text(
               'Este dispositivo no cuenta con lector NFC',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: Colors.grey,
+                color: AppColors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -274,13 +275,13 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.grey.withAlpha((255 * 0.1).round()),
+                color: AppColors.textHint.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.nfc_outlined,
                 size: 60,
-                color: Colors.grey,
+                color: AppColors.textHint,
               ),
             ),
             const SizedBox(height: 24),
@@ -294,7 +295,7 @@ class _EscannerMovilTabState extends State<EscannerMovilTab>
             Text(
               'Activa el NFC para escanear aretes',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: Colors.grey,
+                color: AppColors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),

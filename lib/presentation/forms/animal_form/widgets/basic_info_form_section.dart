@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import '../controllers/animal_form_controller.dart';
 import '../../../widgets/native_dropdown/native_dropdown.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/core/widgets/sirega_text_field.dart';
+import 'package:sirega_app/core/widgets/sirega_card.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class BasicInfoFormSection extends StatelessWidget {
   const BasicInfoFormSection({super.key});
@@ -15,11 +18,9 @@ class BasicInfoFormSection extends StatelessWidget {
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
             
-            return Card(
-              elevation: 2,
-              child: Padding(
-                padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
-                child: Column(
+            return SiregaCard(
+              padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
+              child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(context, isMobile),
@@ -27,7 +28,6 @@ class BasicInfoFormSection extends StatelessWidget {
                     _buildFormFields(context, controller, isMobile),
                   ],
                 ),
-              ),
             );
           },
         );
@@ -100,40 +100,12 @@ class BasicInfoFormSection extends StatelessWidget {
   }
 
   Widget _buildNombreField(BuildContext context, AnimalFormController controller) {
-    return TextFormField(
+    return SiregaTextField(
       controller: controller.nombreController,
-      focusNode: controller.nombreFocus,
-      decoration: InputDecoration(
-        labelText: 'Nombre del Animal',
-        prefixIcon: const Icon(Icons.pets),
-        helperText: 'Nombre único identificativo',
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).primaryColor,
-            width: 2,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 1),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
-        ),
-      ),
-      textCapitalization: TextCapitalization.words,
+      label: 'Nombre del Animal',
+      hint: 'Nombre único identificativo',
+      helperText: 'Nombre único identificativo',
+      prefixIcon: const Icon(Icons.pets),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'El nombre es requerido';
@@ -177,24 +149,24 @@ class BasicInfoFormSection extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: AppColors.info.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
                       raza.tipo,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
-                        color: Colors.blue.shade700,
+                        color: AppColors.info,
                       ),
                     ),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     raza.origen,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -229,8 +201,8 @@ class BasicInfoFormSection extends StatelessWidget {
               Icon(
                 sexo == Sexo.macho ? Icons.male :
                 sexo == Sexo.hembra ? Icons.female : Icons.content_cut,
-                color: sexo == Sexo.macho ? Colors.blue :
-                       sexo == Sexo.hembra ? Colors.pink : Colors.grey,
+                color: sexo == Sexo.macho ? AppColors.info :
+                       sexo == Sexo.hembra ? AppColors.error : AppColors.textHint,
                 size: 24,
               ),
               const SizedBox(width: 12),
@@ -249,7 +221,13 @@ class BasicInfoFormSection extends StatelessWidget {
   }
 
   Widget _buildFechaField(BuildContext context, AnimalFormController controller) {
-    return GestureDetector(
+    return SiregaTextField(
+      controller: controller.fechaController,
+      label: 'Fecha de Nacimiento',
+      helperText: 'Toque para seleccionar',
+      prefixIcon: const Icon(Icons.calendar_today),
+      suffixIcon: const Icon(Icons.arrow_drop_down),
+      readOnly: true,
       onTap: () async {
         final picked = await showDatePicker(
           context: context,
@@ -264,48 +242,12 @@ class BasicInfoFormSection extends StatelessWidget {
           controller.setFechaNacimiento(picked);
         }
       },
-      child: AbsorbPointer(
-        child: TextFormField(
-          controller: controller.fechaController,
-          decoration: InputDecoration(
-            labelText: 'Fecha de Nacimiento',
-            prefixIcon: const Icon(Icons.calendar_today),
-            suffixIcon: const Icon(Icons.arrow_drop_down),
-            helperText: 'Toque para seleccionar',
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Theme.of(context).primaryColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red, width: 1),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red, width: 2),
-            ),
-          ),
-          validator: (value) {
-            if (controller.fechaNacimiento == null) {
-              return 'La fecha es requerida';
-            }
-            return null;
-          },
-        ),
-      ),
+      validator: (value) {
+        if (controller.fechaNacimiento == null) {
+          return 'La fecha es requerida';
+        }
+        return null;
+      },
     );
   }
 

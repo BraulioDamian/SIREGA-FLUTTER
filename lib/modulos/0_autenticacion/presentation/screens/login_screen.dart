@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/modulos/0_autenticacion/presentation/bloc/auth_bloc.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.error,
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -84,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'Sistema de Registro Ganadero',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                             ),
                         textAlign: TextAlign.center,
                       ),
@@ -163,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
+                                      AppColors.surface),
                                 ),
                               )
                             : const Text(
@@ -182,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Text(
                               'O',
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: AppColors.textSecondary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -200,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          side: BorderSide(color: Colors.grey[300]!),
+                          side: const BorderSide(color: AppColors.divider),
                         ),
                         icon: Image.network(
                           'https://www.google.com/favicon.ico',
@@ -212,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         label: const Text(
                           'Continuar con Google',
-                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                          style: TextStyle(fontSize: 16, color: AppColors.textPrimary),
                         ),
                       ),
 
@@ -231,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 'Sincronizando datos...',
-                                style: TextStyle(color: Colors.grey[600]),
+                                style: TextStyle(color: AppColors.textSecondary),
                               ),
                             ],
                           ),
@@ -243,9 +244,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.blue[50],
+                          color: AppColors.info.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.blue[200]!),
+                          border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,13 +254,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             Row(
                               children: [
                                 Icon(Icons.info_outline,
-                                    color: Colors.blue[700], size: 20),
+                                    color: AppColors.info, size: 20),
                                 const SizedBox(width: 8),
-                                Text(
+                                const Text(
                                   'Usuario de prueba',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue[700],
+                                    color: AppColors.info,
                                   ),
                                 ),
                               ],
@@ -267,11 +268,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 8),
                             Text(
                               'Email: test@sirega.com',
-                              style: TextStyle(color: Colors.grey[700]),
+                              style: const TextStyle(color: AppColors.textSecondary),
                             ),
                             Text(
                               'Contraseña: test123456',
-                              style: TextStyle(color: Colors.grey[700]),
+                              style: const TextStyle(color: AppColors.textSecondary),
                             ),
                           ],
                         ),
@@ -283,20 +284,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.green[50],
+                          color: AppColors.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           children: [
                             Icon(Icons.offline_bolt,
-                                color: Colors.green[700], size: 20),
+                                color: AppColors.success, size: 20),
                             const SizedBox(width: 8),
-                            Expanded(
+                            const Expanded(
                               child: Text(
                                 'La app funciona offline después del primer login',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[700],
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ),

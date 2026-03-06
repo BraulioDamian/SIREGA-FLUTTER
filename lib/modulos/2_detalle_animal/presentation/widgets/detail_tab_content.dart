@@ -9,6 +9,7 @@ import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animate
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/health_status_widget.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/production_charts.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/medical_event_card.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 enum TabType { general, health, reproduction, production }
 
@@ -349,7 +350,7 @@ class DetailTabContent extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: (valueColor ?? Theme.of(context).primaryColor).withOpacity(0.1),
+              color: (valueColor ?? Theme.of(context).primaryColor).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -365,9 +366,9 @@ class DetailTabContent extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -376,7 +377,7 @@ class DetailTabContent extends StatelessWidget {
                   value,
                   style: TextStyle(
                     fontSize: 16,
-                    color: valueColor ?? Colors.black87,
+                    color: valueColor ?? AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -394,16 +395,16 @@ class DetailTabContent extends StatelessWidget {
       child: Center(
         child: Column(
           children: [
-            Icon(
+            const Icon(
               Icons.info_outline,
               size: 40,
-              color: Colors.grey.shade400,
+              color: AppColors.textHint,
             ),
             const SizedBox(height: 12),
             Text(
               message,
-              style: TextStyle(
-                color: Colors.grey.shade600,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
                 fontStyle: FontStyle.italic,
                 fontSize: 14,
               ),
@@ -425,19 +426,19 @@ class DetailTabContent extends StatelessWidget {
     
     switch (status.toLowerCase()) {
       case 'gestante':
-        statusColor = Colors.pink;
+        statusColor = AppColors.info;
         statusIcon = Icons.pregnant_woman;
         break;
       case 'lactando':
-        statusColor = Colors.blue;
+        statusColor = AppColors.success;
         statusIcon = Icons.local_drink;
         break;
       case 'seca':
-        statusColor = Colors.grey;
+        statusColor = AppColors.textHint;
         statusIcon = Icons.pause_circle;
         break;
       default:
-        statusColor = Colors.orange;
+        statusColor = AppColors.warning;
         statusIcon = Icons.help_outline;
     }
     
@@ -446,13 +447,13 @@ class DetailTabContent extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            statusColor.withOpacity(0.15),
-            statusColor.withOpacity(0.05),
+            statusColor.withValues(alpha: 0.15),
+            statusColor.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: statusColor.withOpacity(0.3),
+          color: statusColor.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -695,13 +696,13 @@ class DetailTabContent extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'activo':
-        return Colors.green;
+        return AppColors.success;
       case 'enfermo':
-        return Colors.orange;
+        return AppColors.warning;
       case 'muerto':
-        return Colors.red;
+        return AppColors.error;
       default:
-        return Colors.grey;
+        return AppColors.textHint;
     }
   }
 }

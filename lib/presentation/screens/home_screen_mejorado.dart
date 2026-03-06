@@ -13,6 +13,7 @@ import 'package:sirega_app/presentation/screens/profile_screen.dart';
 import 'package:sirega_app/presentation/animations/circular_reveal_clipper.dart';
 
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 import 'dart:async';
 
 // Import the new widgets
@@ -127,9 +128,9 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
           ultimaSync = DateTime.now();
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Sincronización completada'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Text('✅ Sincronización completada', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
+            backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.fixed,
           ),
         );
@@ -138,8 +139,8 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ Error al sincronizar: $e'),
-            backgroundColor: Colors.red,
+            content: Text('❌ Error al sincronizar: $e', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
+            backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.fixed,
           ),
         );
@@ -222,7 +223,7 @@ void _registrarEvento() {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -252,8 +253,8 @@ void _registrarEvento() {
                 icon: Icons.nfc,
                 title: 'Escanear Arete (NFC)',
                 subtitle: 'Identifica un animal rápidamente',
-                gradientStart: theme.primaryColor,
-                gradientEnd: theme.primaryColorDark,
+                gradientStart: theme.colorScheme.primary,
+                gradientEnd: theme.colorScheme.primaryContainer,
                 onTap: () => _onActionTap(_scanNFC),
                 showPulse: true,
               ),
@@ -261,16 +262,16 @@ void _registrarEvento() {
                 icon: Icons.event_note,
                 title: 'Registrar Evento',
                 subtitle: 'Vacunas, pesajes, tratamientos, etc.',
-                gradientStart: Colors.blue,
-                gradientEnd: Colors.blue.shade800,
+                gradientStart: theme.colorScheme.secondary,
+                gradientEnd: theme.colorScheme.secondaryContainer,
                 onTap: () => _onActionTap(_registrarEvento),
               ),
               PrimaryActionCard(
                 icon: Icons.inventory_2,
                 title: 'Ver Inventario',
                 subtitle: 'Consulta todo tu ganado',
-                gradientStart: Colors.orange,
-                gradientEnd: Colors.orange.shade800,
+                gradientStart: theme.colorScheme.tertiary,
+                gradientEnd: theme.colorScheme.tertiary.withValues(alpha: 0.8),
                 onTap: () => _onActionTap(_verInventario),
               ),
               const SizedBox(height: 24),
@@ -286,7 +287,7 @@ void _registrarEvento() {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _registrarAnimal,
-        backgroundColor: theme.primaryColor,
+        backgroundColor: theme.colorScheme.secondary,
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -319,6 +320,7 @@ void _registrarEvento() {
   }
 
   Widget _buildHeader() {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -327,15 +329,13 @@ void _registrarEvento() {
           children: [
             Text(
               _getGreeting(),
-              style: TextStyle(
-                fontSize: 24,
+              style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
               ),
             ),
             Text(
               'Bienvenido a SIREGA',
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              style: theme.textTheme.bodyMedium,
             ),
           ],
         ),
@@ -376,8 +376,8 @@ void _registrarEvento() {
           child: Hero(
             tag: 'profile_avatar',
             child: CircleAvatar(
-              backgroundColor: Theme.of(context).primaryColor,
-              child: const Icon(Icons.person, color: Colors.white),
+              backgroundColor: theme.colorScheme.primary,
+              child: Icon(Icons.person, color: theme.colorScheme.onPrimary),
             ),
           ),
         ),
@@ -400,7 +400,7 @@ void _registrarEvento() {
       elevation: 0.5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: Icon(icon, color: Theme.of(context).primaryColor),
+        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
         title: Text(title),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap,

@@ -6,6 +6,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/esp32_scanner_state.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/scan_result_widget.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/widgets/connection_widgets.dart' as connection;
 import 'package:android_intent_plus/android_intent.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class EscannerExternoTab extends StatefulWidget {
   const EscannerExternoTab({super.key});
@@ -168,11 +169,11 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
             const SizedBox(height: 16),
             Card(
               elevation: 0,
-              color: Colors.blue.withAlpha((255 * 0.05).round()),
+              color: AppColors.info.withAlpha((255 * 0.05).round()),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: Colors.blue.withAlpha((255 * 0.3).round()),
+                  color: AppColors.info.withAlpha((255 * 0.3).round()),
                   width: 1,
                 ),
               ),
@@ -183,9 +184,9 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.info_outline,
-                          color: Colors.blue.shade700,
+                          color: AppColors.info,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -193,7 +194,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
                           'Instrucciones de Conexión',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade700,
+                            color: AppColors.info,
                           ),
                         ),
                       ],
@@ -202,7 +203,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
                     Text(
                       'Para conectar el ESP32:',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.blue.shade700,
+                        color: AppColors.info,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -217,7 +218,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
                       child: Text(
                         step,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.blue.shade600,
+                          color: AppColors.info,
                         ),
                       ),
                     )),
@@ -320,10 +321,10 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green.withAlpha((255 * 0.05).round()),
+                color: AppColors.success.withAlpha((255 * 0.05).round()),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.green.withAlpha((255 * 0.2).round()),
+                  color: AppColors.success.withAlpha((255 * 0.2).round()),
                   width: 1,
                 ),
               ),
@@ -334,7 +335,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
                     width: 8,
                     height: 8,
                     decoration: const BoxDecoration(
-                      color: Colors.green,
+                      color: AppColors.success,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -342,7 +343,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
                   Text(
                     'Dispositivo listo para escanear',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.green.shade700,
+                      color: AppColors.success,
                     ),
                   ),
                 ],
@@ -365,20 +366,20 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.orange.withAlpha((255 * 0.1).round()),
+                color: AppColors.warning.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.wifi_off,
                 size: 60,
-                color: Colors.orange,
+                color: AppColors.warning,
               ),
             ),
             const SizedBox(height: 24),
             Text(
               'WiFi Desactivado',
               style: theme.textTheme.headlineSmall?.copyWith(
-                color: Colors.orange.shade800,
+                color: AppColors.warning,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -386,7 +387,7 @@ class _EscannerExternoTabState extends State<EscannerExternoTab>
             Text(
               'Activa el WiFi para conectar con el dispositivo ESP32',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: Colors.grey,
+                color: AppColors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),

@@ -9,6 +9,7 @@ import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/custom_
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/delete_animal_dialog.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/editar_animal/editar_animal_screen.dart';
 import 'package:flutter/rendering.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class CattleDetailScreen extends StatefulWidget {
   final int id;
@@ -152,7 +153,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
       child: Theme(
         data: Theme.of(context).copyWith(
           colorScheme: Theme.of(context).colorScheme.copyWith(
-            surface: Colors.grey[50],
+            surface: AppColors.background,
           ),
         ),
         child: BlocListener<CattleDetailBloc, CattleDetailState>(
@@ -193,8 +194,8 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             }
           },
           child: Scaffold(
-            extendBodyBehindAppBar: true,
-            backgroundColor: Colors.grey[50],
+              extendBodyBehindAppBar: true,
+            backgroundColor: AppColors.background,
             body: BlocBuilder<CattleDetailBloc, CattleDetailState>(
               buildWhen: (previous, current) => current is! CattleDetailActionState,
               builder: (context, state) {
@@ -242,7 +243,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -296,8 +297,8 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.red.shade50,
-            Colors.orange.shade50,
+            AppColors.error.withValues(alpha: 0.1),
+            AppColors.warning.withValues(alpha: 0.1),
           ],
         ),
       ),
@@ -317,20 +318,20 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.red.withAlpha(51), // withOpacity(0.2)
+                            color: AppColors.error.withAlpha(51), // withOpacity(0.2)
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
                         ],
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.error_outline,
                         size: 50,
-                        color: Colors.red.shade400,
+                        color: AppColors.error,
                       ),
                     ),
                   );
@@ -340,7 +341,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               Text(
                 '¡Ups! Algo salió mal',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.red.shade700,
+                  color: AppColors.error,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -348,15 +349,15 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red.shade200),
+                  border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   message,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.red.shade600,
+                    color: AppColors.error,
                   ),
                 ),
               ),
@@ -369,8 +370,8 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                 icon: const Icon(Icons.arrow_back_rounded),
                 label: const Text('Regresar'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade400,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.error,
+                  foregroundColor: AppColors.surface,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
@@ -502,7 +503,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     return Container(
       margin: const EdgeInsets.all(8),
       child: Material(
-        color: Colors.black.withAlpha(51), // withOpacity(0.2)
+        color: AppColors.textPrimary.withValues(alpha: 0.2), // withOpacity(0.2)
         shape: const CircleBorder(),
         child: InkWell(
           onTap: () {
@@ -512,7 +513,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           customBorder: const CircleBorder(),
           child: const Padding(
             padding: EdgeInsets.all(8.0),
-            child: Icon(Icons.arrow_back_rounded, color: Colors.white, size: 24),
+            child: Icon(Icons.arrow_back_rounded, color: AppColors.surface, size: 24),
           ),
         ),
       ),
@@ -523,7 +524,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     return Container(
       margin: const EdgeInsets.all(8),
       child: Material(
-        color: Colors.black.withAlpha(51), // withOpacity(0.2)
+        color: AppColors.textPrimary.withValues(alpha: 0.2), // withOpacity(0.2)
         shape: const CircleBorder(),
         child: InkWell(
           onTap: () {
@@ -533,7 +534,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           customBorder: const CircleBorder(),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: AppColors.surface, size: 24),
           ),
         ),
       ),
@@ -553,8 +554,8 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             borderRadius: BorderRadius.circular(50),
             color: Theme.of(context).primaryColor,
           ),
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.grey[600],
+          labelColor: AppColors.surface,
+          unselectedLabelColor: AppColors.textSecondary,
           labelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
@@ -604,7 +605,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           children: [
             _buildSmallFAB(
               Icons.medical_services_rounded,
-              Colors.orange,
+              AppColors.warning,
               () => _registerEvent(context, animal),
               'Registrar Evento',
             ),
@@ -652,7 +653,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                     onPressed();
                   },
                   customBorder: const CircleBorder(),
-                  child: Icon(icon, color: Colors.white, size: 24),
+                  child: Icon(icon, color: AppColors.surface, size: 24),
                 ),
               ),
             ),
@@ -694,7 +695,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               onPressed();
             },
             customBorder: const CircleBorder(),
-            child: Icon(icon, color: Colors.white, size: 28),
+            child: Icon(icon, color: AppColors.surface, size: 28),
           ),
         ),
       ),
@@ -721,7 +722,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
       backgroundColor: Colors.transparent,
       builder: (modalContext) => Container(
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
         ),
         child: Column(
@@ -732,33 +733,33 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               height: 5,
               margin: const EdgeInsets.symmetric(vertical: 15),
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: AppColors.divider,
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
             _buildOptionTile(
               Icons.print_rounded,
               'Imprimir ficha',
-              Colors.blue,
+              AppColors.info,
               () => _printAnimalCard(context, animal),
             ),
             _buildOptionTile(
               Icons.qr_code_rounded,
               'Generar código QR',
-              Colors.purple,
+              AppColors.secondary,
               () => _generateQRCode(context, animal),
             ),
             _buildOptionTile(
               Icons.archive_rounded,
               'Archivar',
-              Colors.grey,
+              AppColors.textHint,
               () => _archiveAnimal(context, animal),
             ),
             const Divider(height: 1),
             _buildOptionTile(
               Icons.delete_rounded,
               'Eliminar',
-              Colors.red,
+              AppColors.error,
               () => _deleteAnimal(context, animal),
             ),
             const SizedBox(height: 20),
@@ -784,7 +785,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withAlpha(26), // withOpacity(0.1)
+                  color: color.withValues(alpha: 0.1), // withOpacity(0.1)
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: color),
@@ -795,7 +796,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: color == Colors.red ? Colors.red : Colors.black87,
+                  color: color == AppColors.error ? AppColors.error : AppColors.textPrimary,
                 ),
               ),
             ],
@@ -859,7 +860,7 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
           boxShadow: overlapsContent
               ? [
                   BoxShadow(
-                    color: Colors.black.withAlpha(13), // withOpacity(0.05)
+                    color: AppColors.textPrimary.withValues(alpha: 0.05), // withOpacity(0.05)
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentation/bloc/cattle_list_bloc.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentation/widgets/animal_card.dart';
+import 'package:sirega_app/modulos/1_lista_ganado/presentation/widgets/animal_card_skeleton.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/cattle_detail_screen.dart';
 // Importar enums
 import 'package:sirega_app/nucleo/modelos/animal_model.dart'; // Importar Animal
@@ -51,8 +52,11 @@ class _CattleListScreenState extends State<CattleListScreen> with SingleTickerPr
       ),
       body: BlocBuilder<CattleListBloc, CattleListState>(
         builder: (context, state) {
-          if (state.loading) {
-            return const Center(child: CircularProgressIndicator());
+          if (state.loading && state.activeItems.isEmpty && state.historicalItems.isEmpty) {
+            return ListView.builder(
+              itemCount: 6, // Show 6 skeleton items
+              itemBuilder: (context, index) => const AnimalCardSkeleton(),
+            );
           }
           
           if (state.error != null) {
@@ -60,7 +64,7 @@ class _CattleListScreenState extends State<CattleListScreen> with SingleTickerPr
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error, size: 64, color: Colors.red[300]),
+                  Icon(Icons.error, size: 64, color: Theme.of(context).colorScheme.error),
                   const SizedBox(height: 16),
                   Text('Error: ${state.error}'),
                   const SizedBox(height: 16),
@@ -91,7 +95,7 @@ class _CattleListScreenState extends State<CattleListScreen> with SingleTickerPr
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.pets, size: 64, color: Colors.grey[400]),
+            Icon(Icons.pets, size: 64, color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: 16),
             Text(
               'No hay animales en esta categoría',

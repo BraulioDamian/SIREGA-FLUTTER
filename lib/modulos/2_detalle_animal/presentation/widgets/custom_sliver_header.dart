@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class CustomSliverHeader extends StatelessWidget {
   final Animal animal;
@@ -26,29 +27,23 @@ class CustomSliverHeader extends StatelessWidget {
         StretchMode.fadeTitle,
       ],
       centerTitle: false,
-      titlePadding: const EdgeInsets.only(left: 16, bottom: 16, right: 16),
+      titlePadding: const EdgeInsets.only(left: 64, bottom: 16, right: 16),
       title: AnimatedOpacity(
         duration: const Duration(milliseconds: 200),
         opacity: isScrolled ? 1.0 : 0.0,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            animal.nombre,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              shadows: [
-                Shadow(
-                  color: Colors.black54,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
+        child: Text(
+          animal.nombre,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            shadows: [
+              Shadow(
+                color: Colors.black54,
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
         ),
       ),
@@ -60,10 +55,7 @@ class CustomSliverHeader extends StatelessWidget {
             offset: Offset(0, scrollOffset * 0.5),
             child: Transform.scale(
               scale: 1 + (scrollOffset.abs() * 0.001),
-              child: Hero(
-                tag: 'animal_image_${animal.id}',
-                child: _buildImage(),
-              ),
+              child: _buildImage(),
             ),
           ),
           // Efecto de blur gradual
@@ -73,9 +65,7 @@ class CustomSliverHeader extends StatelessWidget {
                 sigmaX: scrollOffset * 0.01,
                 sigmaY: scrollOffset * 0.01,
               ),
-              child: Container(
-                color: Colors.transparent,
-              ),
+              child: Container(color: Colors.transparent),
             ),
           // Gradiente oscuro
           Container(
@@ -85,8 +75,8 @@ class CustomSliverHeader extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  Colors.black.withOpacity(0.1),
-                  Colors.black.withOpacity(0.7),
+                  Colors.black.withValues(alpha: 0.1),
+                  Colors.black.withValues(alpha: 0.7),
                 ],
                 stops: const [0.3, 0.6, 1.0],
               ),
@@ -104,19 +94,18 @@ class CustomSliverHeader extends StatelessWidget {
                 children: [
                   // Nombre con efecto de sombra
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.pets,
-                          color: Colors.white,
-                          size: 28,
-                        ),
+                        const Icon(Icons.pets, color: Colors.white, size: 28),
                         const SizedBox(width: 12),
                         Text(
                           animal.nombre,
@@ -146,23 +135,21 @@ class CustomSliverHeader extends StatelessWidget {
                       _buildInfoChip(
                         Icons.cake,
                         animal.getEdadFormateada(),
-                        Colors.orange,
+                        AppColors.warning,
                       ),
                       _buildInfoChip(
                         animal.sexo.name == 'macho' ? Icons.male : Icons.female,
                         animal.sexo.name.toUpperCase(),
-                        animal.sexo.name == 'macho' ? Colors.blue : Colors.pink,
+                        animal.sexo.name == 'macho'
+                            ? AppColors.info
+                            : AppColors.accent,
                       ),
-                      _buildInfoChip(
-                        Icons.tag,
-                        animal.raza,
-                        Colors.green,
-                      ),
+                      _buildInfoChip(Icons.tag, animal.raza, AppColors.success),
                       if (animal.estado.name == 'activo')
                         _buildInfoChip(
                           Icons.check_circle,
                           'ACTIVO',
-                          Colors.greenAccent,
+                          AppColors.success,
                         ),
                     ],
                   ),
@@ -184,7 +171,9 @@ class CustomSliverHeader extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: _getHealthColor(animal.estadoSalud.name).withOpacity(0.5),
+                      color: _getHealthColor(
+                        animal.estadoSalud.name,
+                      ).withValues(alpha: 0.5),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -223,32 +212,28 @@ class CustomSliverHeader extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.green.shade400,
-            Colors.green.shade600,
-            Colors.green.shade800,
+            AppColors.primaryLight,
+            AppColors.primary,
+            AppColors.primaryDark,
           ],
         ),
       ),
       child: Stack(
         children: [
           // Patrón de fondo
-          Positioned.fill(
-            child: CustomPaint(
-              painter: PatternPainter(),
-            ),
-          ),
+          Positioned.fill(child: CustomPaint(painter: PatternPainter())),
           // Icono central
           Center(
             child: Container(
               padding: const EdgeInsets.all(30),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.pets,
                 size: 80,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
               ),
             ),
           ),
@@ -265,29 +250,29 @@ class CustomSliverHeader extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: color.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(25),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1.5,
-            ),
+            border: Border.all(color: color.withValues(alpha: 0.4), width: 1.5),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                color: Colors.white,
-                size: 18,
-              ),
+              Icon(icon, color: color, size: 18),
               const SizedBox(width: 8),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -300,13 +285,13 @@ class CustomSliverHeader extends StatelessWidget {
   Color _getHealthColor(String status) {
     switch (status.toLowerCase()) {
       case 'sano':
-        return Colors.green;
+        return AppColors.success;
       case 'enfermo':
-        return Colors.orange;
+        return AppColors.warning;
       case 'critico':
-        return Colors.red;
+        return AppColors.error;
       default:
-        return Colors.grey;
+        return AppColors.textHint;
     }
   }
 
@@ -329,12 +314,12 @@ class PatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
     const spacing = 30.0;
-    
+
     // Dibujar líneas diagonales
     for (double i = -size.height; i < size.width + size.height; i += spacing) {
       canvas.drawLine(
@@ -346,8 +331,8 @@ class PatternPainter extends CustomPainter {
 
     // Dibujar círculos decorativos
     paint.style = PaintingStyle.fill;
-    paint.color = Colors.white.withOpacity(0.03);
-    
+    paint.color = Colors.white.withValues(alpha: 0.03);
+
     for (double x = 0; x < size.width; x += spacing * 2) {
       for (double y = 0; y < size.height; y += spacing * 2) {
         canvas.drawCircle(Offset(x, y), 10, paint);

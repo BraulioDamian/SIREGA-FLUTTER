@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentation/bloc/cattle_list_bloc.dart';
 import 'package:sirega_app/modulos/3_registro_evento/presentation/pantallas/confirmacion_evento_screen.dart';
+import 'package:sirega_app/modulos/3_registro_evento/presentation/widgets/animal_selection_card.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/nfc_scanner_bloc.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/nfc_scanner_event.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/nfc_scanner_state.dart';
@@ -10,6 +11,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/esp32_scanner_event.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/esp32_scanner_state.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 enum ScannerMode { none, mobile, external }
 
@@ -40,27 +42,27 @@ class SeleccionarAnimalesScreen extends StatefulWidget {
 
 class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
   final Set<int> _selectedAnimalIds = {};
+  final Set<int> _nfcScannedIds = {};
   bool _selectAll = false;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  int? _lastScannedAnimalId;
   ScannerMode _activeScanner = ScannerMode.none;
   String _searchQuery = '';
 
   Map<String, dynamic> _getEventTypeDetails() {
     switch (widget.tipoEvento) {
       case TipoEvento.vacuna:
-        return {'color': Colors.green};
+        return {'color': AppColors.success};
       case TipoEvento.desparasitante:
-        return {'color': Colors.orange};
+        return {'color': AppColors.warning};
       case TipoEvento.tratamiento:
-        return {'color': Colors.blue};
+        return {'color': AppColors.info};
       case TipoEvento.revisionVeterinaria:
-        return {'color': Colors.teal};
+        return {'color': AppColors.secondary};
       case TipoEvento.castracion:
-        return {'color': Colors.purple};
+        return {'color': AppColors.error};
       default:
-        return {'color': Colors.grey};
+        return {'color': AppColors.textHint};
     }
   }
 
@@ -84,13 +86,25 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
 
     setState(() {
       _selectedAnimalIds.add(animal.id);
+      _nfcScannedIds.add(animal.id);
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Animal escaneado: ${animal.nombre}. Total seleccionados: ${_selectedAnimalIds.length}'),
-        backgroundColor: Colors.green,
+        content: Row(
+          children: [
+            const Icon(Icons.verified_rounded, color: AppColors.surface, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '${animal.nombre} verificado por NFC (${_selectedAnimalIds.length} seleccionados)'),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
       ),
     );
 
@@ -100,11 +114,43 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
 
     if (index != -1) {
       _scrollController.animateTo(
-        index * 80.0, // Approximate height of a ListTile with image
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
+        index * 90.0,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutCubic,
       );
     }
+  }
+
+  Future<bool> _confirmNfcDeselection(Animal animal) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        icon: Icon(Icons.verified_rounded, color: AppColors.info, size: 40),
+        title: const Text('Animal verificado por NFC'),
+        content: Text(
+          '"${animal.nombre}" fue escaneado y verificado por NFC.\n\n¿Estás seguro de que deseas quitarlo de la selección?',
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Sí, quitar'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 
   @override
@@ -123,7 +169,7 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Error de escaneo: ${state.errorMessage}'),
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.error,
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -139,7 +185,7 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Error de ESP32: ${state.errorMessage}'),
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.error,
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -148,7 +194,7 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
         ),
       ],
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           title: const Text('Seleccionar Animales'),
           elevation: 0,
@@ -167,7 +213,7 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                     child: Text(
                       '${_selectedAnimalIds.length}',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -191,19 +237,22 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey[300],
-                  elevation: 3,
+                  foregroundColor: AppColors.surface,
+                  disabledBackgroundColor: AppColors.divider,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 onPressed: _selectedAnimalIds.isNotEmpty
                     ? () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => ConfirmacionEventoScreen(
+                          PageRouteBuilder(
+                            transitionDuration: const Duration(milliseconds: 300),
+                            reverseTransitionDuration: const Duration(milliseconds: 250),
+                            pageBuilder: (context, animation, secondaryAnimation) =>
+                                ConfirmacionEventoScreen(
                               tipoEvento: widget.tipoEvento,
                               producto: widget.producto,
                               fecha: widget.fecha,
@@ -213,11 +262,26 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                               notas: widget.notas,
                               animalesIds: _selectedAnimalIds.toList(),
                             ),
+                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                              return FadeTransition(
+                                opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                                child: SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(0.03, 0),
+                                    end: Offset.zero,
+                                  ).animate(CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeOutCubic,
+                                  )),
+                                  child: child,
+                                ),
+                              );
+                            },
                           ),
                         );
                       }
                     : null,
-                icon: const Icon(Icons.check_circle_outline, size: 24),
+                icon: const Icon(Icons.check_circle_outline_rounded, size: 24),
                 label: Text(
                   _selectedAnimalIds.isEmpty
                       ? 'Selecciona al menos un animal'
@@ -240,10 +304,10 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
         children: [
           Text(
             'Métodos de Escaneo',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -305,15 +369,15 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
         duration: const Duration(milliseconds: 300),
         height: 140,
         decoration: BoxDecoration(
-          color: isActive ? primaryColor.withAlpha(30) : Colors.white,
+          color: isActive ? primaryColor.withValues(alpha: 0.12) : AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isActive ? primaryColor : Colors.grey[300]!,
+            color: isActive ? primaryColor : AppColors.divider,
             width: isActive ? 3 : 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: isActive ? primaryColor.withAlpha(50) : Colors.black12,
+              color: isActive ? primaryColor.withValues(alpha: 0.2) : AppColors.textPrimary.withValues(alpha: 0.12),
               blurRadius: isActive ? 12 : 4,
               offset: const Offset(0, 2),
             ),
@@ -335,7 +399,7 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: isActive ? primaryColor : Colors.grey[700],
+                  color: isActive ? primaryColor : AppColors.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -344,7 +408,7 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                 isActive ? 'Activo' : 'Toca para activar',
                 style: TextStyle(
                   fontSize: 11,
-                  color: isActive ? primaryColor : Colors.grey[500],
+                  color: isActive ? primaryColor : AppColors.textHint,
                 ),
               ),
             ],
@@ -358,18 +422,18 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
     return Expanded(
       child: Column(
         children: [
-          // Barra de búsqueda mejorada
+          // Search bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Buscar por nombre o arete...',
-                hintStyle: TextStyle(color: Colors.grey[400]),
+                hintStyle: const TextStyle(color: AppColors.textHint),
                 prefixIcon: Icon(Icons.search, color: primaryColor),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear_rounded, size: 20),
                         onPressed: () {
                           setState(() {
                             _searchController.clear();
@@ -379,20 +443,23 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                       )
                     : null,
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.surface,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: AppColors.divider),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: AppColors.divider),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(color: primaryColor, width: 2),
                 ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
               onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
-                });
+                setState(() => _searchQuery = value.toLowerCase());
               },
             ),
           ),
@@ -406,7 +473,6 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                   return Center(child: Text('Error: ${state.error}'));
                 }
 
-                // Filtrar animales según la búsqueda
                 final allAnimals = state.activeItems;
                 final animals = _searchQuery.isEmpty
                     ? allAnimals
@@ -420,11 +486,11 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+                        Icon(Icons.search_off_rounded, size: 64, color: AppColors.divider),
                         const SizedBox(height: 16),
-                        Text(
+                        const Text(
                           'No se encontraron animales',
-                          style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                          style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -436,95 +502,130 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: animals.length + 1,
                   itemBuilder: (context, index) {
+                    // Select all row
                     if (index == 0) {
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: CheckboxListTile(
-                          tileColor: primaryColor.withAlpha(20),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          title: Text(
-                            'Seleccionar Todos (${animals.length})',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: primaryColor,
-                            ),
-                          ),
-                          value: _selectAll,
-                          onChanged: (bool? value) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: GestureDetector(
+                          onTap: () {
                             setState(() {
-                              _selectAll = value!;
+                              _selectAll = !_selectAll;
                               _selectedAnimalIds.clear();
                               if (_selectAll) {
                                 _selectedAnimalIds.addAll(animals.map((a) => a.id).toSet());
                               }
                             });
                           },
-                          activeColor: primaryColor,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: _selectAll
+                                  ? primaryColor.withValues(alpha: 0.08)
+                                  : AppColors.surface,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: _selectAll ? primaryColor : AppColors.divider,
+                                width: _selectAll ? 2 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeOut,
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: _selectAll ? primaryColor : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: _selectAll ? primaryColor : AppColors.divider,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: _selectAll
+                                      ? const Icon(Icons.check_rounded, size: 16, color: AppColors.surface)
+                                      : null,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Seleccionar Todos (${animals.length})',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                    color: _selectAll ? primaryColor : AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       );
                     }
 
                     final animal = animals[index - 1];
                     final isSelected = _selectedAnimalIds.contains(animal.id);
+                    final isNfcScanned = _nfcScannedIds.contains(animal.id);
 
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      elevation: isSelected ? 4 : 1,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: isSelected
-                            ? BorderSide(color: primaryColor, width: 2)
-                            : BorderSide.none,
-                      ),
-                      child: CheckboxListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        secondary: CircleAvatar(
-                          radius: 28,
-                          backgroundColor: primaryColor.withAlpha(30),
-                          backgroundImage: animal.fotoPerfilUrl != null
-                              ? NetworkImage(animal.fotoPerfilUrl!)
-                              : null,
-                          child: animal.fotoPerfilUrl == null
-                              ? Icon(Icons.pets, size: 28, color: primaryColor)
-                              : null,
-                        ),
-                        title: Text(
-                          animal.nombre,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 4.0),
-                          child: Text(
-                            'Arete: ${animal.idSinigaParaMostrar}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ),
-                        value: isSelected,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value!) {
-                              _selectedAnimalIds.add(animal.id);
-                            } else {
+                    return TweenAnimationBuilder<double>(
+                      duration: Duration(milliseconds: 300 + (index * 40)),
+                      curve: Curves.easeOutCubic,
+                      tween: Tween<double>(begin: 0, end: 1),
+                      builder: (context, value, child) {
+                        return Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: Opacity(opacity: value, child: child),
+                        );
+                      },
+                      child: AnimalSelectionCard(
+                        animal: animal,
+                        isSelected: isSelected,
+                        isNfcScanned: isNfcScanned,
+                        accentColor: primaryColor,
+                        onChanged: (selected) async {
+                          if (!selected && isNfcScanned) {
+                            // NFC-scanned: full confirmation dialog
+                            final confirmed = await _confirmNfcDeselection(animal);
+                            if (!confirmed) return;
+                            if (!mounted) return;
+                            setState(() {
+                              _selectedAnimalIds.remove(animal.id);
+                              _nfcScannedIds.remove(animal.id);
+                              _selectAll = false;
+                            });
+                          } else if (!selected) {
+                            // Manual deselection: SnackBar with undo
+                            setState(() {
                               _selectedAnimalIds.remove(animal.id);
                               _selectAll = false;
-                            }
-                          });
+                            });
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${animal.nombre} removido'),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                margin: const EdgeInsets.all(16),
+                                duration: const Duration(seconds: 3),
+                                action: SnackBarAction(
+                                  label: 'Deshacer',
+                                  textColor: AppColors.surface,
+                                  onPressed: () {
+                                    if (!mounted) return;
+                                    setState(() {
+                                      _selectedAnimalIds.add(animal.id);
+                                    });
+                                  },
+                                ),
+                              ),
+                            );
+                          } else {
+                            setState(() {
+                              _selectedAnimalIds.add(animal.id);
+                            });
+                          }
                         },
-                        activeColor: primaryColor,
-                        checkColor: Colors.white,
                       ),
                     );
                   },
@@ -603,7 +704,7 @@ class _ScannerAnimationState extends State<ScannerAnimation> with TickerProvider
           child: Icon(
             widget.icon,
             size: 32,
-            color: widget.isActive ? widget.primaryColor : Colors.grey[600],
+            color: widget.isActive ? widget.primaryColor : AppColors.textSecondary,
           ),
         ),
       ),
@@ -629,7 +730,7 @@ class RipplePainter extends CustomPainter {
 
     if (isActive) {
       final ripplePaint1 = Paint()
-        ..color = color.withAlpha((255 * (1 - ripple.value)).toInt())
+        ..color = color.withValues(alpha: (1 - ripple.value))
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5;
 
@@ -637,7 +738,7 @@ class RipplePainter extends CustomPainter {
 
       final delayedRippleValue = (ripple.value - 0.5).clamp(0.0, 1.0);
       final ripplePaint2 = Paint()
-        ..color = color.withAlpha((255 * (1 - delayedRippleValue)).toInt())
+        ..color = color.withValues(alpha: (1 - delayedRippleValue))
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5;
       canvas.drawCircle(center, radius * delayedRippleValue, ripplePaint2);

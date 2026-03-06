@@ -4,6 +4,7 @@ import 'package:sirega_app/modulos/3_registro_evento/aplicacion/registro_evento_
 import 'package:sirega_app/modulos/3_registro_evento/presentation/pantallas/resultado_evento_screen.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class ConfirmacionEventoScreen extends StatefulWidget {
   final TipoEvento tipoEvento;
@@ -37,17 +38,17 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
   Map<String, dynamic> _getEventTypeDetails() {
     switch (widget.tipoEvento) {
       case TipoEvento.vacuna:
-        return {'title': 'Vacunación', 'icon': Icons.vaccines, 'color': Colors.green};
+        return {'title': 'Vacunación', 'icon': Icons.vaccines, 'color': AppColors.success};
       case TipoEvento.desparasitante:
-        return {'title': 'Desparasitación', 'icon': Icons.bug_report, 'color': Colors.orange};
+        return {'title': 'Desparasitación', 'icon': Icons.bug_report, 'color': AppColors.warning};
       case TipoEvento.tratamiento:
-        return {'title': 'Tratamiento', 'icon': Icons.medical_services, 'color': Colors.blue};
+        return {'title': 'Tratamiento', 'icon': Icons.medical_services, 'color': AppColors.info};
       case TipoEvento.revisionVeterinaria:
-        return {'title': 'Revisión Veterinaria', 'icon': Icons.science, 'color': Colors.teal};
+        return {'title': 'Revisión Veterinaria', 'icon': Icons.science, 'color': AppColors.secondary};
       case TipoEvento.castracion:
-        return {'title': 'Castración', 'icon': Icons.cut, 'color': Colors.purple};
+        return {'title': 'Castración', 'icon': Icons.cut, 'color': AppColors.error};
       default:
-        return {'title': 'Evento', 'icon': Icons.event, 'color': Colors.grey};
+        return {'title': 'Evento', 'icon': Icons.event, 'color': AppColors.textHint};
     }
   }
 
@@ -72,8 +73,26 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
 
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(
-          builder: (_) => ResultadoEventoScreen(animalCount: widget.animalesIds.length),
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 300),
+          reverseTransitionDuration: const Duration(milliseconds: 250),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              ResultadoEventoScreen(animalCount: widget.animalesIds.length),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.03, 0),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                )),
+                child: child,
+              ),
+            );
+          },
         ),
         (route) => route.isFirst,
       );
@@ -85,7 +104,7 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al guardar el evento: ${e.toString()}'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
         ),
@@ -99,7 +118,7 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
     final primaryColor = eventDetails['color'] as Color;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Confirmar Registro'),
         elevation: 0,
@@ -118,7 +137,7 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
                 borderRadius: BorderRadius.circular(16),
                 gradient: LinearGradient(
                   colors: [
-                    primaryColor.withAlpha(200),
+                    primaryColor.withValues(alpha: 0.8),
                     primaryColor,
                   ],
                 ),
@@ -128,21 +147,22 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(50),
+                      color: AppColors.surface.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(eventDetails['icon'], size: 32, color: Colors.white),
+                    child: Icon(eventDetails['icon'], size: 32, color: AppColors.surface),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Resumen del Evento',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white70,
+                            color: AppColors.surface.withValues(alpha: 0.9),
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
@@ -150,7 +170,7 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           ),
                         ),
                       ],
@@ -162,30 +182,40 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
             const SizedBox(height: 24),
 
             // Datos del Evento
-            Text(
-              'Datos del Evento',
+            const Text(
+              'Información General',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.divider),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    _buildSummaryRow('Producto', widget.producto, Icons.inventory_2),
-                    _buildSummaryRow('Fecha', DateFormat('dd/MM/yyyy').format(widget.fecha), Icons.calendar_today),
-                    if (widget.dosis != null)
-                      _buildSummaryRow('Dosis', '${widget.dosis} ${widget.unidadDosis ?? ''}', Icons.medical_information),
-                    if (widget.veterinario != null && widget.veterinario!.isNotEmpty)
-                      _buildSummaryRow('Veterinario', widget.veterinario!, Icons.person),
-                    if (widget.notas != null && widget.notas!.isNotEmpty)
-                      _buildSummaryRow('Notas', widget.notas!, Icons.notes, maxLines: 3),
+                    _buildSummaryRow('Producto / Vacuna', widget.producto, Icons.inventory_2_rounded),
+                    const Divider(height: 24),
+                    _buildSummaryRow('Fecha de Aplicación', DateFormat('dd/MM/yyyy').format(widget.fecha), Icons.calendar_month_rounded),
+                    if (widget.dosis != null) ...[
+                      const Divider(height: 24),
+                      _buildSummaryRow('Dosis por Animal', '${widget.dosis} ${widget.unidadDosis ?? ''}', Icons.vaccines_rounded),
+                    ],
+                    if (widget.veterinario != null && widget.veterinario!.isNotEmpty) ...[
+                      const Divider(height: 24),
+                      _buildSummaryRow('Médico Veterinario', widget.veterinario!, Icons.badge_rounded),
+                    ],
+                    if (widget.notas != null && widget.notas!.isNotEmpty) ...[
+                      const Divider(height: 24),
+                      _buildSummaryRow('Anotaciones', widget.notas!, Icons.notes_rounded, maxLines: 3),
+                    ],
                   ],
                 ),
               ),
@@ -193,47 +223,60 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
             const SizedBox(height: 24),
 
             // Animales Seleccionados
-            Text(
-              'Animales Seleccionados',
+            const Text(
+              'Ganado Seleccionado',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: primaryColor.withAlpha(30),
-                        borderRadius: BorderRadius.circular(12),
+                        color: primaryColor.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.pets, color: primaryColor, size: 32),
+                      child: Icon(Icons.pets_rounded, color: primaryColor, size: 32),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 20),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           '${widget.animalesIds.length}',
                           style: TextStyle(
-                            fontSize: 32,
+                            fontSize: 36,
                             fontWeight: FontWeight.bold,
                             color: primaryColor,
+                            height: 1.0,
                           ),
                         ),
+                        const SizedBox(height: 4),
                         Text(
-                          widget.animalesIds.length == 1 ? 'Animal' : 'Animales',
-                          style: TextStyle(
+                          widget.animalesIds.length == 1 ? 'Animal recibirá tratamiento' : 'Animales recibirán tratamiento',
+                          style: const TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
@@ -248,33 +291,40 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
             SizedBox(
               width: double.infinity,
               height: 56,
-              child: ElevatedButton.icon(
+              child: ElevatedButton(
                 onPressed: _isLoading ? null : _guardarEvento,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey[300],
-                  elevation: 3,
+                  foregroundColor: AppColors.surface,
+                  disabledBackgroundColor: AppColors.divider,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                icon: _isLoading
+                child: _isLoading
                     ? const SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: 24,
+                        height: 24,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.surface),
                         ),
                       )
-                    : const Icon(Icons.check_circle, size: 24),
-                label: Text(
-                  _isLoading ? 'Guardando...' : 'Confirmar y Guardar',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.check_circle_outline_rounded, size: 24),
+                          SizedBox(width: 8),
+                          Text(
+                            'Confirmar y Guardar',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
               ),
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -282,48 +332,46 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
   }
 
   Widget _buildSummaryRow(String label, String value, IconData icon, {int maxLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, size: 20, color: Colors.grey[700]),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.textPrimary.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(10),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
+          child: Icon(icon, size: 20, color: AppColors.textSecondary),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: maxLines,
-                  overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                  height: 1.2,
                 ),
-              ],
-            ),
+                maxLines: maxLines,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

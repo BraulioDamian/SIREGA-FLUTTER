@@ -1,5 +1,6 @@
 // lib/presentation/widgets/home/primary_action_card.dart
 import 'package:flutter/material.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 /// Tarjeta de acción principal con diseño prominente para funciones críticas
 class PrimaryActionCard extends StatefulWidget {
@@ -92,7 +93,7 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: widget.gradientStart.withOpacity(0.3),
+                    color: widget.gradientStart.withValues(alpha: 0.3),
                     blurRadius: _isPressed ? 5 : 12,
                     offset: Offset(0, _isPressed ? 2 : 5),
                   ),
@@ -109,7 +110,7 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
                         width: 56,
                         height: 56,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: AppColors.surface.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Stack(
@@ -118,7 +119,7 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
                               child: Icon(
                                 widget.icon,
                                 size: 32,
-                                color: Colors.white,
+                                color: AppColors.surface,
                               ),
                             ),
                             if (widget.showPulse)
@@ -129,11 +130,11 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
                                   width: 8,
                                   height: 8,
                                   decoration: BoxDecoration(
-                                    color: Colors.yellow,
+                                    color: AppColors.warning,
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.yellow.withOpacity(0.5),
+                                        color: AppColors.warning.withValues(alpha: 0.5),
                                         blurRadius: 4,
                                         spreadRadius: 1,
                                       ),
@@ -154,7 +155,7 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
                             Text(
                               widget.title,
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: AppColors.surface,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -163,7 +164,7 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
                             Text(
                               widget.subtitle,
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: AppColors.surface.withValues(alpha: 0.9),
                                 fontSize: 13,
                               ),
                             ),
@@ -173,7 +174,7 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
                       // Flecha indicadora
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: Colors.white.withOpacity(0.7),
+                        color: AppColors.surface.withValues(alpha: 0.7),
                         size: 20,
                       ),
                     ],

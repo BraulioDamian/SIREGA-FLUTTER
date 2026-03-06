@@ -12,7 +12,7 @@ import 'package:sirega_app/modulos/0_autenticacion/presentation/bloc/auth_bloc.d
 import 'package:sirega_app/modulos/0_autenticacion/presentation/widgets/auth_wrapper.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentation/bloc/cattle_list_bloc.dart';
 import 'package:sirega_app/presentation/screens/home_screen_mejorado.dart';
-
+import 'package:sirega_app/core/theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -94,16 +94,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'SIREGA',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-            useMaterial3: true,
-            inputDecorationTheme: const InputDecorationTheme(
-              border: OutlineInputBorder(),
-            ),
-            snackBarTheme: const SnackBarThemeData(
-              behavior: SnackBarBehavior.floating,
-            ),
-          ),
+          theme: AppTheme.lightTheme,
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,

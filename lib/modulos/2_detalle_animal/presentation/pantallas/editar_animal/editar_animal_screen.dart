@@ -19,6 +19,7 @@ import 'package:sirega_app/presentation/forms/animal_form/widgets/vaccines_form_
 import 'package:sirega_app/presentation/forms/animal_form/widgets/medical_events_form_section.dart';
 import 'package:sirega_app/presentation/forms/animal_form/widgets/offspring_form_section.dart';
 import 'package:provider/provider.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 /// Pantalla para editar un animal existente con interfaz completa de tabs
 /// Idéntica a AgregarAnimalScreen pero con datos pre-cargados del animal
@@ -136,8 +137,8 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.surface,
             ),
             child: const Text('Descartar'),
           ),
@@ -165,7 +166,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
       child: ChangeNotifierProvider.value(
         value: _formController,
         child: Scaffold(
-          backgroundColor: Colors.grey[100],
+          backgroundColor: AppColors.background,
           appBar: AppBar(
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,7 +176,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppColors.surface,
                   ),
                 ),
                 Text(
@@ -183,7 +184,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.normal,
-                    color: Colors.white70,
+                    color: AppColors.surface,
                   ),
                 ),
               ],
@@ -191,9 +192,9 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
             centerTitle: false,
             elevation: 0,
             backgroundColor: theme.primaryColor,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.surface,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              icon: const Icon(Icons.arrow_back_rounded, color: AppColors.surface),
               onPressed: () async {
                 if (_hasUnsavedChanges) {
                   if (!mounted) return;
@@ -213,7 +214,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                     margin: const EdgeInsets.only(right: 16),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade700,
+                      color: AppColors.warning,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -221,7 +222,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppColors.surface,
                       ),
                     ),
                   ),
@@ -232,7 +233,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
               child: Container(
                 decoration: const BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: Colors.white, width: 3),
+                    bottom: BorderSide(color: AppColors.surface, width: 3),
                   ),
                 ),
                 child: Row(
@@ -320,12 +321,12 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                 vertical: 6,
               ),
               decoration: BoxDecoration(
-                color: Colors.white.withAlpha((activation * 26).round()),
+                color: AppColors.surface.withValues(alpha: activation * 0.1),
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: activation > 0.3
                     ? [
                         BoxShadow(
-                          color: Colors.black.withAlpha((activation * 20).round()),
+                          color: AppColors.textPrimary.withValues(alpha: activation * 0.1),
                           blurRadius: 4 * activation,
                           offset: Offset(0, 2 * activation),
                         ),
@@ -342,8 +343,8 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                       icon,
                       size: 22,
                       color: Color.lerp(
-                        Colors.white.withAlpha(179),
-                        Colors.white,
+                        AppColors.surface.withValues(alpha: 0.7),
+                        AppColors.surface,
                         activation,
                       ),
                     ),
@@ -361,7 +362,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppColors.surface,
                             ),
                             overflow: TextOverflow.visible,
                             maxLines: 1,
@@ -385,12 +386,12 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: _generalCompleto ? Colors.green.withAlpha(13) : Colors.white,
+        color: _generalCompleto ? AppColors.success.withValues(alpha: 0.05) : AppColors.surface,
         border: Border(
           bottom: BorderSide(
             color: _generalCompleto
-                ? Colors.green.withAlpha(51)
-                : Colors.grey.withAlpha(26),
+                ? AppColors.success.withValues(alpha: 0.2)
+                : AppColors.divider,
             width: 1,
           ),
         ),
@@ -403,7 +404,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
               _generalCompleto ? Icons.check_circle : Icons.info_outline,
               key: ValueKey(_generalCompleto),
               size: 18,
-              color: _generalCompleto ? Colors.green : Colors.grey[600],
+              color: _generalCompleto ? AppColors.success : AppColors.textSecondary,
             ),
           ),
           const SizedBox(width: 10),
@@ -412,7 +413,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
               duration: const Duration(milliseconds: 300),
               style: TextStyle(
                 fontSize: 12,
-                color: _generalCompleto ? Colors.green.shade700 : Colors.grey[700],
+                color: _generalCompleto ? AppColors.success : AppColors.textSecondary,
                 fontWeight: _generalCompleto ? FontWeight.w500 : FontWeight.normal,
                 height: 1.3,
               ),
@@ -479,7 +480,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
       children: [
         _buildInfoBanner(
           'Actualice el estado de salud, vacunas y eventos médicos del animal.',
-          Colors.blue,
+          AppColors.info,
         ),
         const SizedBox(height: 16),
 
@@ -513,7 +514,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
       children: [
         _buildInfoBanner(
           'Actualice el estado reproductivo e historial de partos del animal.',
-          Colors.pink,
+          AppColors.secondary,
         ),
         const SizedBox(height: 16),
 
@@ -547,7 +548,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
       children: [
         _buildInfoBanner(
           'Actualice los datos de peso y producción del animal.',
-          Colors.orange,
+          AppColors.warning,
         ),
         const SizedBox(height: 16),
 
@@ -563,15 +564,15 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            color.withAlpha(15),
-            color.withAlpha(25),
+            color.withValues(alpha: 0.06),
+            color.withValues(alpha: 0.1),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withAlpha(40),
+          color: color.withValues(alpha: 0.15),
           width: 1.5,
         ),
       ),
@@ -581,7 +582,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: color.withAlpha(30),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -597,7 +598,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
               child: Text(
                 message,
                 style: TextStyle(
-                  color: color.withAlpha(230),
+                  color: color.withValues(alpha: 0.9),
                   fontSize: 13,
                   height: 1.4,
                   fontWeight: FontWeight.w500,
@@ -626,7 +627,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withAlpha(26),
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -649,13 +650,13 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withAlpha(26),
+                      color: AppColors.warning.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: const Text(
                       'Requerido',
                       style: TextStyle(
-                        color: Colors.orange,
+                        color: AppColors.warning,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
@@ -675,7 +676,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
     return Container(
       width: 120,
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withAlpha(38),
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(60),
           bottomLeft: Radius.circular(60),
@@ -724,10 +725,10 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(13),
+            color: AppColors.textPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -747,8 +748,8 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
           ),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
+            backgroundColor: AppColors.success,
+            foregroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -856,12 +857,12 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.green.withAlpha(26),
+                    color: AppColors.success.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.check_circle,
-                    color: Colors.green,
+                    color: AppColors.success,
                     size: 60,
                   ),
                 ),
@@ -879,7 +880,7 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -1048,13 +1049,13 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
             children: [
               Icon(
                 esError ? Icons.error : Icons.check_circle,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
               const SizedBox(width: 8),
               Expanded(child: Text(mensaje)),
             ],
           ),
-          backgroundColor: esError ? Colors.red : Colors.green,
+          backgroundColor: esError ? AppColors.error : AppColors.success,
           behavior: SnackBarBehavior.fixed,
           duration: const Duration(seconds: 2),
         ),
@@ -1118,12 +1119,12 @@ class _SwipeAnimationState extends State<_SwipeAnimation>
               ),
               Icon(
                 Icons.chevron_left,
-                color: widget.primaryColor.withAlpha(179),
+                color: widget.primaryColor.withValues(alpha: 0.7),
                 size: 38,
               ),
               Icon(
                 Icons.chevron_left,
-                color: widget.primaryColor.withAlpha(128),
+                color: widget.primaryColor.withValues(alpha: 0.5),
                 size: 38,
               ),
             ],

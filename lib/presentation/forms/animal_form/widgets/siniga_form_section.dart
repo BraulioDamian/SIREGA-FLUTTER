@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../controllers/animal_form_controller.dart';
 import '../../../widgets/native_dropdown/native_dropdown.dart';
+import 'package:sirega_app/core/widgets/sirega_text_field.dart';
+import 'package:sirega_app/core/widgets/sirega_card.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class SinigaFormSection extends StatelessWidget {
   const SinigaFormSection({super.key});
@@ -16,11 +19,9 @@ class SinigaFormSection extends StatelessWidget {
             final isMobile = constraints.maxWidth < 600;
             final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 1024;
             
-            return Card(
-              elevation: 2,
-              child: Padding(
-                padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
-                child: Column(
+            return SiregaCard(
+              padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
+              child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(context, isMobile),
@@ -36,7 +37,6 @@ class SinigaFormSection extends StatelessWidget {
                     ],
                   ],
                 ),
-              ),
             );
           },
         );
@@ -72,7 +72,7 @@ class SinigaFormSection extends StatelessWidget {
       'Formato: Especie (2) + Estado (2) + Número Nacional (8)',
       style: TextStyle(
         fontSize: isMobile ? 12 : 14,
-        color: Colors.grey.shade600,
+        color: AppColors.textSecondary,
       ),
     );
   }
@@ -106,22 +106,10 @@ class SinigaFormSection extends StatelessWidget {
   }
 
   Widget _buildEspecieField(AnimalFormController controller) {
-    return TextFormField(
+    return SiregaTextField(
       controller: controller.especieController,
-      decoration: InputDecoration(
-        labelText: 'Especie',
-        helperText: '00 = Bovinos',
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
-        ),
-        counterText: '',
-      ),
+      label: 'Especie',
+      helperText: '00 = Bovinos',
       maxLength: 2,
       readOnly: true,
       style: const TextStyle(
@@ -136,64 +124,24 @@ class SinigaFormSection extends StatelessWidget {
     final bool isValid = controller.estadoController.text.length == 2 &&
                          controller.estadoSeleccionado != null;
 
-    return TextFormField(
-      controller: controller.estadoController,
-      focusNode: controller.estadoFocus,
-      decoration: InputDecoration(
-        labelText: 'Estado',
-        filled: true,
-        fillColor: Colors.white,
-        helperText: isValid
-            ? '✓ ${controller.estadoSeleccionado?.nombre ?? ''}'
-            : 'Código 01-32',
-        helperStyle: TextStyle(
-          color: isValid ? Colors.green : null,
-          fontWeight: isValid ? FontWeight.bold : null,
-          fontSize: 11,
-        ),
-        errorText: controller.estadoController.text.isNotEmpty &&
+    final errorText = controller.estadoController.text.isNotEmpty &&
                   !isValid &&
                   controller.estadoController.text.length == 2
             ? 'Código inválido'
-            : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isValid ? Colors.green : Colors.grey.shade300,
-            width: 1,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isValid ? Colors.green : Theme.of(context).primaryColor,
-            width: 2,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isValid ? Colors.green.shade300 : Colors.grey.shade300,
-            width: isValid ? 1.5 : 1,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 1),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
-        ),
-        counterText: '',
-      ),
+            : null;
+
+    return SiregaTextField(
+      controller: controller.estadoController,
+      label: 'Estado',
+      helperText: isValid
+            ? '✓ ${controller.estadoSeleccionado?.nombre ?? ''}'
+            : 'Código 01-32',
+      errorText: errorText,
       maxLength: 2,
       keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.next,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(2),
-        // Validador personalizado para limitar a 32
         TextInputFormatter.withFunction(
           (oldValue, newValue) {
             if (newValue.text.isEmpty) return newValue;
@@ -222,54 +170,14 @@ class SinigaFormSection extends StatelessWidget {
   Widget _buildNumeroField(AnimalFormController controller, BuildContext context) {
     final bool isValid = controller.numeroController.text.length == 8;
 
-    return TextFormField(
+    return SiregaTextField(
       controller: controller.numeroController,
-      focusNode: controller.numeroFocus,
-      decoration: InputDecoration(
-        labelText: 'Número Nacional',
-        filled: true,
-        fillColor: Colors.white,
-        helperText: isValid
+      label: 'Número Nacional',
+      helperText: isValid
             ? '✓ Completo'
             : '8 dígitos únicos',
-        helperStyle: TextStyle(
-          color: isValid ? Colors.green : null,
-          fontWeight: isValid ? FontWeight.bold : null,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isValid ? Colors.green : Colors.grey.shade300,
-            width: 1,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isValid ? Colors.green : Theme.of(context).primaryColor,
-            width: 2,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isValid ? Colors.green.shade300 : Colors.grey.shade300,
-            width: isValid ? 1.5 : 1,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 1),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
-        ),
-        counterText: '',
-      ),
       maxLength: 8,
       keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.done,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(8),
@@ -305,7 +213,7 @@ class SinigaFormSection extends StatelessWidget {
         final bool isSelected = controller.estadoSeleccionado?.clave == estado.clave;
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
+          color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : null,
           child: Row(
             children: [
               Container(
@@ -313,7 +221,7 @@ class SinigaFormSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected 
                       ? Theme.of(context).primaryColor 
-                      : Theme.of(context).primaryColor.withOpacity(0.1),
+                      : Theme.of(context).primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -321,7 +229,7 @@ class SinigaFormSection extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontFamily: 'monospace',
-                    color: isSelected ? Colors.white : null,
+                    color: isSelected ? AppColors.surface : null,
                   ),
                 ),
               ),
@@ -353,10 +261,10 @@ class SinigaFormSection extends StatelessWidget {
       padding: EdgeInsets.all(isMobile ? 10 : 12),
       decoration: BoxDecoration(
         color: controller.sinigaIsValid
-            ? Colors.green.withOpacity(0.1)
-            : Colors.red.withOpacity(0.1),
+            ? AppColors.success.withValues(alpha: 0.1)
+            : AppColors.error.withValues(alpha: 0.1),
         border: Border.all(
-          color: controller.sinigaIsValid ? Colors.green : Colors.red,
+          color: controller.sinigaIsValid ? AppColors.success : AppColors.error,
         ),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -365,7 +273,7 @@ class SinigaFormSection extends StatelessWidget {
         children: [
           Icon(
             controller.sinigaIsValid ? Icons.check_circle : Icons.error,
-            color: controller.sinigaIsValid ? Colors.green : Colors.red,
+            color: controller.sinigaIsValid ? AppColors.success : AppColors.error,
             size: isMobile ? 20 : 24,
           ),
           SizedBox(width: isMobile ? 6 : 8),
@@ -379,8 +287,8 @@ class SinigaFormSection extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     fontSize: isMobile ? 13 : 14,
                     color: controller.sinigaIsValid
-                        ? Colors.green.shade700
-                        : Colors.red.shade700,
+                        ? AppColors.success
+                        : AppColors.error,
                   ),
                 ),
                 if (controller.sinigaIsValid && controller.sinigaId != null) ...[

@@ -1,6 +1,7 @@
 
 // lib/presentation/widgets/home/home_app_bar.dart
 import 'package:flutter/material.dart';
+import 'package:sirega_app/core/theme/app_colors.dart';
 
 class HomeAppBar extends StatelessWidget {
   final bool isSearching;
@@ -29,25 +30,25 @@ class HomeAppBar extends StatelessWidget {
       child: TextField(
         controller: searchController,
         autofocus: true,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: AppColors.surface),
         decoration: InputDecoration(
           hintText: 'Buscar por nombre, arete o ID...',
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+          hintStyle: TextStyle(color: AppColors.surface.withValues(alpha: 0.7)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
-            borderSide: const BorderSide(color: Colors.white),
+            borderSide: const BorderSide(color: AppColors.surface),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: Colors.white.withOpacity(0.5)),
+            borderSide: BorderSide(color: AppColors.surface.withValues(alpha: 0.5)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
-            borderSide: const BorderSide(color: Colors.white),
+            borderSide: const BorderSide(color: AppColors.surface),
           ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-          suffixIcon: Icon(Icons.search, color: Colors.white.withOpacity(0.7)),
+          suffixIcon: Icon(Icons.search, color: AppColors.surface.withValues(alpha: 0.7)),
         ),
         onSubmitted: onSearchSubmitted,
       ),
@@ -76,7 +77,7 @@ class HomeAppBar extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 theme.primaryColor,
-                theme.primaryColor.withOpacity(0.7),
+                theme.primaryColor.withValues(alpha: 0.7),
               ],
             ),
           ),
@@ -89,7 +90,7 @@ class HomeAppBar extends StatelessWidget {
                 child: Icon(
                   Icons.pets,
                   size: 250,
-                  color: Colors.white.withOpacity(0.1),
+                  color: AppColors.surface.withValues(alpha: 0.1),
                 ),
               ),
               // Información del header
@@ -102,7 +103,7 @@ class HomeAppBar extends StatelessWidget {
                     Text(
                       'Rancho Los Alamos',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
+                        color: AppColors.surface.withValues(alpha: 0.9),
                         fontSize: 16,
                       ),
                     ),
@@ -110,7 +111,7 @@ class HomeAppBar extends StatelessWidget {
                     Text(
                       'Oaxaca, México',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: AppColors.surface.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -124,19 +125,19 @@ class HomeAppBar extends StatelessWidget {
       actions: [
         if (!isSearching)
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
+            icon: const Icon(Icons.search, color: AppColors.surface),
             onPressed: onToggleSearch,
           ),
         if (isSearching)
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
+            icon: const Icon(Icons.close, color: AppColors.surface),
             onPressed: onToggleSearch,
           ),
         Stack(
           children: [
             IconButton(
               icon: const Icon(Icons.notifications_outlined,
-                  color: Colors.white),
+                  color: AppColors.surface),
               onPressed: onShowNotifications,
             ),
             if (alertasSanitarias > 0)
@@ -146,7 +147,7 @@ class HomeAppBar extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
-                    color: Colors.red,
+                    color: AppColors.error,
                     shape: BoxShape.circle,
                   ),
                   constraints: const BoxConstraints(
@@ -156,7 +157,7 @@ class HomeAppBar extends StatelessWidget {
                   child: Text(
                     '$alertasSanitarias',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -167,7 +168,7 @@ class HomeAppBar extends StatelessWidget {
           ],
         ),
         PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert, color: Colors.white),
+          icon: const Icon(Icons.more_vert, color: AppColors.surface),
           onSelected: onMenuOptionSelected,
           itemBuilder: (context) => [
             const PopupMenuItem(
@@ -204,9 +205,9 @@ class HomeAppBar extends StatelessWidget {
               value: 'salir',
               child: Row(
                 children: [
-                  Icon(Icons.logout, size: 20, color: Colors.red),
+                  Icon(Icons.logout, size: 20, color: AppColors.error),
                   SizedBox(width: 12),
-                  Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+                  Text('Cerrar Sesión', style: TextStyle(color: AppColors.error)),
                 ],
               ),
             ),
