@@ -22,7 +22,7 @@ import 'package:sirega_app/presentation/widgets/home/primary_action_card.dart';
 import 'package:sirega_app/presentation/widgets/home/sync_status_card.dart';
 import 'package:sirega_app/modulos/1_lista_ganado/presentation/pantallas/cattle_list_screen.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/screens/escaneo_nfc_screen.dart';
-
+import 'package:sirega_app/modulos/5_reporte_aereo/presentation/pantallas/aerial_report_screen.dart';
 
 class HomeScreenMejorado extends StatefulWidget {
   const HomeScreenMejorado({super.key});
@@ -96,14 +96,15 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
       if (mounted) {
         setState(() {
           totalAnimales = animales.length;
-          animalesActivos =
-              animales.where((a) => a.estado == EstadoAnimal.activo).length;
+          animalesActivos = animales
+              .where((a) => a.estado == EstadoAnimal.activo)
+              .length;
 
           // Calcular alertas sanitarias reales basadas en el estado de salud
           alertasSanitarias = animales.where((animal) {
             return animal.estadoSalud == EstadoSalud.critico ||
-                   animal.estadoSalud == EstadoSalud.enfermo ||
-                   animal.estadoSalud == EstadoSalud.enTratamiento;
+                animal.estadoSalud == EstadoSalud.enfermo ||
+                animal.estadoSalud == EstadoSalud.enTratamiento;
           }).length;
 
           registrosPendientesSync = pendientes;
@@ -129,7 +130,12 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ Sincronización completada', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
+            content: Text(
+              '✅ Sincronización completada',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white),
+            ),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.fixed,
           ),
@@ -139,7 +145,12 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ Error al sincronizar: $e', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
+            content: Text(
+              '❌ Error al sincronizar: $e',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.fixed,
           ),
@@ -152,7 +163,7 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
       }
     }
   }
-  
+
   void _onActionTap(VoidCallback action) {
     HapticFeedback.mediumImpact();
     action();
@@ -164,19 +175,21 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
       MaterialPageRoute(builder: (context) => const EscaneoNfcScreen()),
     );
   }
+
   void _registrarAnimal() {
     Navigator.push(
       context,
-    //MaterialPageRoute(builder: (context) => const RegisterAnimalScreen()),
+      //MaterialPageRoute(builder: (context) => const RegisterAnimalScreen()),
       MaterialPageRoute(builder: (context) => const AgregarAnimalScreen()),
-
     ).then((_) => _cargarDatos());
   }
 
-void _registrarEvento() {
+  void _registrarEvento() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const SeleccionarTipoEventoScreen()),
+      MaterialPageRoute(
+        builder: (context) => const SeleccionarTipoEventoScreen(),
+      ),
     );
   }
 
@@ -186,7 +199,7 @@ void _registrarEvento() {
       MaterialPageRoute(builder: (context) => const CattleListScreen()),
     ).then((_) => _cargarDatos());
   }
-  
+
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) return 'Buenos Días';
@@ -279,6 +292,18 @@ void _registrarEvento() {
               // Placeholder for secondary tools
               _buildSecondaryTool(Icons.bar_chart, 'Reportes', () {}),
               _buildSecondaryTool(Icons.medication, 'Botiquín', () {}),
+              _buildSecondaryTool(
+                Icons.flight,
+                'Reporte Aéreo (Dron + IA)',
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AerialReportScreen(),
+                    ),
+                  );
+                },
+              ),
               // Espacio adicional para evitar que el SnackBar se salga de pantalla
               const SizedBox(height: 100),
             ],
@@ -333,10 +358,7 @@ void _registrarEvento() {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Text(
-              'Bienvenido a SIREGA',
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text('Bienvenido a SIREGA', style: theme.textTheme.bodyMedium),
           ],
         ),
         GestureDetector(
@@ -346,8 +368,7 @@ void _registrarEvento() {
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
                     const ProfileScreen(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
                   // Animación tipo "gota" que sale del avatar
                   return AnimatedBuilder(
                     animation: animation,
@@ -390,7 +411,9 @@ void _registrarEvento() {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(
         title,
-        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

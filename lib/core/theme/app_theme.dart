@@ -43,6 +43,20 @@ class AppTheme {
         ),
       ),
 
+      // Tab Bar Theme definition
+      tabBarTheme: TabBarThemeData(
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: AppColors.primary,
+        ),
+        labelColor: AppColors.surface,
+        unselectedLabelColor: AppColors.textSecondary,
+        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
+      ),
+
       // Card Theme definition
       cardTheme: CardThemeData(
         color: AppColors.surface,

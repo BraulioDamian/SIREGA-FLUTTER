@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/bloc/cattle_detail_bloc.dart';
@@ -8,6 +10,7 @@ import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/detail_
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/custom_sliver_header.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/delete_animal_dialog.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/editar_animal/editar_animal_screen.dart';
+import 'package:sirega_app/modulos/3_registro_evento/presentation/pantallas/seleccionar_tipo_evento_screen.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
 
@@ -34,7 +37,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
 
   final ScrollController _scrollController = ScrollController();
   bool _isScrolled = false;
-  double _scrollOffset = 0.0;
+  final ValueNotifier<double> _scrollOffsetNotifier = ValueNotifier(0.0);
 
   bool _showFloatingButtons = false;
 
@@ -99,10 +102,11 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
 
   void _setupListeners() {
     _scrollController.addListener(() {
-      setState(() {
-        _scrollOffset = _scrollController.offset;
-        _isScrolled = _scrollController.offset > 50;
-      });
+      _scrollOffsetNotifier.value = _scrollController.offset;
+      final scrolled = _scrollController.offset > 50;
+      if (scrolled != _isScrolled) {
+        setState(() => _isScrolled = scrolled);
+      }
     });
 
     _tabController.addListener(() {
@@ -120,6 +124,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     _scaleController.dispose();
     _floatingButtonController.dispose();
     _scrollController.dispose();
+    _scrollOffsetNotifier.dispose();
     super.dispose();
   }
 
@@ -167,10 +172,20 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                 ),
               ).then((result) {
                 if (result != null && result is Animal) {
-                  // Recargar los detalles del animal actualizado
                   bloc.add(LoadCattleDetail(result.id));
                 }
               });
+            }
+            if (state is NavigateToRegisterEvent) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SeleccionarTipoEventoScreen(),
+                ),
+              );
+            }
+            if (state is ShowImagePickerBottomSheet) {
+              _showImageSourcePicker(context, state.animal);
             }
           },
           child: Scaffold(
@@ -481,11 +496,16 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           () => _showMoreOptions(context, animal),
         ),
       ],
-      flexibleSpace: CustomSliverHeader(
-        animal: animal,
-        scrollOffset: _scrollOffset,
-        isScrolled: _isScrolled,
-        fadeAnimation: _fadeAnimation,
+      flexibleSpace: ValueListenableBuilder<double>(
+        valueListenable: _scrollOffsetNotifier,
+        builder: (context, scrollOffset, _) {
+          return CustomSliverHeader(
+            animal: animal,
+            scrollOffset: scrollOffset,
+            isScrolled: _isScrolled,
+            fadeAnimation: _fadeAnimation,
+          );
+        },
       ),
     );
   }
@@ -846,6 +866,133 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
         child: DeleteAnimalDialog(animal: animal),
       ),
     );
+  }
+
+  void _showImageSourcePicker(BuildContext context, Animal animal) {
+    final bloc = context.read<CattleDetailBloc>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 50,
+              height: 5,
+              margin: const EdgeInsets.symmetric(vertical: 15),
+              decoration: BoxDecoration(
+                color: AppColors.divider,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Actualizar foto de ${animal.nombre}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildImageOption(
+              Icons.camera_alt_rounded,
+              'Tomar foto',
+              AppColors.primary,
+              () async {
+                Navigator.pop(modalContext);
+                await _pickAndSaveImage(ImageSource.camera, animal, bloc);
+              },
+            ),
+            _buildImageOption(
+              Icons.photo_library_rounded,
+              'Elegir de galería',
+              AppColors.secondary,
+              () async {
+                Navigator.pop(modalContext);
+                await _pickAndSaveImage(ImageSource.gallery, animal, bloc);
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageOption(
+    IconData icon,
+    String title,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 26),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndSaveImage(
+    ImageSource source,
+    Animal animal,
+    CattleDetailBloc bloc,
+  ) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        bloc.add(UpdateAnimalPhoto(animal, File(image.path)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al seleccionar imagen: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 }
 

@@ -14,7 +14,8 @@ class CattleListScreen extends StatefulWidget {
   State<CattleListScreen> createState() => _CattleListScreenState();
 }
 
-class _CattleListScreenState extends State<CattleListScreen> with SingleTickerProviderStateMixin {
+class _CattleListScreenState extends State<CattleListScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -42,46 +43,77 @@ class _CattleListScreenState extends State<CattleListScreen> with SingleTickerPr
             onPressed: () => context.read<CattleListBloc>().add(LoadCattle()),
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Activos'),
-            Tab(text: 'Historial'),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.3),
+                ),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'Activos'),
+                  Tab(text: 'Historial'),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
       body: BlocBuilder<CattleListBloc, CattleListState>(
         builder: (context, state) {
-          if (state.loading && state.activeItems.isEmpty && state.historicalItems.isEmpty) {
+          if (state.loading &&
+              state.activeItems.isEmpty &&
+              state.historicalItems.isEmpty) {
             return ListView.builder(
               itemCount: 6, // Show 6 skeleton items
               itemBuilder: (context, index) => const AnimalCardSkeleton(),
             );
           }
-          
+
           if (state.error != null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error, size: 64, color: Theme.of(context).colorScheme.error),
+                  Icon(
+                    Icons.error,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                   const SizedBox(height: 16),
                   Text('Error: ${state.error}'),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => context.read<CattleListBloc>().add(LoadCattle()),
+                    onPressed: () =>
+                        context.read<CattleListBloc>().add(LoadCattle()),
                     child: const Text('Reintentar'),
                   ),
                 ],
               ),
             );
           }
-          
+
           return TabBarView(
             controller: _tabController,
             children: [
               _buildAnimalList(state.activeItems, context), // Pestaña Activos
-              _buildAnimalList(state.historicalItems, context), // Pestaña Historial
+              _buildAnimalList(
+                state.historicalItems,
+                context,
+              ), // Pestaña Historial
             ],
           );
         },
@@ -95,7 +127,11 @@ class _CattleListScreenState extends State<CattleListScreen> with SingleTickerPr
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.pets, size: 64, color: Theme.of(context).colorScheme.outline),
+            Icon(
+              Icons.pets,
+              size: 64,
+              color: Theme.of(context).colorScheme.outline,
+            ),
             const SizedBox(height: 16),
             Text(
               'No hay animales en esta categoría',
@@ -128,7 +164,7 @@ class _CattleListScreenState extends State<CattleListScreen> with SingleTickerPr
                   builder: (_) => CattleDetailScreen(id: animal.id),
                 ),
               );
-              
+
               // Recargar la lista cuando regrese
               if (context.mounted) {
                 context.read<CattleListBloc>().add(LoadCattle());

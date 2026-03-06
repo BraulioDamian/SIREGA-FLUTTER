@@ -61,3 +61,10 @@ class ArchiveAnimalClicked extends CattleDetailEvent {
   final Animal animal;
   ArchiveAnimalClicked(this.animal);
 }
+
+class UpdateAnimalPhoto extends CattleDetailEvent {
+  final Animal animal;
+  final File photoFile;
+
+  UpdateAnimalPhoto(this.animal, this.photoFile);
+}

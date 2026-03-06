@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
@@ -23,17 +24,23 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
     on<ShareAnimalClicked>(_onShareAnimalClicked);
     on<RegisterEventClicked>(_onRegisterEventClicked);
     on<AddPhotoClicked>(_onAddPhotoClicked);
+    on<UpdateAnimalPhoto>(_onUpdateAnimalPhoto);
     on<PrintAnimalCardClicked>(_onPrintAnimalCardClicked);
     on<GenerateQRCodeClicked>(_onGenerateQRCodeClicked);
     on<ArchiveAnimalClicked>(_onArchiveAnimalClicked);
   }
 
-  Future<void> _onLoadCattleDetail(LoadCattleDetail event, Emitter<CattleDetailState> emit) async {
+  Future<void> _onLoadCattleDetail(
+    LoadCattleDetail event,
+    Emitter<CattleDetailState> emit,
+  ) async {
     emit(CattleDetailLoading());
     try {
       final animal = await isarService.obtenerAnimalPorId(event.animalId);
       if (animal != null) {
-        final eventos = await isarService.obtenerEventosPorAnimal(event.animalId);
+        final eventos = await isarService.obtenerEventosPorAnimal(
+          event.animalId,
+        );
         emit(CattleDetailLoaded(animal: animal, eventos: eventos));
       } else {
         emit(CattleDetailError('Animal no encontrado'));
@@ -43,10 +50,14 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
     }
   }
 
-  Future<void> _onDeactivateAnimal(DeactivateAnimal event, Emitter<CattleDetailState> emit) async {
+  Future<void> _onDeactivateAnimal(
+    DeactivateAnimal event,
+    Emitter<CattleDetailState> emit,
+  ) async {
     try {
       final animalToUpdate = event.animal;
-      animalToUpdate.estado = EstadoAnimal.muerto; // O el estado que corresponda
+      animalToUpdate.estado =
+          EstadoAnimal.muerto; // O el estado que corresponda
       await isarService.guardarAnimal(animalToUpdate);
       emit(AnimalDeactivationSuccess());
     } catch (e) {
@@ -56,39 +67,85 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
 
   // --- Handlers for simple UI actions ---
 
-  void _onEditAnimalClicked(EditAnimalClicked event, Emitter<CattleDetailState> emit) {
+  void _onEditAnimalClicked(
+    EditAnimalClicked event,
+    Emitter<CattleDetailState> emit,
+  ) {
     emit(NavigateToEditScreen(event.animal));
   }
 
-  void _onShareAnimalClicked(ShareAnimalClicked event, Emitter<CattleDetailState> emit) {
+  void _onShareAnimalClicked(
+    ShareAnimalClicked event,
+    Emitter<CattleDetailState> emit,
+  ) {
     emit(ShowInfoSnackbar('Compartiendo información...'));
   }
 
-  void _onRegisterEventClicked(RegisterEventClicked event, Emitter<CattleDetailState> emit) {
-    emit(ShowInfoSnackbar('Abriendo registro de eventos...'));
+  void _onRegisterEventClicked(
+    RegisterEventClicked event,
+    Emitter<CattleDetailState> emit,
+  ) {
+    emit(NavigateToRegisterEvent(event.animal));
   }
 
-  void _onAddPhotoClicked(AddPhotoClicked event, Emitter<CattleDetailState> emit) {
-    emit(ShowInfoSnackbar('Abriendo cámara...'));
+  void _onAddPhotoClicked(
+    AddPhotoClicked event,
+    Emitter<CattleDetailState> emit,
+  ) {
+    emit(ShowImagePickerBottomSheet(event.animal));
   }
 
-  void _onPrintAnimalCardClicked(PrintAnimalCardClicked event, Emitter<CattleDetailState> emit) {
+  Future<void> _onUpdateAnimalPhoto(
+    UpdateAnimalPhoto event,
+    Emitter<CattleDetailState> emit,
+  ) async {
+    try {
+      final animalToUpdate = event.animal;
+      animalToUpdate.fotoPerfilUrl = event.photoFile.path;
+      await isarService.guardarAnimal(animalToUpdate);
+
+      // Recargar la UI con los nuevos datos
+      final eventos = await isarService.obtenerEventosPorAnimal(
+        animalToUpdate.id,
+      );
+      emit(CattleDetailLoaded(animal: animalToUpdate, eventos: eventos));
+      emit(ShowInfoSnackbar('Foto actualizada con éxito'));
+    } catch (e) {
+      emit(ShowInfoSnackbar('Error al guardar la foto: ${e.toString()}'));
+    }
+  }
+
+  void _onPrintAnimalCardClicked(
+    PrintAnimalCardClicked event,
+    Emitter<CattleDetailState> emit,
+  ) {
     emit(ShowInfoSnackbar('Preparando impresión...'));
   }
 
-  void _onGenerateQRCodeClicked(GenerateQRCodeClicked event, Emitter<CattleDetailState> emit) {
+  void _onGenerateQRCodeClicked(
+    GenerateQRCodeClicked event,
+    Emitter<CattleDetailState> emit,
+  ) {
     emit(ShowInfoSnackbar('Generando código QR...'));
   }
 
-  void _onArchiveAnimalClicked(ArchiveAnimalClicked event, Emitter<CattleDetailState> emit) {
+  void _onArchiveAnimalClicked(
+    ArchiveAnimalClicked event,
+    Emitter<CattleDetailState> emit,
+  ) {
     emit(ShowInfoSnackbar('Animal archivado correctamente'));
   }
 
-  Future<void> _onUpdateAnimal(UpdateAnimal event, Emitter<CattleDetailState> emit) async {
+  Future<void> _onUpdateAnimal(
+    UpdateAnimal event,
+    Emitter<CattleDetailState> emit,
+  ) async {
     try {
       await isarService.guardarAnimal(event.animal);
       // Recargar los datos del animal
-      final eventos = await isarService.obtenerEventosPorAnimal(event.animal.id);
+      final eventos = await isarService.obtenerEventosPorAnimal(
+        event.animal.id,
+      );
       emit(CattleDetailLoaded(animal: event.animal, eventos: eventos));
       emit(ShowInfoSnackbar('Animal actualizado correctamente'));
     } catch (e) {
@@ -96,7 +153,10 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
     }
   }
 
-  Future<void> _onDeleteAnimalPermanently(DeleteAnimalPermanently event, Emitter<CattleDetailState> emit) async {
+  Future<void> _onDeleteAnimalPermanently(
+    DeleteAnimalPermanently event,
+    Emitter<CattleDetailState> emit,
+  ) async {
     try {
       // Eliminar físicamente de la base de datos
       await isarService.eliminarAnimal(event.animalId);

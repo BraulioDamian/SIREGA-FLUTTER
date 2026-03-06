@@ -7,6 +7,7 @@ import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animate
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animal_detail_helpers.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/health_status_widget.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/medical_event_card.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/sanitary_history_screen.dart';
 
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 
@@ -52,9 +53,14 @@ class HealthTab extends StatelessWidget {
           color: Colors.teal,
           delay: 100,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Historial médico completo próximamente'),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SanitaryHistoryScreen(
+                  animalId: animal.id,
+                  animalName: animal.nombre,
+                  initialFilter: 'Todos',
+                ),
               ),
             );
           },
@@ -67,9 +73,14 @@ class HealthTab extends StatelessWidget {
           color: Colors.orange,
           delay: 200,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Historial de vacunas completo próximamente'),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SanitaryHistoryScreen(
+                  animalId: animal.id,
+                  animalName: animal.nombre,
+                  initialFilter: 'Vacunas',
+                ),
               ),
             );
           },
@@ -103,12 +114,13 @@ class HealthTab extends StatelessWidget {
 
         // Ordenar por fecha descendente (más reciente primero)
         eventos.sort((a, b) => b.fecha.compareTo(a.fecha));
+        final previewList = eventos.take(3).toList();
 
         return Column(
-          children: eventos.asMap().entries.map((entry) {
+          children: previewList.asMap().entries.map((entry) {
             final index = entry.key;
             final evento = entry.value;
-            final isLast = index == eventos.length - 1;
+            final isLast = index == previewList.length - 1;
 
             return MedicalEventCard(
               evento: evento,
@@ -148,12 +160,13 @@ class HealthTab extends StatelessWidget {
 
         // Ordenar por fecha descendente
         vacunas.sort((a, b) => b.fecha.compareTo(a.fecha));
+        final previewList = vacunas.take(3).toList();
 
         return Column(
-          children: vacunas.asMap().entries.map((entry) {
+          children: previewList.asMap().entries.map((entry) {
             final index = entry.key;
             final vacuna = entry.value;
-            final isLast = index == vacunas.length - 1;
+            final isLast = index == previewList.length - 1;
 
             return MedicalEventCard(
               evento: vacuna,

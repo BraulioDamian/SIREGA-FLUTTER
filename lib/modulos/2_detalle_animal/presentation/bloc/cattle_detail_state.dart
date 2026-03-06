@@ -20,7 +20,6 @@ class CattleDetailError extends CattleDetailState {
   CattleDetailError(this.message);
 }
 
-
 // --- Estados de Acción (para el BlocListener) ---
 // Estos estados se usan para "efectos secundarios" como mostrar un SnackBar o navegar
 
@@ -45,4 +44,16 @@ class NavigateToEditScreen extends CattleDetailActionState {
 class AnimalUpdateSuccess extends CattleDetailActionState {
   final Animal animal;
   AnimalUpdateSuccess(this.animal);
+}
+
+// Navegar al registro de evento preseleccionando animal
+class NavigateToRegisterEvent extends CattleDetailActionState {
+  final Animal animal;
+  NavigateToRegisterEvent(this.animal);
+}
+
+// Abrir selector de imagenes para el avatar
+class ShowImagePickerBottomSheet extends CattleDetailActionState {
+  final Animal animal;
+  ShowImagePickerBottomSheet(this.animal);
 }
