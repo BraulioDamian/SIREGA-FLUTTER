@@ -93,11 +93,16 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.verified_rounded, color: AppColors.surface, size: 20),
+            const Icon(
+              Icons.verified_rounded,
+              color: AppColors.surface,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                '${animal.nombre} verificado por NFC (${_selectedAnimalIds.length} seleccionados)'),
+                '${animal.nombre} verificado por NFC (${_selectedAnimalIds.length} seleccionados)',
+              ),
             ),
           ],
         ),
@@ -143,7 +148,9 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
               foregroundColor: AppColors.surface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: const Text('Sí, quitar'),
           ),
@@ -205,7 +212,10 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                 child: Padding(
                   padding: const EdgeInsets.only(right: 16.0),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: primaryColor,
                       borderRadius: BorderRadius.circular(20),
@@ -249,34 +259,51 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                         Navigator.push(
                           context,
                           PageRouteBuilder(
-                            transitionDuration: const Duration(milliseconds: 300),
-                            reverseTransitionDuration: const Duration(milliseconds: 250),
-                            pageBuilder: (context, animation, secondaryAnimation) =>
-                                ConfirmacionEventoScreen(
-                              tipoEvento: widget.tipoEvento,
-                              producto: widget.producto,
-                              fecha: widget.fecha,
-                              dosis: widget.dosis,
-                              unidadDosis: widget.unidadDosis,
-                              veterinario: widget.veterinario,
-                              notas: widget.notas,
-                              animalesIds: _selectedAnimalIds.toList(),
+                            transitionDuration: const Duration(
+                              milliseconds: 300,
                             ),
-                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                              return FadeTransition(
-                                opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-                                child: SlideTransition(
-                                  position: Tween<Offset>(
-                                    begin: const Offset(0.03, 0),
-                                    end: Offset.zero,
-                                  ).animate(CurvedAnimation(
-                                    parent: animation,
-                                    curve: Curves.easeOutCubic,
-                                  )),
-                                  child: child,
-                                ),
-                              );
-                            },
+                            reverseTransitionDuration: const Duration(
+                              milliseconds: 250,
+                            ),
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    ConfirmacionEventoScreen(
+                                      tipoEvento: widget.tipoEvento,
+                                      producto: widget.producto,
+                                      fecha: widget.fecha,
+                                      dosis: widget.dosis,
+                                      unidadDosis: widget.unidadDosis,
+                                      veterinario: widget.veterinario,
+                                      notas: widget.notas,
+                                      animalesIds: _selectedAnimalIds.toList(),
+                                    ),
+                            transitionsBuilder:
+                                (
+                                  context,
+                                  animation,
+                                  secondaryAnimation,
+                                  child,
+                                ) {
+                                  return FadeTransition(
+                                    opacity: CurvedAnimation(
+                                      parent: animation,
+                                      curve: Curves.easeOut,
+                                    ),
+                                    child: SlideTransition(
+                                      position:
+                                          Tween<Offset>(
+                                            begin: const Offset(0.03, 0),
+                                            end: Offset.zero,
+                                          ).animate(
+                                            CurvedAnimation(
+                                              parent: animation,
+                                              curve: Curves.easeOutCubic,
+                                            ),
+                                          ),
+                                      child: child,
+                                    ),
+                                  );
+                                },
                           ),
                         );
                       }
@@ -286,7 +313,10 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                   _selectedAnimalIds.isEmpty
                       ? 'Selecciona al menos un animal'
                       : 'Registrar Evento (${_selectedAnimalIds.length})',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -369,7 +399,9 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
         duration: const Duration(milliseconds: 300),
         height: 140,
         decoration: BoxDecoration(
-          color: isActive ? primaryColor.withValues(alpha: 0.12) : AppColors.surface,
+          color: isActive
+              ? primaryColor.withValues(alpha: 0.12)
+              : AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isActive ? primaryColor : AppColors.divider,
@@ -377,7 +409,9 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: isActive ? primaryColor.withValues(alpha: 0.2) : AppColors.textPrimary.withValues(alpha: 0.12),
+              color: isActive
+                  ? primaryColor.withValues(alpha: 0.2)
+                  : AppColors.textPrimary.withValues(alpha: 0.12),
               blurRadius: isActive ? 12 : 4,
               offset: const Offset(0, 2),
             ),
@@ -424,7 +458,10 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
         children: [
           // Search bar
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 12.0,
+            ),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -456,7 +493,10 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(color: primaryColor, width: 2),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
               ),
               onChanged: (value) {
                 setState(() => _searchQuery = value.toLowerCase());
@@ -477,8 +517,12 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                 final animals = _searchQuery.isEmpty
                     ? allAnimals
                     : allAnimals.where((animal) {
-                        return animal.nombre.toLowerCase().contains(_searchQuery) ||
-                            animal.idSinigaParaMostrar.toLowerCase().contains(_searchQuery);
+                        return animal.nombre.toLowerCase().contains(
+                              _searchQuery,
+                            ) ||
+                            animal.idSinigaParaMostrar.toLowerCase().contains(
+                              _searchQuery,
+                            );
                       }).toList();
 
                 if (animals.isEmpty) {
@@ -486,11 +530,18 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_off_rounded, size: 64, color: AppColors.divider),
+                        Icon(
+                          Icons.search_off_rounded,
+                          size: 64,
+                          color: AppColors.divider,
+                        ),
                         const SizedBox(height: 16),
                         const Text(
                           'No se encontraron animales',
-                          style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -512,19 +563,26 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                               _selectAll = !_selectAll;
                               _selectedAnimalIds.clear();
                               if (_selectAll) {
-                                _selectedAnimalIds.addAll(animals.map((a) => a.id).toSet());
+                                _selectedAnimalIds.addAll(
+                                  animals.map((a) => a.id).toSet(),
+                                );
                               }
                             });
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
                             decoration: BoxDecoration(
                               color: _selectAll
                                   ? primaryColor.withValues(alpha: 0.08)
                                   : AppColors.surface,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: _selectAll ? primaryColor : AppColors.divider,
+                                color: _selectAll
+                                    ? primaryColor
+                                    : AppColors.divider,
                                 width: _selectAll ? 2 : 1,
                               ),
                             ),
@@ -536,15 +594,23 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                                   width: 24,
                                   height: 24,
                                   decoration: BoxDecoration(
-                                    color: _selectAll ? primaryColor : Colors.transparent,
+                                    color: _selectAll
+                                        ? primaryColor
+                                        : Colors.transparent,
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
-                                      color: _selectAll ? primaryColor : AppColors.divider,
+                                      color: _selectAll
+                                          ? primaryColor
+                                          : AppColors.divider,
                                       width: 2,
                                     ),
                                   ),
                                   child: _selectAll
-                                      ? const Icon(Icons.check_rounded, size: 16, color: AppColors.surface)
+                                      ? const Icon(
+                                          Icons.check_rounded,
+                                          size: 16,
+                                          color: AppColors.surface,
+                                        )
                                       : null,
                                 ),
                                 const SizedBox(width: 12),
@@ -553,7 +619,9 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 15,
-                                    color: _selectAll ? primaryColor : AppColors.textPrimary,
+                                    color: _selectAll
+                                        ? primaryColor
+                                        : AppColors.textPrimary,
                                   ),
                                 ),
                               ],
@@ -585,7 +653,9 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                         onChanged: (selected) async {
                           if (!selected && isNfcScanned) {
                             // NFC-scanned: full confirmation dialog
-                            final confirmed = await _confirmNfcDeselection(animal);
+                            final confirmed = await _confirmNfcDeselection(
+                              animal,
+                            );
                             if (!confirmed) return;
                             if (!mounted) return;
                             setState(() {
@@ -605,7 +675,9 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                               SnackBar(
                                 content: Text('${animal.nombre} removido'),
                                 behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 margin: const EdgeInsets.all(16),
                                 duration: const Duration(seconds: 3),
                                 action: SnackBarAction(
@@ -652,10 +724,11 @@ class ScannerAnimation extends StatefulWidget {
   });
 
   @override
-  _ScannerAnimationState createState() => _ScannerAnimationState();
+  State<ScannerAnimation> createState() => _ScannerAnimationState();
 }
 
-class _ScannerAnimationState extends State<ScannerAnimation> with TickerProviderStateMixin {
+class _ScannerAnimationState extends State<ScannerAnimation>
+    with TickerProviderStateMixin {
   late AnimationController _rippleController;
 
   @override
@@ -704,7 +777,9 @@ class _ScannerAnimationState extends State<ScannerAnimation> with TickerProvider
           child: Icon(
             widget.icon,
             size: 32,
-            color: widget.isActive ? widget.primaryColor : AppColors.textSecondary,
+            color: widget.isActive
+                ? widget.primaryColor
+                : AppColors.textSecondary,
           ),
         ),
       ),

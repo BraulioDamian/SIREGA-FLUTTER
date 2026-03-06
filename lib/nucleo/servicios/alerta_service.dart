@@ -12,12 +12,12 @@ class AlertaService {
   static final AlertaService _instance = AlertaService._internal();
   factory AlertaService() => _instance;
   AlertaService._internal();
-  
+
   Timer? _checkTimer;
   final _alertasController = StreamController<List<Alerta>>.broadcast();
-  
+
   Stream<List<Alerta>> get alertasStream => _alertasController.stream;
-  
+
   // Inicializar servicio de alertas
   Future<void> initialize() async {
     // Verificar alertas cada hora
@@ -25,65 +25,65 @@ class AlertaService {
       const Duration(hours: 1),
       (_) => verificarAlertas(),
     );
-    
+
     // Verificación inicial
     await verificarAlertas();
   }
-  
+
   // Verificar y generar alertas
   Future<void> verificarAlertas() async {
     final config = await _getConfiguration();
-    final ahora = DateTime.now();
-    
+
     // Verificar vacunaciones pendientes
     if (config.notificacionesVacunas) {
       await _verificarVacunaciones(config.diasAnticipacionVacunas);
     }
-    
+
     // Verificar desparasitaciones pendientes
     await _verificarDesparasitaciones(config.diasAnticipacionDesparasitante);
-    
+
     // Verificar partos próximos
     if (config.notificacionesPartos) {
       await _verificarPartosProximos(config.diasAnticipacionParto);
     }
-    
+
     // Verificar animales enfermos
     await _verificarAnimalesEnfermos();
-    
+
     // Verificar stock de medicamentos
     if (config.alertasStockMedicamentos) {
       await _verificarStockMedicamentos(config.umbralMinimoMedicamentos);
     }
-    
+
     // Emitir alertas activas
     await _emitirAlertasActivas();
   }
-  
+
   // Verificar vacunaciones pendientes
   Future<void> _verificarVacunaciones(int diasAnticipacion) async {
     final animales = await IsarService.isar.animals
         .filter()
         .estadoEqualTo(EstadoAnimal.activo)
         .findAll();
-    
+
     for (final animal in animales) {
       // Cargar eventos del animal
       await animal.eventos.load();
-      
+
       // Buscar última vacunación
       final ultimaVacuna = animal.eventos
           .where((e) => e.tipo == TipoEvento.vacuna)
           .fold<EventoSanitario?>(
             null,
-            (prev, curr) => prev == null || curr.fecha.isAfter(prev.fecha) ? curr : prev,
+            (prev, curr) =>
+                prev == null || curr.fecha.isAfter(prev.fecha) ? curr : prev,
           );
-      
+
       // Determinar si necesita vacunación
       bool necesitaVacuna = false;
       String tipoVacuna = '';
       DateTime? fechaProgramada;
-      
+
       if (ultimaVacuna == null) {
         // Nunca ha sido vacunado
         necesitaVacuna = true;
@@ -91,8 +91,10 @@ class AlertaService {
         fechaProgramada = DateTime.now();
       } else {
         // Calcular próxima vacunación según el tipo
-        final diasDesdeUltima = DateTime.now().difference(ultimaVacuna.fecha).inDays;
-        
+        final diasDesdeUltima = DateTime.now()
+            .difference(ultimaVacuna.fecha)
+            .inDays;
+
         // Lógica simplificada: revacunar cada 6 meses
         if (diasDesdeUltima >= 180 - diasAnticipacion) {
           necesitaVacuna = true;
@@ -100,7 +102,7 @@ class AlertaService {
           fechaProgramada = ultimaVacuna.fecha.add(const Duration(days: 180));
         }
       }
-      
+
       if (necesitaVacuna) {
         await _crearAlerta(
           tipo: TipoAlerta.vacunacion,
@@ -113,39 +115,44 @@ class AlertaService {
       }
     }
   }
-  
+
   // Verificar desparasitaciones pendientes
   Future<void> _verificarDesparasitaciones(int diasAnticipacion) async {
     final animales = await IsarService.isar.animals
         .filter()
         .estadoEqualTo(EstadoAnimal.activo)
         .findAll();
-    
+
     for (final animal in animales) {
       await animal.eventos.load();
-      
+
       final ultimaDesparasitacion = animal.eventos
           .where((e) => e.tipo == TipoEvento.desparasitante)
           .fold<EventoSanitario?>(
             null,
-            (prev, curr) => prev == null || curr.fecha.isAfter(prev.fecha) ? curr : prev,
+            (prev, curr) =>
+                prev == null || curr.fecha.isAfter(prev.fecha) ? curr : prev,
           );
-      
+
       bool necesitaDesparasitacion = false;
       DateTime? fechaProgramada;
-      
+
       if (ultimaDesparasitacion == null) {
         necesitaDesparasitacion = true;
         fechaProgramada = DateTime.now();
       } else {
         // Desparasitar cada 3 meses
-        final diasDesdeUltima = DateTime.now().difference(ultimaDesparasitacion.fecha).inDays;
+        final diasDesdeUltima = DateTime.now()
+            .difference(ultimaDesparasitacion.fecha)
+            .inDays;
         if (diasDesdeUltima >= 90 - diasAnticipacion) {
           necesitaDesparasitacion = true;
-          fechaProgramada = ultimaDesparasitacion.fecha.add(const Duration(days: 90));
+          fechaProgramada = ultimaDesparasitacion.fecha.add(
+            const Duration(days: 90),
+          );
         }
       }
-      
+
       if (necesitaDesparasitacion) {
         await _crearAlerta(
           tipo: TipoAlerta.desparasitacion,
@@ -158,7 +165,7 @@ class AlertaService {
       }
     }
   }
-  
+
   // Verificar partos próximos
   Future<void> _verificarPartosProximos(int diasAnticipacion) async {
     final animales = await IsarService.isar.animals
@@ -166,11 +173,13 @@ class AlertaService {
         .sexoEqualTo(Sexo.hembra)
         .gestanteEqualTo(true)
         .findAll();
-    
+
     for (final animal in animales) {
       if (animal.fechaProximoParto != null) {
-        final diasParaParto = animal.fechaProximoParto!.difference(DateTime.now()).inDays;
-        
+        final diasParaParto = animal.fechaProximoParto!
+            .difference(DateTime.now())
+            .inDays;
+
         if (diasParaParto <= diasAnticipacion && diasParaParto >= 0) {
           await _crearAlerta(
             tipo: TipoAlerta.parto,
@@ -184,7 +193,7 @@ class AlertaService {
       }
     }
   }
-  
+
   // Verificar animales enfermos
   Future<void> _verificarAnimalesEnfermos() async {
     final animalesEnfermos = await IsarService.isar.animals
@@ -193,29 +202,29 @@ class AlertaService {
         .or()
         .estadoSaludEqualTo(EstadoSalud.critico)
         .findAll();
-    
+
     for (final animal in animalesEnfermos) {
       await _crearAlerta(
         tipo: TipoAlerta.tratamiento,
         titulo: 'Animal enfermo',
         mensaje: '${animal.nombre} - Estado: ${animal.estadoSalud.name}',
         animal: animal,
-        prioridad: animal.estadoSalud == EstadoSalud.critico 
-            ? Prioridad.urgente 
+        prioridad: animal.estadoSalud == EstadoSalud.critico
+            ? Prioridad.urgente
             : Prioridad.alta,
         requiereAccion: true,
       );
     }
   }
-  
+
   // Verificar stock de medicamentos (simulado)
   Future<void> _verificarStockMedicamentos(int umbralMinimo) async {
     // Esta función sería más compleja con un inventario real
     // Por ahora creamos una alerta de ejemplo
-    
+
     // Simulamos que hay poco stock de un medicamento
     final hayPocoStock = DateTime.now().day % 3 == 0; // Simular aleatoriamente
-    
+
     if (hayPocoStock) {
       final alerta = Alerta()
         ..tipo = TipoAlerta.stockBajo
@@ -225,13 +234,13 @@ class AlertaService {
         ..fechaProgramada = DateTime.now()
         ..requiereAccion = true
         ..accionRequerida = 'Realizar pedido de medicamentos';
-      
+
       await IsarService.isar.writeTxn(() async {
         await IsarService.isar.alertas.put(alerta);
       });
     }
   }
-  
+
   // Crear alerta
   Future<void> _crearAlerta({
     required TipoAlerta tipo,
@@ -249,12 +258,12 @@ class AlertaService {
         .tituloEqualTo(titulo)
         .estadoEqualTo(EstadoAlerta.activa)
         .findFirst();
-    
+
     if (alertaExistente != null) {
       // Actualizar alerta existente si es necesario
       return;
     }
-    
+
     final alerta = Alerta()
       ..tipo = tipo
       ..titulo = titulo
@@ -263,11 +272,11 @@ class AlertaService {
       ..prioridad = prioridad
       ..requiereAccion = requiereAccion
       ..estado = EstadoAlerta.activa;
-    
+
     if (animal != null) {
       alerta.idAnimalReferencia = animal.idAreteNFC ?? animal.nombre;
     }
-    
+
     await IsarService.isar.writeTxn(() async {
       await IsarService.isar.alertas.put(alerta);
       if (animal != null) {
@@ -276,7 +285,7 @@ class AlertaService {
       }
     });
   }
-  
+
   // Obtener configuración
   Future<ConfiguracionLocal> _getConfiguration() async {
     final config = await IsarService.isar.configuracionLocals.get(1);
@@ -289,7 +298,7 @@ class AlertaService {
     }
     return config;
   }
-  
+
   // Emitir alertas activas
   Future<void> _emitirAlertasActivas() async {
     final alertasActivas = await IsarService.isar.alertas
@@ -298,25 +307,25 @@ class AlertaService {
         .sortByPrioridadDesc()
         .thenByFechaProgramada()
         .findAll();
-    
+
     _alertasController.add(alertasActivas);
   }
-  
+
   // Marcar alerta como leída
   Future<void> marcarComoLeida(int alertaId) async {
     final alerta = await IsarService.isar.alertas.get(alertaId);
     if (alerta != null) {
       alerta.leida = true;
       alerta.fechaLectura = DateTime.now();
-      
+
       await IsarService.isar.writeTxn(() async {
         await IsarService.isar.alertas.put(alerta);
       });
-      
+
       await _emitirAlertasActivas();
     }
   }
-  
+
   // Procesar alerta
   Future<void> procesarAlerta(int alertaId, String? resolucion) async {
     final alerta = await IsarService.isar.alertas.get(alertaId);
@@ -325,30 +334,31 @@ class AlertaService {
       alerta.estado = EstadoAlerta.procesada;
       alerta.fechaResolucion = DateTime.now();
       alerta.resolucion = resolucion;
-      
+
       await IsarService.isar.writeTxn(() async {
         await IsarService.isar.alertas.put(alerta);
       });
-      
+
       await _emitirAlertasActivas();
     }
   }
-  
+
   // Posponer alerta
   Future<void> posponerAlerta(int alertaId, Duration duracion) async {
     final alerta = await IsarService.isar.alertas.get(alertaId);
     if (alerta != null) {
       alerta.estado = EstadoAlerta.pospuesta;
       alerta.fechaProgramada = DateTime.now().add(duracion);
-      
+
       await IsarService.isar.writeTxn(() async {
         await IsarService.isar.alertas.put(alerta);
       });
-      
+
       // Programar reactivación
       Timer(duracion, () async {
         final alertaPospuesta = await IsarService.isar.alertas.get(alertaId);
-        if (alertaPospuesta != null && alertaPospuesta.estado == EstadoAlerta.pospuesta) {
+        if (alertaPospuesta != null &&
+            alertaPospuesta.estado == EstadoAlerta.pospuesta) {
           alertaPospuesta.estado = EstadoAlerta.activa;
           await IsarService.isar.writeTxn(() async {
             await IsarService.isar.alertas.put(alertaPospuesta);
@@ -356,11 +366,11 @@ class AlertaService {
           await _emitirAlertasActivas();
         }
       });
-      
+
       await _emitirAlertasActivas();
     }
   }
-  
+
   // Obtener estadísticas de alertas
   Future<AlertaStatistics> getStatistics() async {
     final total = await IsarService.isar.alertas.count();
@@ -376,7 +386,7 @@ class AlertaService {
         .filter()
         .estadoEqualTo(EstadoAlerta.procesada)
         .count();
-    
+
     return AlertaStatistics(
       total: total,
       activas: activas,
@@ -384,11 +394,11 @@ class AlertaService {
       procesadas: procesadas,
     );
   }
-  
+
   // Limpiar alertas antiguas
   Future<void> limpiarAlertasAntiguas() async {
     final fechaLimite = DateTime.now().subtract(const Duration(days: 30));
-    
+
     await IsarService.isar.writeTxn(() async {
       await IsarService.isar.alertas
           .filter()
@@ -397,7 +407,7 @@ class AlertaService {
           .deleteAll();
     });
   }
-  
+
   // Dispose
   void dispose() {
     _checkTimer?.cancel();
@@ -411,14 +421,14 @@ class AlertaStatistics {
   final int activas;
   final int leidas;
   final int procesadas;
-  
+
   AlertaStatistics({
     required this.total,
     required this.activas,
     required this.leidas,
     required this.procesadas,
   });
-  
+
   double get tasaProcesamiento => total > 0 ? procesadas / total : 0.0;
   bool get hayPendientes => activas > 0;
 }

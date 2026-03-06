@@ -40,14 +40,10 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
     if (widget.showPulse) {
       _pulseController.repeat(reverse: true);
@@ -64,7 +60,7 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final cardHeight = size.height * 0.12; // Altura responsiva
-    
+
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) => setState(() => _isPressed = false),
@@ -78,17 +74,17 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
               height: cardHeight,
-              transform: Matrix4.identity()
-                ..scale(_isPressed ? 0.95 : 1.0),
+              transform: Matrix4.diagonal3Values(
+                _isPressed ? 0.95 : 1.0,
+                _isPressed ? 0.95 : 1.0,
+                1.0,
+              ),
               margin: const EdgeInsets.symmetric(vertical: 6),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    widget.gradientStart,
-                    widget.gradientEnd,
-                  ],
+                  colors: [widget.gradientStart, widget.gradientEnd],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
@@ -134,7 +130,9 @@ class _PrimaryActionCardState extends State<PrimaryActionCard>
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.warning.withValues(alpha: 0.5),
+                                        color: AppColors.warning.withValues(
+                                          alpha: 0.5,
+                                        ),
                                         blurRadius: 4,
                                         spreadRadius: 1,
                                       ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -20,7 +21,11 @@ class Esp32Service {
       final result = await InternetAddress.lookup('192.168.4.1');
       if (result.isNotEmpty) {
         // Intentar conexión HTTP simple para verificar que el ESP32 esté respondiendo
-        final socket = await Socket.connect('192.168.4.1', 80, timeout: const Duration(seconds: 3));
+        final socket = await Socket.connect(
+          '192.168.4.1',
+          80,
+          timeout: const Duration(seconds: 3),
+        );
         socket.destroy();
         return true;
       }
@@ -32,12 +37,10 @@ class Esp32Service {
 
   Future<void> openWifiSettings() async {
     try {
-      const intent = AndroidIntent(
-        action: 'android.settings.WIFI_SETTINGS',
-      );
+      const intent = AndroidIntent(action: 'android.settings.WIFI_SETTINGS');
       await intent.launch();
     } catch (e) {
-      print('Error al abrir configuración WiFi: $e');
+      debugPrint('Error al abrir configuración WiFi: $e');
       // Fallback: intentar abrir configuración general
       try {
         const fallbackIntent = AndroidIntent(
@@ -45,7 +48,7 @@ class Esp32Service {
         );
         await fallbackIntent.launch();
       } catch (e2) {
-        print('Error al abrir configuración general: $e2');
+        debugPrint('Error al abrir configuración general: $e2');
       }
     }
   }
@@ -57,7 +60,9 @@ class Esp32Service {
       if (!canReach) {
         // Abrir automáticamente la configuración WiFi
         await openWifiSettings();
-        throw Esp32ConnectionException('No se puede conectar con el dispositivo ESP32.\n\nSe ha abierto la configuración de WiFi para que:\n• Te conectes a la red "ESP32-NFC"\n• Verifiques que el ESP32 esté encendido\n\nDespués regresa a la app e intenta conectar nuevamente.');
+        throw Esp32ConnectionException(
+          'No se puede conectar con el dispositivo ESP32.\n\nSe ha abierto la configuración de WiFi para que:\n• Te conectes a la red "ESP32-NFC"\n• Verifiques que el ESP32 esté encendido\n\nDespués regresa a la app e intenta conectar nuevamente.',
+        );
       }
 
       _streamController = StreamController<String>();
@@ -78,13 +83,17 @@ class Esp32Service {
         onError: (error) {
           if (_streamController != null && !_streamController!.isClosed) {
             String friendlyError = _mapWebSocketError(error);
-            _streamController!.addError(Esp32ConnectionException(friendlyError));
+            _streamController!.addError(
+              Esp32ConnectionException(friendlyError),
+            );
           }
         },
         onDone: () {
           if (_streamController != null && !_streamController!.isClosed) {
             _streamController!.addError(
-              Esp32ConnectionException('La conexión con el ESP32 se ha perdido. Intenta reconectar.')
+              Esp32ConnectionException(
+                'La conexión con el ESP32 se ha perdido. Intenta reconectar.',
+              ),
             );
           }
         },
@@ -101,24 +110,26 @@ class Esp32Service {
 
   String _mapWebSocketError(dynamic error) {
     String errorString = error.toString().toLowerCase();
-    
-    if (errorString.contains('websocketchannelexception') || 
+
+    if (errorString.contains('websocketchannelexception') ||
         errorString.contains('websocket')) {
       return 'Error de conexión con el ESP32. Verifica que:\n• El dispositivo ESP32 esté encendido\n• Estés conectado a la red WiFi "ESP32-NFC"\n• El dispositivo esté dentro del rango';
     }
-    
+
     if (errorString.contains('timeout') || errorString.contains('timed out')) {
       return 'Tiempo de espera agotado. El ESP32 no responde.\nVerifica la conexión WiFi.';
     }
-    
-    if (errorString.contains('network') || errorString.contains('connection refused')) {
+
+    if (errorString.contains('network') ||
+        errorString.contains('connection refused')) {
       return 'No se puede conectar al ESP32.\nAsegúrate de estar conectado a la red "ESP32-NFC"';
     }
-    
-    if (errorString.contains('host lookup failed') || errorString.contains('no address associated')) {
+
+    if (errorString.contains('host lookup failed') ||
+        errorString.contains('no address associated')) {
       return 'No se encuentra el dispositivo ESP32.\nVerifica que esté encendido y en rango.';
     }
-    
+
     // Error genérico más amigable
     return 'Error de conexión con el ESP32.\nIntenta reconectar el dispositivo.';
   }
@@ -130,7 +141,7 @@ class Esp32Service {
       await HapticFeedback.lightImpact();
     } catch (e) {
       // Si hay error con la vibración, no hacer nada (no es crítico)
-      print('Error al vibrar: $e');
+      debugPrint('Error al vibrar: $e');
     }
   }
 
@@ -145,9 +156,9 @@ class Esp32Service {
 // Excepción personalizada para errores de ESP32
 class Esp32ConnectionException implements Exception {
   final String message;
-  
+
   Esp32ConnectionException(this.message);
-  
+
   @override
   String toString() => message;
 }

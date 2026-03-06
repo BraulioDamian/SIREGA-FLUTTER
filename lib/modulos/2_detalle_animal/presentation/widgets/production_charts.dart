@@ -12,11 +12,7 @@ class ProductionChart extends StatefulWidget {
   final ChartType type;
   final Animal animal;
 
-  const ProductionChart({
-    super.key,
-    required this.type,
-    required this.animal,
-  });
+  const ProductionChart({super.key, required this.type, required this.animal});
 
   @override
   State<ProductionChart> createState() => _ProductionChartState();
@@ -34,13 +30,9 @@ class _ProductionChartState extends State<ProductionChart>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    _animation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _animationController.forward();
   }
 
@@ -52,13 +44,12 @@ class _ProductionChartState extends State<ProductionChart>
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.type == ChartType.milk ? AppColors.info : AppColors.success;
+    final color = widget.type == ChartType.milk
+        ? AppColors.info
+        : AppColors.success;
     final title = widget.type == ChartType.milk
         ? 'Producción de Leche (L/día)'
         : 'Evolución del Peso (kg)';
-    final subtitle = widget.type == ChartType.milk
-        ? 'Últimos 30 días'
-        : 'Últimos 6 meses';
 
     final isarService = RepositoryProvider.of<IsarService>(context);
 
@@ -71,14 +62,9 @@ class _ProductionChartState extends State<ProductionChart>
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: color.withValues(alpha: 0.2),
-                width: 1,
-              ),
+              border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
             ),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: const Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -97,13 +83,16 @@ class _ProductionChartState extends State<ProductionChart>
         registrosFiltrados.sort((a, b) => a.fecha.compareTo(b.fecha));
 
         // Extraer datos para el gráfico
-        final data = registrosFiltrados.map((r) {
-          if (widget.type == ChartType.milk) {
-            return r.litrosPorDia ?? 0.0;
-          } else {
-            return r.pesoKg ?? 0.0;
-          }
-        }).where((value) => value > 0).toList();
+        final data = registrosFiltrados
+            .map((r) {
+              if (widget.type == ChartType.milk) {
+                return r.litrosPorDia ?? 0.0;
+              } else {
+                return r.pesoKg ?? 0.0;
+              }
+            })
+            .where((value) => value > 0)
+            .toList();
 
         // Si no hay datos suficientes, mostrar estado vacío
         if (data.isEmpty || data.length < 2) {
@@ -112,10 +101,7 @@ class _ProductionChartState extends State<ProductionChart>
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: color.withValues(alpha: 0.2),
-                width: 1,
-              ),
+              border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
             ),
             child: Center(
               child: Column(
@@ -141,10 +127,7 @@ class _ProductionChartState extends State<ProductionChart>
                   const SizedBox(height: 8),
                   const Text(
                     'Registra al menos 2 mediciones',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textHint,
-                    ),
+                    style: TextStyle(fontSize: 12, color: AppColors.textHint),
                   ),
                 ],
               ),
@@ -167,10 +150,7 @@ class _ProductionChartState extends State<ProductionChart>
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: color.withValues(alpha: 0.2),
-              width: 1,
-            ),
+            border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -213,8 +193,12 @@ class _ProductionChartState extends State<ProductionChart>
                       child: Row(
                         children: [
                           Icon(
-                            trend >= 0 ? Icons.trending_up : Icons.trending_down,
-                            color: trend >= 0 ? AppColors.success : AppColors.error,
+                            trend >= 0
+                                ? Icons.trending_up
+                                : Icons.trending_down,
+                            color: trend >= 0
+                                ? AppColors.success
+                                : AppColors.error,
                             size: 16,
                           ),
                           const SizedBox(width: 4),
@@ -223,7 +207,9 @@ class _ProductionChartState extends State<ProductionChart>
                                 ? '${trend >= 0 ? '+' : ''}${trendPercent.toStringAsFixed(1)}%'
                                 : '${trend >= 0 ? '+' : ''}${trend.toStringAsFixed(1)}kg',
                             style: TextStyle(
-                              color: trend >= 0 ? AppColors.success : AppColors.error,
+                              color: trend >= 0
+                                  ? AppColors.success
+                                  : AppColors.error,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -253,12 +239,7 @@ class _ProductionChartState extends State<ProductionChart>
                 ),
                 const SizedBox(height: 16),
                 // Leyenda con datos reales
-                _buildLegendWithData(
-                  color,
-                  minValue,
-                  avgValue,
-                  maxValue,
-                ),
+                _buildLegendWithData(color, minValue, avgValue, maxValue),
               ],
             ),
           ),
@@ -272,9 +253,17 @@ class _ProductionChartState extends State<ProductionChart>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildLegendItem('Min', '${min.toStringAsFixed(1)}$suffix', color.withValues(alpha: 0.5)),
+        _buildLegendItem(
+          'Min',
+          '${min.toStringAsFixed(1)}$suffix',
+          color.withValues(alpha: 0.5),
+        ),
         _buildLegendItem('Promedio', '${avg.toStringAsFixed(1)}$suffix', color),
-        _buildLegendItem('Max', '${max.toStringAsFixed(1)}$suffix', color.withValues(alpha: 0.8)),
+        _buildLegendItem(
+          'Max',
+          '${max.toStringAsFixed(1)}$suffix',
+          color.withValues(alpha: 0.8),
+        ),
       ],
     );
   }
@@ -285,10 +274,7 @@ class _ProductionChartState extends State<ProductionChart>
         Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(height: 4),
         Text(
@@ -301,10 +287,7 @@ class _ProductionChartState extends State<ProductionChart>
         ),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 11,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -336,10 +319,7 @@ class ChartPainter extends CustomPainter {
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
-          color.withValues(alpha: 0.3),
-          color.withValues(alpha: 0.0),
-        ],
+        colors: [color.withValues(alpha: 0.3), color.withValues(alpha: 0.0)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     final gridPaint = Paint()
@@ -350,11 +330,7 @@ class ChartPainter extends CustomPainter {
     const int gridLines = 4;
     for (int i = 0; i <= gridLines; i++) {
       final y = (size.height / gridLines) * i;
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        gridPaint,
-      );
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
 
     // Usar los datos reales pasados como parámetro
@@ -372,20 +348,21 @@ class ChartPainter extends CustomPainter {
     // Dibujar área bajo la curva con gradiente
     if (points.isNotEmpty && progress > 0) {
       final path = Path();
-      final lastIndex = (points.length * progress).round().clamp(1, points.length);
-      
+      final lastIndex = (points.length * progress).round().clamp(
+        1,
+        points.length,
+      );
+
       path.moveTo(points.first.dx, size.height);
       path.lineTo(points.first.dx, points.first.dy);
-      
+
       // Usar curvas de Bézier para suavizar la línea
       for (int i = 1; i < lastIndex; i++) {
         final xMid = (points[i - 1].dx + points[i].dx) / 2;
-        final yMid = (points[i - 1].dy + points[i].dy) / 2;
         final cp1 = Offset(xMid, points[i - 1].dy);
-        final cp2 = Offset(xMid, points[i].dy);
         path.quadraticBezierTo(cp1.dx, cp1.dy, points[i].dx, points[i].dy);
       }
-      
+
       path.lineTo(points[lastIndex - 1].dx, size.height);
       path.close();
       canvas.drawPath(path, fillPaint);
@@ -394,18 +371,24 @@ class ChartPainter extends CustomPainter {
     // Dibujar línea principal con suavizado
     if (points.length > 1 && progress > 0) {
       final progressPath = Path();
-      final lastIndex = (points.length * progress).round().clamp(1, points.length);
-      
+      final lastIndex = (points.length * progress).round().clamp(
+        1,
+        points.length,
+      );
+
       progressPath.moveTo(points.first.dx, points.first.dy);
-      
+
       for (int i = 1; i < lastIndex; i++) {
         final xMid = (points[i - 1].dx + points[i].dx) / 2;
-        final yMid = (points[i - 1].dy + points[i].dy) / 2;
         final cp1 = Offset(xMid, points[i - 1].dy);
-        final cp2 = Offset(xMid, points[i].dy);
-        progressPath.quadraticBezierTo(cp1.dx, cp1.dy, points[i].dx, points[i].dy);
+        progressPath.quadraticBezierTo(
+          cp1.dx,
+          cp1.dy,
+          points[i].dx,
+          points[i].dy,
+        );
       }
-      
+
       canvas.drawPath(progressPath, paint);
     }
 
@@ -414,7 +397,7 @@ class ChartPainter extends CustomPainter {
       if (i / points.length <= progress) {
         final pointProgress = ((progress * points.length) - i).clamp(0.0, 1.0);
         final pointSize = 6.0 * pointProgress;
-        
+
         // Sombra del punto
         canvas.drawCircle(
           points[i],
@@ -423,7 +406,7 @@ class ChartPainter extends CustomPainter {
             ..color = color.withValues(alpha: 0.2)
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
         );
-        
+
         // Círculo exterior
         canvas.drawCircle(
           points[i],
@@ -432,7 +415,7 @@ class ChartPainter extends CustomPainter {
             ..color = color.withValues(alpha: 0.3)
             ..style = PaintingStyle.fill,
         );
-        
+
         // Círculo interior blanco
         canvas.drawCircle(
           points[i],
@@ -441,7 +424,7 @@ class ChartPainter extends CustomPainter {
             ..color = AppColors.surface
             ..style = PaintingStyle.fill,
         );
-        
+
         // Borde del círculo
         canvas.drawCircle(
           points[i],
@@ -461,7 +444,9 @@ class ChartPainter extends CustomPainter {
         final value = data[lastIndex];
         final textPainter = TextPainter(
           text: TextSpan(
-            text: type == ChartType.milk ? '${value.toStringAsFixed(0)}L' : '${value.toStringAsFixed(0)}kg',
+            text: type == ChartType.milk
+                ? '${value.toStringAsFixed(0)}L'
+                : '${value.toStringAsFixed(0)}kg',
             style: TextStyle(
               color: color,
               fontSize: 12,
@@ -471,7 +456,7 @@ class ChartPainter extends CustomPainter {
           textDirection: TextDirection.ltr,
         );
         textPainter.layout();
-        
+
         final offset = points[lastIndex];
         final boxRect = RRect.fromRectAndRadius(
           Rect.fromCenter(
@@ -481,7 +466,7 @@ class ChartPainter extends CustomPainter {
           ),
           const Radius.circular(8),
         );
-        
+
         // Fondo del tooltip
         canvas.drawRRect(
           boxRect,
@@ -489,7 +474,7 @@ class ChartPainter extends CustomPainter {
             ..color = AppColors.surface
             ..style = PaintingStyle.fill,
         );
-        
+
         // Borde del tooltip
         canvas.drawRRect(
           boxRect,
@@ -498,11 +483,14 @@ class ChartPainter extends CustomPainter {
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1.5,
         );
-        
+
         // Texto del valor
         textPainter.paint(
           canvas,
-          Offset(offset.dx - textPainter.width / 2, offset.dy - 25 - textPainter.height / 2),
+          Offset(
+            offset.dx - textPainter.width / 2,
+            offset.dy - 25 - textPainter.height / 2,
+          ),
         );
       }
     }

@@ -8,40 +8,44 @@ class BluetoothService {
   static final BluetoothService _instance = BluetoothService._internal();
   factory BluetoothService() => _instance;
   BluetoothService._internal();
-  
+
   // Estado de conexión
   bool _isConnected = false;
-  String? _connectedDeviceId;
+
   String? _connectedDeviceName;
-  
+
   // Streams
-  final _connectionStatusController = StreamController<BluetoothConnectionStatus>.broadcast();
+  final _connectionStatusController =
+      StreamController<BluetoothConnectionStatus>.broadcast();
   final _nfcReadingsController = StreamController<NFCReading>.broadcast();
   final _batteryStatusController = StreamController<BatteryStatus>.broadcast();
-  
+
   // Getters
-  Stream<BluetoothConnectionStatus> get connectionStatus => _connectionStatusController.stream;
+  Stream<BluetoothConnectionStatus> get connectionStatus =>
+      _connectionStatusController.stream;
   Stream<NFCReading> get nfcReadings => _nfcReadingsController.stream;
   Stream<BatteryStatus> get batteryStatus => _batteryStatusController.stream;
   bool get isConnected => _isConnected;
   String? get connectedDeviceName => _connectedDeviceName;
-  
+
   // Timer para simulación
   Timer? _simulationTimer;
-  
+
   /// Inicializar el servicio Bluetooth
   Future<void> initialize() async {
     // En producción aquí se inicializaría flutter_blue_plus
     _emitConnectionStatus(BluetoothConnectionStatus.disconnected);
   }
-  
+
   /// Escanear dispositivos Bluetooth disponibles
-  Future<List<BluetoothDevice>> scanDevices({Duration timeout = const Duration(seconds: 10)}) async {
+  Future<List<BluetoothDevice>> scanDevices({
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
     _emitConnectionStatus(BluetoothConnectionStatus.scanning);
-    
+
     // Simular escaneo
     await Future.delayed(const Duration(seconds: 2));
-    
+
     // Dispositivos simulados
     final devices = [
       BluetoothDevice(
@@ -63,38 +67,38 @@ class BluetoothService {
         isConnectable: false,
       ),
     ];
-    
+
     _emitConnectionStatus(BluetoothConnectionStatus.disconnected);
     return devices;
   }
-  
+
   /// Conectar a un dispositivo específico
   Future<bool> connectToDevice(String deviceId, {String? deviceName}) async {
     if (_isConnected) {
       await disconnect();
     }
-    
+
     _emitConnectionStatus(BluetoothConnectionStatus.connecting);
-    
+
     try {
       // Simular proceso de conexión
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Simular éxito/fallo aleatorio para testing
       final success = DateTime.now().millisecond % 10 > 2; // 80% éxito
-      
+
       if (success) {
         _isConnected = true;
-        _connectedDeviceId = deviceId;
+
         _connectedDeviceName = deviceName ?? deviceId;
         _emitConnectionStatus(BluetoothConnectionStatus.connected);
-        
+
         // Iniciar simulación de lecturas
         _startSimulation();
-        
+
         // Solicitar estado de batería inicial
         await requestBatteryStatus();
-        
+
         return true;
       } else {
         throw Exception('Error de conexión simulado');
@@ -106,80 +110,83 @@ class BluetoothService {
       return false;
     }
   }
-  
+
   /// Desconectar del dispositivo actual
   Future<void> disconnect() async {
     if (!_isConnected) return;
-    
+
     _stopSimulation();
     _isConnected = false;
-    _connectedDeviceId = null;
+
     _connectedDeviceName = null;
     _emitConnectionStatus(BluetoothConnectionStatus.disconnected);
   }
-  
+
   /// Configurar el lector (potencia, timeout, etc.)
   Future<bool> configureLector(LectorConfiguration config) async {
     if (!_isConnected) return false;
-    
+
     try {
       // Simular envío de configuración
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       // En producción aquí se enviarían los comandos al ESP32
       // Por ejemplo:
       // await _sendCommand('CONFIG_POWER', config.potencia.toString());
       // await _sendCommand('CONFIG_TIMEOUT', config.timeout.toString());
-      
+
       return true;
     } catch (e) {
       return false;
     }
   }
-  
+
   /// Solicitar estado de batería
   Future<void> requestBatteryStatus() async {
     if (!_isConnected) return;
-    
+
     // Simular respuesta de batería
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     final battery = BatteryStatus(
       level: 75 + (DateTime.now().millisecond % 25), // 75-100%
       isCharging: DateTime.now().second % 10 == 0,
       voltage: 3.7 + (DateTime.now().millisecond % 100) / 200, // 3.7-4.2V
       temperature: 25 + (DateTime.now().millisecond % 10), // 25-35°C
     );
-    
+
     _batteryStatusController.add(battery);
   }
-  
+
   /// Activar modo de lectura continua
   Future<void> startContinuousReading() async {
     if (!_isConnected) return;
-    
+
     // En producción enviaría comando al ESP32
     // await _sendCommand('START_CONTINUOUS');
   }
-  
+
   /// Detener modo de lectura continua
   Future<void> stopContinuousReading() async {
     if (!_isConnected) return;
-    
+
     // En producción enviaría comando al ESP32
     // await _sendCommand('STOP_CONTINUOUS');
   }
-  
+
   /// Solicitar una lectura única
-  Future<NFCReading?> requestSingleReading({Duration timeout = const Duration(seconds: 10)}) async {
+  Future<NFCReading?> requestSingleReading({
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
     if (!_isConnected) return null;
-    
+
     try {
       // Simular proceso de lectura
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Simular lectura exitosa/fallida
-      if (DateTime.now().millisecond % 10 > 3) { // 70% éxito
+      if (DateTime.now().millisecond % 10 > 3) {
+        // 70% éxito
         final reading = NFCReading(
           tagId: 'NFC-${DateTime.now().millisecondsSinceEpoch}',
           timestamp: DateTime.now(),
@@ -191,7 +198,7 @@ class BluetoothService {
             'writable': 'true',
           },
         );
-        
+
         _nfcReadingsController.add(reading);
         return reading;
       } else {
@@ -201,11 +208,11 @@ class BluetoothService {
       return null;
     }
   }
-  
+
   /// Calibrar el lector
   Future<bool> calibrateLector() async {
     if (!_isConnected) return false;
-    
+
     try {
       // Simular proceso de calibración
       await Future.delayed(const Duration(seconds: 3));
@@ -214,7 +221,7 @@ class BluetoothService {
       return false;
     }
   }
-  
+
   /// Actualizar firmware del dispositivo (simulado)
   Stream<FirmwareUpdateProgress> updateFirmware(Uint8List firmwareData) async* {
     if (!_isConnected) {
@@ -226,11 +233,11 @@ class BluetoothService {
       );
       return;
     }
-    
+
     // Simular actualización de firmware
     for (int i = 0; i <= 100; i += 5) {
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       String status;
       if (i < 20) {
         status = 'Preparando actualización...';
@@ -241,7 +248,7 @@ class BluetoothService {
       } else {
         status = 'Actualización completada';
       }
-      
+
       yield FirmwareUpdateProgress(
         percentage: i,
         status: status,
@@ -250,13 +257,13 @@ class BluetoothService {
       );
     }
   }
-  
+
   /// Obtener diagnóstico del dispositivo
   Future<DeviceDiagnostics?> getDiagnostics() async {
     if (!_isConnected) return null;
-    
+
     await Future.delayed(const Duration(seconds: 1));
-    
+
     return DeviceDiagnostics(
       firmwareVersion: '1.2.3',
       hardwareVersion: 'ESP32-WROOM-32',
@@ -270,42 +277,39 @@ class BluetoothService {
       signalStrength: -45,
     );
   }
-  
+
   // Métodos privados
-  
+
   void _startSimulation() {
     _stopSimulation();
-    
+
     // Simular lecturas NFC periódicas aleatorias
-    _simulationTimer = Timer.periodic(
-      const Duration(seconds: 10),
-      (_) {
-        if (_isConnected && DateTime.now().second % 30 == 0) {
-          // Simular lectura aleatoria
-          final reading = NFCReading(
-            tagId: 'AUTO-${DateTime.now().millisecondsSinceEpoch}',
-            timestamp: DateTime.now(),
-            rssi: -35,
-            tagType: 'ISO14443A',
-            data: {'auto': 'true'},
-          );
-          _nfcReadingsController.add(reading);
-        }
-      },
-    );
+    _simulationTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (_isConnected && DateTime.now().second % 30 == 0) {
+        // Simular lectura aleatoria
+        final reading = NFCReading(
+          tagId: 'AUTO-${DateTime.now().millisecondsSinceEpoch}',
+          timestamp: DateTime.now(),
+          rssi: -35,
+          tagType: 'ISO14443A',
+          data: {'auto': 'true'},
+        );
+        _nfcReadingsController.add(reading);
+      }
+    });
   }
-  
+
   void _stopSimulation() {
     _simulationTimer?.cancel();
     _simulationTimer = null;
   }
-  
+
   void _emitConnectionStatus(BluetoothConnectionStatus status) {
     if (!_connectionStatusController.isClosed) {
       _connectionStatusController.add(status);
     }
   }
-  
+
   /// Limpiar recursos
   void dispose() {
     _stopSimulation();
@@ -330,14 +334,14 @@ class BluetoothDevice {
   final String name;
   final int rssi;
   final bool isConnectable;
-  
+
   BluetoothDevice({
     required this.id,
     required this.name,
     required this.rssi,
     required this.isConnectable,
   });
-  
+
   int get signalStrength {
     if (rssi >= -50) return 4; // Excelente
     if (rssi >= -60) return 3; // Bueno
@@ -353,7 +357,7 @@ class NFCReading {
   final int rssi;
   final String tagType;
   final Map<String, dynamic> data;
-  
+
   NFCReading({
     required this.tagId,
     required this.timestamp,
@@ -368,16 +372,16 @@ class BatteryStatus {
   final bool isCharging;
   final double voltage;
   final int temperature; // Celsius
-  
+
   BatteryStatus({
     required this.level,
     required this.isCharging,
     required this.voltage,
     required this.temperature,
   });
-  
+
   String get levelText => '$level%';
-  
+
   String get statusText {
     if (isCharging) return 'Cargando';
     if (level < 20) return 'Batería baja';
@@ -394,7 +398,7 @@ class LectorConfiguration {
   final bool vibracionExito;
   final bool ledIndicador;
   final int intervaloLectura; // ms
-  
+
   LectorConfiguration({
     this.potencia = 100,
     this.timeout = 10,
@@ -411,7 +415,7 @@ class FirmwareUpdateProgress {
   final String status;
   final bool isComplete;
   final bool hasError;
-  
+
   FirmwareUpdateProgress({
     required this.percentage,
     required this.status,
@@ -431,7 +435,7 @@ class DeviceDiagnostics {
   final int freeMemory; // bytes
   final int temperature; // Celsius
   final int signalStrength; // dBm
-  
+
   DeviceDiagnostics({
     required this.firmwareVersion,
     required this.hardwareVersion,
@@ -444,16 +448,15 @@ class DeviceDiagnostics {
     required this.temperature,
     required this.signalStrength,
   });
-  
-  double get successRate => totalReadings > 0 
-      ? (successfulReadings / totalReadings * 100) 
-      : 0.0;
-  
+
+  double get successRate =>
+      totalReadings > 0 ? (successfulReadings / totalReadings * 100) : 0.0;
+
   String get uptimeFormatted {
     final days = uptime.inDays;
     final hours = uptime.inHours.remainder(24);
     final minutes = uptime.inMinutes.remainder(60);
-    
+
     if (days > 0) {
       return '$days días, $hours horas';
     } else if (hours > 0) {

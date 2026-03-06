@@ -26,16 +26,16 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
   late AnimationController _slideController;
   late AnimationController _scaleController;
   late AnimationController _floatingButtonController;
-  
+
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  late Animation<double> _scaleAnimation;
+
   late Animation<double> _floatingButtonAnimation;
-  
+
   final ScrollController _scrollController = ScrollController();
   bool _isScrolled = false;
   double _scrollOffset = 0.0;
-  double _scrollPercentage = 0.0;
+
   bool _showFloatingButtons = false;
 
   @override
@@ -68,37 +68,21 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
   }
 
   void _setupAnimations() {
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.5),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
-    
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.elasticOut,
-    ));
-    
-    _floatingButtonAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _floatingButtonController,
-      curve: Curves.easeOutBack,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
+
+    _floatingButtonAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _floatingButtonController,
+        curve: Curves.easeOutBack,
+      ),
+    );
   }
 
   void _startAnimations() {
@@ -115,17 +99,12 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
 
   void _setupListeners() {
     _scrollController.addListener(() {
-      final size = MediaQuery.of(context).size;
-      final double expandedHeight = size.height * 0.45;
-      
       setState(() {
         _scrollOffset = _scrollController.offset;
         _isScrolled = _scrollController.offset > 50;
-        
-        _scrollPercentage = (_scrollController.offset / expandedHeight).clamp(0.0, 1.0);
       });
     });
-    
+
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
         HapticFeedback.selectionClick();
@@ -152,9 +131,9 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
       )..add(LoadCattleDetail(widget.id)),
       child: Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: Theme.of(context).colorScheme.copyWith(
-            surface: AppColors.background,
-          ),
+          colorScheme: Theme.of(
+            context,
+          ).colorScheme.copyWith(surface: AppColors.background),
         ),
         child: BlocListener<CattleDetailBloc, CattleDetailState>(
           listenWhen: (previous, current) => current is CattleDetailActionState,
@@ -183,7 +162,8 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EditarAnimalScreen(animal: state.animal),
+                  builder: (context) =>
+                      EditarAnimalScreen(animal: state.animal),
                 ),
               ).then((result) {
                 if (result != null && result is Animal) {
@@ -194,12 +174,14 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             }
           },
           child: Scaffold(
-              extendBodyBehindAppBar: true,
+            extendBodyBehindAppBar: true,
             backgroundColor: AppColors.background,
             body: BlocBuilder<CattleDetailBloc, CattleDetailState>(
-              buildWhen: (previous, current) => current is! CattleDetailActionState,
+              buildWhen: (previous, current) =>
+                  current is! CattleDetailActionState,
               builder: (context, state) {
-                if (state is CattleDetailLoading || state is CattleDetailInitial) {
+                if (state is CattleDetailLoading ||
+                    state is CattleDetailInitial) {
                   return _buildLoadingState();
                 }
                 if (state is CattleDetailError) {
@@ -247,7 +229,9 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).primaryColor.withAlpha(51), // withOpacity(0.2)
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withAlpha(51), // withOpacity(0.2)
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -277,7 +261,9 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                   Text(
                     'Por favor espere...',
                     style: TextStyle(
-                      color: Theme.of(context).primaryColor.withAlpha(153), // withOpacity(0.6)
+                      color: Theme.of(
+                        context,
+                      ).primaryColor.withAlpha(153), // withOpacity(0.6)
                       fontSize: 14,
                     ),
                   ),
@@ -322,7 +308,9 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.error.withAlpha(51), // withOpacity(0.2)
+                            color: AppColors.error.withAlpha(
+                              51,
+                            ), // withOpacity(0.2)
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -347,18 +335,23 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               ),
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: AppColors.error.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.error,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppColors.error),
                 ),
               ),
               const SizedBox(height: 32),
@@ -372,7 +365,10 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.error,
                   foregroundColor: AppColors.surface,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -389,7 +385,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
   Widget _buildLoadedBody(BuildContext context, Animal animal) {
     final size = MediaQuery.of(context).size;
     final double expandedHeight = size.height * 0.45;
-    
+
     return Stack(
       children: [
         NotificationListener<UserScrollNotification>(
@@ -421,12 +417,13 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           child: NestedScrollView(
             controller: _scrollController,
             physics: const ClampingScrollPhysics(),
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                _buildSliverAppBar(context, animal, size),
-                _buildSliverTabBar(context),
-              ];
-            },
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+                  return <Widget>[
+                    _buildSliverAppBar(context, animal, size),
+                    _buildSliverTabBar(context),
+                  ];
+                },
             body: FadeTransition(
               opacity: _fadeAnimation,
               child: SlideTransition(
@@ -440,30 +437,15 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                       DetailTabContent(
                         animal: animal,
                         tabType: TabType.general,
-                        scaleAnimation: _scaleAnimation,
-                        isScrolled: _isScrolled,
-                        scrollPercentage: _scrollPercentage,
                       ),
-                      DetailTabContent(
-                        animal: animal,
-                        tabType: TabType.health,
-                        scaleAnimation: _scaleAnimation,
-                        isScrolled: _isScrolled,
-                        scrollPercentage: _scrollPercentage,
-                      ),
+                      DetailTabContent(animal: animal, tabType: TabType.health),
                       DetailTabContent(
                         animal: animal,
                         tabType: TabType.reproduction,
-                        scaleAnimation: _scaleAnimation,
-                        isScrolled: _isScrolled,
-                        scrollPercentage: _scrollPercentage,
                       ),
                       DetailTabContent(
                         animal: animal,
                         tabType: TabType.production,
-                        scaleAnimation: _scaleAnimation,
-                        isScrolled: _isScrolled,
-                        scrollPercentage: _scrollPercentage,
                       ),
                     ],
                   ),
@@ -486,9 +468,18 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
       elevation: 0,
       leading: _buildBackButton(context),
       actions: [
-        _buildActionButton(Icons.edit_rounded, () => _editAnimal(context, animal)),
-        _buildActionButton(Icons.share_rounded, () => _shareAnimal(context, animal)),
-        _buildActionButton(Icons.more_vert_rounded, () => _showMoreOptions(context, animal)),
+        _buildActionButton(
+          Icons.edit_rounded,
+          () => _editAnimal(context, animal),
+        ),
+        _buildActionButton(
+          Icons.share_rounded,
+          () => _shareAnimal(context, animal),
+        ),
+        _buildActionButton(
+          Icons.more_vert_rounded,
+          () => _showMoreOptions(context, animal),
+        ),
       ],
       flexibleSpace: CustomSliverHeader(
         animal: animal,
@@ -513,7 +504,11 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           customBorder: const CircleBorder(),
           child: const Padding(
             padding: EdgeInsets.all(8.0),
-            child: Icon(Icons.arrow_back_rounded, color: AppColors.surface, size: 24),
+            child: Icon(
+              Icons.arrow_back_rounded,
+              color: AppColors.surface,
+              size: 24,
+            ),
           ),
         ),
       ),
@@ -622,7 +617,12 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     );
   }
 
-  Widget _buildSmallFAB(IconData icon, Color color, VoidCallback onPressed, String tooltip) {
+  Widget _buildSmallFAB(
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+    String tooltip,
+  ) {
     return Tooltip(
       message: tooltip,
       child: TweenAnimationBuilder<double>(
@@ -663,7 +663,12 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     );
   }
 
-  Widget _buildMainFAB(IconData icon, Color color, VoidCallback onPressed, String tooltip) {
+  Widget _buildMainFAB(
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+    String tooltip,
+  ) {
     return Tooltip(
       message: tooltip,
       child: Container(
@@ -769,7 +774,12 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
     );
   }
 
-  Widget _buildOptionTile(IconData icon, String title, Color color, VoidCallback onTap) {
+  Widget _buildOptionTile(
+    IconData icon,
+    String title,
+    Color color,
+    VoidCallback onTap,
+  ) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -796,7 +806,9 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: color == AppColors.error ? AppColors.error : AppColors.textPrimary,
+                  color: color == AppColors.error
+                      ? AppColors.error
+                      : AppColors.textPrimary,
                 ),
               ),
             ],
@@ -805,8 +817,6 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
       ),
     );
   }
-
-  
 
   void _registerEvent(BuildContext context, Animal animal) {
     context.read<CattleDetailBloc>().add(RegisterEventClicked(animal));
@@ -851,7 +861,11 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height + 24;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: Container(
@@ -860,7 +874,9 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
           boxShadow: overlapsContent
               ? [
                   BoxShadow(
-                    color: AppColors.textPrimary.withValues(alpha: 0.05), // withOpacity(0.05)
+                    color: AppColors.textPrimary.withValues(
+                      alpha: 0.05,
+                    ), // withOpacity(0.05)
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),

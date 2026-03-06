@@ -12,10 +12,11 @@ class ExpandingFab extends StatefulWidget {
   });
 
   @override
-  _ExpandingFabState createState() => _ExpandingFabState();
+  State<ExpandingFab> createState() => _ExpandingFabState();
 }
 
-class _ExpandingFabState extends State<ExpandingFab> with SingleTickerProviderStateMixin {
+class _ExpandingFabState extends State<ExpandingFab>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _expandAnimation;
   bool _open = false;
@@ -80,10 +81,7 @@ class _ExpandingFabState extends State<ExpandingFab> with SingleTickerProviderSt
             onTap: _toggle,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.close,
-                color: Theme.of(context).primaryColor,
-              ),
+              child: Icon(Icons.close, color: Theme.of(context).primaryColor),
             ),
           ),
         ),
@@ -95,7 +93,11 @@ class _ExpandingFabState extends State<ExpandingFab> with SingleTickerProviderSt
     final children = <Widget>[];
     final count = 2;
     final step = 90.0 / (count - 1);
-    for (var i = 0, angleInDegrees = 0.0; i < count; i++, angleInDegrees += step) {
+    for (
+      var i = 0, angleInDegrees = 0.0;
+      i < count;
+      i++, angleInDegrees += step
+    ) {
       children.add(
         _ExpandingActionButton(
           directionInDegrees: angleInDegrees,
@@ -176,10 +178,7 @@ class _ExpandingActionButton extends StatelessWidget {
           ),
         );
       },
-      child: FadeTransition(
-        opacity: progress,
-        child: child,
-      ),
+      child: FadeTransition(opacity: progress, child: child),
     );
   }
 }

@@ -76,15 +76,15 @@ class CustomSliverHeader extends StatelessWidget {
                 colors: [
                   Colors.transparent,
                   Colors.black.withValues(alpha: 0.1),
-                  Colors.black.withValues(alpha: 0.7),
+                  Colors.black.withValues(alpha: 0.4),
                 ],
-                stops: const [0.3, 0.6, 1.0],
+                stops: const [0.5, 0.75, 1.0],
               ),
             ),
           ),
           // Información del animal
           Positioned(
-            bottom: 60,
+            bottom: 20,
             left: 20,
             right: 20,
             child: FadeTransition(
@@ -92,66 +92,27 @@ class CustomSliverHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nombre con efecto de sombra
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.pets, color: Colors.white, size: 28),
-                        const SizedBox(width: 12),
-                        Text(
-                          animal.nombre,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black45,
-                                blurRadius: 8,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
+                  // Minimalist Name indicator
+                  Text(
+                    animal.nombre,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black87,
+                          blurRadius: 16,
+                          offset: Offset(0, 4),
+                        ),
+                        Shadow(
+                          color: Colors.black54,
+                          blurRadius: 4,
+                          offset: Offset(0, 1),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Chips de información
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
-                    children: [
-                      _buildInfoChip(
-                        Icons.cake,
-                        animal.getEdadFormateada(),
-                        AppColors.warning,
-                      ),
-                      _buildInfoChip(
-                        animal.sexo.name == 'macho' ? Icons.male : Icons.female,
-                        animal.sexo.name.toUpperCase(),
-                        animal.sexo.name == 'macho'
-                            ? AppColors.info
-                            : AppColors.accent,
-                      ),
-                      _buildInfoChip(Icons.tag, animal.raza, AppColors.success),
-                      if (animal.estado.name == 'activo')
-                        _buildInfoChip(
-                          Icons.check_circle,
-                          'ACTIVO',
-                          AppColors.success,
-                        ),
-                    ],
                   ),
                 ],
               ),
@@ -238,46 +199,6 @@ class CustomSliverHeader extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildInfoChip(IconData icon, String label, Color color) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(25),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: color.withValues(alpha: 0.4), width: 1.5),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: color, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      blurRadius: 2,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

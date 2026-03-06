@@ -7,6 +7,7 @@ class AnimatedInfoCard extends StatelessWidget {
   final Color color;
   final Widget child;
   final int delay;
+  final VoidCallback? onTap; // Nueva propiedad opcional
 
   const AnimatedInfoCard({
     super.key,
@@ -15,6 +16,7 @@ class AnimatedInfoCard extends StatelessWidget {
     required this.color,
     required this.child,
     this.delay = 0,
+    this.onTap,
   });
 
   @override
@@ -50,50 +52,58 @@ class AnimatedInfoCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 child: Column(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            color.withValues(alpha: 0.9),
-                            color,
-                          ],
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: onTap,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              icon,
-                              color: Colors.white,
-                              size: 24,
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [color.withValues(alpha: 0.9), color],
                             ),
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Text(
-                              title,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  icon,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Text(
+                                  title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              if (onTap != null)
+                                Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                  size: 18,
+                                ),
+                            ],
                           ),
-                          Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            size: 18,
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                     Container(

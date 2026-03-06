@@ -13,6 +13,7 @@ class NfcService {
     // 1. Verificar disponibilidad de NFC
     var availability = await FlutterNfcKit.nfcAvailability;
     if (availability == NFCAvailability.not_supported) {
+      if (!context.mounted) return null;
       await _showAlertDialog(
         context: context,
         title: 'NFC no soportado',
@@ -20,10 +21,12 @@ class NfcService {
       );
       return null;
     } else if (availability == NFCAvailability.disabled) {
+      if (!context.mounted) return null;
       await _showAlertDialog(
         context: context,
         title: 'NFC desactivado',
-        message: 'Por favor, activa el NFC en la configuración de tu dispositivo.',
+        message:
+            'Por favor, activa el NFC en la configuración de tu dispositivo.',
         actionText: 'Abrir Configuración',
         action: () {
           const intent = AndroidIntent(action: 'android.settings.NFC_SETTINGS');
@@ -42,6 +45,7 @@ class NfcService {
 
       // Si se lee un tag, devolvemos su ID
       HapticFeedback.mediumImpact(); // Vibración para confirmar
+      if (!context.mounted) return tag.id;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Chip NFC leído correctamente'),
@@ -87,6 +91,7 @@ class NfcService {
     nfcIdController.dispose();
 
     if (id != null && id.isNotEmpty) {
+      if (!context.mounted) return id;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('ID NFC simulado correctamente'),

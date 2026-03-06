@@ -30,13 +30,13 @@ class SiregaDropdown<T> extends StatelessWidget {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: AppSpacing.xs),
           DropdownButtonFormField<T>(
-            value: value,
+            initialValue: value,
             items: items,
             onChanged: onChanged,
             validator: validator,
@@ -45,7 +45,10 @@ class SiregaDropdown<T> extends StatelessWidget {
               hintText: hint ?? 'Seleccione $label',
               prefixIcon: prefixIcon,
             ),
-            icon: Icon(Icons.keyboard_arrow_down_rounded, color: Theme.of(context).colorScheme.primary),
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             dropdownColor: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),

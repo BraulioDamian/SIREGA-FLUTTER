@@ -1,12 +1,15 @@
 // Script temporal para verificar datos de SINIGA en Isar
+import 'package:flutter/foundation.dart';
+import 'package:isar/isar.dart';
+import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 
 Future<void> checkSinigaData() async {
-  print('🔍 Verificando datos de SINIGA en Isar...\n');
+  debugPrint('🔍 Verificando datos de SINIGA en Isar...\n');
 
   final animals = await IsarService.isar.animals.where().findAll();
 
-  print('📊 Total de animales: ${animals.length}\n');
+  debugPrint('📊 Total de animales: ${animals.length}\n');
 
   int withSiniga = 0;
   int withoutSiniga = 0;
@@ -17,7 +20,7 @@ Future<void> checkSinigaData() async {
 
     if (siniga == null) {
       withoutSiniga++;
-      print('❌ ${animal.nombre} (${animal.nfcChipId}) - SIN siniigaId');
+      debugPrint('❌ ${animal.nombre} (${animal.nfcChipId}) - SIN siniigaId');
     } else {
       final hasEspecie = siniga.especie != null;
       final hasEstado = siniga.estadoClave != null;
@@ -25,35 +28,39 @@ Future<void> checkSinigaData() async {
 
       if (hasEspecie && hasEstado && hasNumero) {
         withSiniga++;
-        print('✅ ${animal.nombre} (${animal.nfcChipId}) - CON siniigaId válido:');
-        print('   especie: ${siniga.especie}');
-        print('   estadoClave: ${siniga.estadoClave}');
-        print('   numeroNacional: ${siniga.numeroNacional}');
-        print('   fullId: ${siniga.fullId}');
+        debugPrint(
+          '✅ ${animal.nombre} (${animal.nfcChipId}) - CON siniigaId válido:',
+        );
+        debugPrint('   especie: ${siniga.especie}');
+        debugPrint('   estadoClave: ${siniga.estadoClave}');
+        debugPrint('   numeroNacional: ${siniga.numeroNacional}');
+        debugPrint('   fullId: ${siniga.fullId}');
       } else {
         withPartialSiniga++;
-        print('⚠️  ${animal.nombre} (${animal.nfcChipId}) - SINIGA parcial:');
-        print('   especie: ${siniga.especie ?? "NULL"}');
-        print('   estadoClave: ${siniga.estadoClave ?? "NULL"}');
-        print('   numeroNacional: ${siniga.numeroNacional ?? "NULL"}');
+        debugPrint(
+          '⚠️  ${animal.nombre} (${animal.nfcChipId}) - SINIGA parcial:',
+        );
+        debugPrint('   especie: ${siniga.especie ?? "NULL"}');
+        debugPrint('   estadoClave: ${siniga.estadoClave ?? "NULL"}');
+        debugPrint('   numeroNacional: ${siniga.numeroNacional ?? "NULL"}');
       }
     }
-    print('');
+    debugPrint('');
   }
 
-  print('\n📈 RESUMEN:');
-  print('   ✅ Con SINIGA válido: $withSiniga');
-  print('   ⚠️  Con SINIGA parcial: $withPartialSiniga');
-  print('   ❌ Sin SINIGA: $withoutSiniga');
-  print('   📊 Total: ${animals.length}\n');
+  debugPrint('\n📈 RESUMEN:');
+  debugPrint('   ✅ Con SINIGA válido: $withSiniga');
+  debugPrint('   ⚠️  Con SINIGA parcial: $withPartialSiniga');
+  debugPrint('   ❌ Sin SINIGA: $withoutSiniga');
+  debugPrint('   📊 Total: ${animals.length}\n');
 
   if (withSiniga == 0) {
-    print('⚠️  NINGÚN animal tiene siniigaId válido.');
-    print('   Esto es normal si los animales fueron creados antes de');
-    print('   implementar el campo siniigaId.\n');
-    print('💡 SOLUCIÓN:');
-    print('   1. Edita un animal y agrega su ID SINIGA');
-    print('   2. O crea un animal nuevo con ID SINIGA');
-    print('   3. Luego sincroniza para ver el campo en Firestore');
+    debugPrint('⚠️  NINGÚN animal tiene siniigaId válido.');
+    debugPrint('   Esto es normal si los animales fueron creados antes de');
+    debugPrint('   implementar el campo siniigaId.\n');
+    debugPrint('💡 SOLUCIÓN:');
+    debugPrint('   1. Edita un animal y agrega su ID SINIGA');
+    debugPrint('   2. O crea un animal nuevo con ID SINIGA');
+    debugPrint('   3. Luego sincroniza para ver el campo en Firestore');
   }
 }

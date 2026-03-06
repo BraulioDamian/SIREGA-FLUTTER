@@ -1,5 +1,6 @@
 // lib/nucleo/servicios/connection_service.dart
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// Servicio para detectar y monitorear la conexión a internet
@@ -61,10 +62,10 @@ class ConnectionService {
 
     // Ejecutar callbacks si cambió
     if (_isConnected && !wasConnected) {
-      print('📡 Conexión a internet detectada');
+      debugPrint('📡 Conexión a internet detectada');
       onConnected?.call();
     } else if (!_isConnected && wasConnected) {
-      print('📡 Conexión a internet perdida');
+      debugPrint('📡 Conexión a internet perdida');
       onDisconnected?.call();
     }
   }
@@ -72,10 +73,12 @@ class ConnectionService {
   /// Determinar si hay conexión basado en los resultados
   bool _hasConnection(List<ConnectivityResult> results) {
     // Si hay cualquier tipo de conexión (WiFi, Mobile, Ethernet)
-    return results.any((result) =>
-        result == ConnectivityResult.wifi ||
-        result == ConnectivityResult.mobile ||
-        result == ConnectivityResult.ethernet);
+    return results.any(
+      (result) =>
+          result == ConnectivityResult.wifi ||
+          result == ConnectivityResult.mobile ||
+          result == ConnectivityResult.ethernet,
+    );
   }
 
   /// Obtener descripción del tipo de conexión

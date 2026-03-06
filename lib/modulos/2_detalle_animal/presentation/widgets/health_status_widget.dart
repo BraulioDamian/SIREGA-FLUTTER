@@ -4,14 +4,10 @@ import 'package:sirega_app/core/theme/app_colors.dart';
 class HealthStatusWidget extends StatelessWidget {
   final String status;
 
-  const HealthStatusWidget({
-    super.key,
-    required this.status,
-  });
+  const HealthStatusWidget({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final isHealthy = status.toLowerCase() == 'sano';
     final color = _getStatusColor();
     final icon = _getStatusIcon();
     final message = _getStatusMessage();
@@ -35,10 +31,7 @@ class HealthStatusWidget extends StatelessWidget {
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 2,
-              ),
+              border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
             ),
             child: Column(
               children: [
@@ -64,11 +57,7 @@ class HealthStatusWidget extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: Icon(
-                          icon,
-                          color: color,
-                          size: 40,
-                        ),
+                        child: Icon(icon, color: color, size: 40),
                       ),
                     );
                   },
@@ -107,7 +96,7 @@ class HealthStatusWidget extends StatelessWidget {
 
   Widget _buildHealthBar(Color color) {
     double percentage = _getHealthPercentage();
-    
+
     return Column(
       children: [
         Row(
@@ -149,10 +138,7 @@ class HealthStatusWidget extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        color,
-                        color.withValues(alpha: 0.7),
-                      ],
+                      colors: [color, color.withValues(alpha: 0.7)],
                     ),
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
