@@ -24,29 +24,7 @@ class CustomSliverHeader extends StatelessWidget {
       stretchModes: const [
         StretchMode.zoomBackground,
         StretchMode.blurBackground,
-        StretchMode.fadeTitle,
       ],
-      centerTitle: false,
-      titlePadding: const EdgeInsets.only(left: 64, bottom: 16, right: 16),
-      title: AnimatedOpacity(
-        duration: const Duration(milliseconds: 200),
-        opacity: isScrolled ? 1.0 : 0.0,
-        child: Text(
-          animal.nombre,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            shadows: [
-              Shadow(
-                color: Colors.black54,
-                blurRadius: 4,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-        ),
-      ),
       background: Stack(
         fit: StackFit.expand,
         children: [
@@ -75,16 +53,17 @@ class CustomSliverHeader extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  Colors.black.withValues(alpha: 0.1),
-                  Colors.black.withValues(alpha: 0.4),
+                  Colors.black.withValues(alpha: 0.05),
+                  Colors.black.withValues(alpha: 0.3),
+                  Colors.black.withValues(alpha: 0.6),
                 ],
-                stops: const [0.5, 0.75, 1.0],
+                stops: const [0.3, 0.55, 0.78, 1.0],
               ),
             ),
           ),
           // Información del animal
           Positioned(
-            bottom: 20,
+            bottom: 72,
             left: 20,
             right: 20,
             child: FadeTransition(

@@ -23,31 +23,42 @@ class ReproductionTab extends StatelessWidget {
     return ListView(
       padding: padding,
       physics: const BouncingScrollPhysics(),
-      children: [
-        AnimatedInfoCard(
-          title: 'Estado Reproductivo',
-          icon: Icons.child_care,
-          color: Colors.pink,
-          delay: 0,
-          child: _buildReproductiveStatus(context),
-        ),
-        const SizedBox(height: 16),
-        AnimatedInfoCard(
-          title: 'Historial de Crías',
-          icon: Icons.pets,
-          color: Colors.indigo,
-          delay: 100,
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Historial de crías completo próximamente'),
-              ),
-            );
-          },
-          child: _buildOffspringHistory(context),
-        ),
-      ],
+      children: _buildChildren(context),
     );
+  }
+
+  List<Widget> _buildChildren(BuildContext context) {
+    return [
+      AnimatedInfoCard(
+        title: 'Estado Reproductivo',
+        icon: Icons.child_care,
+        color: Colors.pink,
+        delay: 0,
+        child: _buildReproductiveStatus(context),
+      ),
+      const SizedBox(height: 16),
+      AnimatedInfoCard(
+        title: 'Historial de Crías',
+        icon: Icons.pets,
+        color: Colors.indigo,
+        delay: 100,
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Historial de crías completo próximamente'),
+            ),
+          );
+        },
+        child: _buildOffspringHistory(context),
+      ),
+    ];
+  }
+
+  static List<Widget> buildChildrenStatic(BuildContext context, Animal animal) {
+    return ReproductionTab(
+      animal: animal,
+      padding: EdgeInsets.zero,
+    )._buildChildren(context);
   }
 
   Widget _buildReproductiveStatus(BuildContext context) {
@@ -234,6 +245,18 @@ class ReproductionTab extends StatelessWidget {
           }).toList(),
         );
       },
+    );
+  }
+}
+
+class ReproductionTabContent extends StatelessWidget {
+  final Animal animal;
+  const ReproductionTabContent({super.key, required this.animal});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: ReproductionTab.buildChildrenStatic(context, animal),
     );
   }
 }

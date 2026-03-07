@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/presentation/widgets/native_dropdown/native_dropdown.dart';
+import 'package:sirega_app/presentation/widgets/native_dropdown/dropdown_item_tile.dart';
 import '../controllers/animal_form_controller.dart';
 
 /// Sección del formulario para información de salud del animal
@@ -15,87 +18,67 @@ class HealthFormSection extends StatelessWidget {
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
 
-            return Card(
-              elevation: 2,
-              child: Padding(
-                padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(context, isMobile),
-                    SizedBox(height: isMobile ? 8 : 12),
-                    _buildDescription(context, isMobile),
-                    SizedBox(height: isMobile ? 12 : 16),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                NativeDropdown<EstadoSalud>(
+                  controller: controller.estadoSaludDisplayController,
+                  focusNode: controller.estadoSaludFocus,
+                  labelText: 'Estado de Salud',
+                  prefixIcon: Icons.favorite,
+                  items: EstadoSalud.values,
+                  displayStringForOption: (e) => e.displayName,
+                  onSelected: (estado) {
+                    controller.setEstadoSalud(estado);
+                  },
+                  readOnly: true,
+                  initialSelection: controller.estadoSalud,
+                  itemBuilder: (context, estado) => DropdownItemTile(
+                    icon: estado.icon,
+                    color: estado.color,
+                    text: estado.displayName,
+                  ),
+                ),
 
-                    // Estado de Salud
-                    DropdownButtonFormField<EstadoSalud>(
-                      initialValue: controller.estadoSalud,
-                      decoration: _inputDecoration(
-                        'Estado de Salud',
-                        _getHealthIcon(controller.estadoSalud),
-                        context: context,
-                      ),
-                      items: EstadoSalud.values.map((estado) {
-                        return DropdownMenuItem(
-                          value: estado,
-                          child: Row(
-                            children: [
-                              Icon(
-                                _getHealthIcon(estado),
-                                color: _getHealthColor(estado),
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(_getEstadoSaludName(estado)),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          controller.setEstadoSalud(value);
-                        }
-                      },
-                    ),
+                SizedBox(height: isMobile ? 12 : 16),
 
-                    SizedBox(height: isMobile ? 12 : 16),
+                NativeDropdown<EstadoAnimal>(
+                  controller: controller.estadoAnimalDisplayController,
+                  focusNode: controller.estadoAnimalFocus,
+                  labelText: 'Estado del Animal',
+                  prefixIcon: Icons.pets,
+                  items: EstadoAnimal.values,
+                  displayStringForOption: (e) => e.displayName,
+                  onSelected: (estado) {
+                    controller.setEstadoAnimal(estado);
+                  },
+                  readOnly: true,
+                  initialSelection: controller.estadoAnimal,
+                  itemBuilder: (context, estado) => DropdownItemTile(
+                    icon: estado.icon,
+                    color: estado.color,
+                    text: estado.displayName,
+                  ),
+                ),
 
-                    // Estado del Animal
-                    DropdownButtonFormField<EstadoAnimal>(
-                      initialValue: controller.estadoAnimal,
-                      decoration: _inputDecoration('Estado del Animal', Icons.pets, context: context),
-                      items: EstadoAnimal.values.map((estado) {
-                        return DropdownMenuItem(
-                          value: estado,
-                          child: Text(_getEstadoAnimalName(estado)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          controller.setEstadoAnimal(value);
-                        }
-                      },
-                    ),
-
-                    // Campo condicional: Descripción de la situación de salud
-                    if (controller.requiereDescripcionSalud(controller.estadoSalud)) ...[
+                if (controller.requiereDescripcionSalud(controller.estadoSalud)) ...[
                       SizedBox(height: isMobile ? 12 : 16),
 
                       // Banner informativo
                       Container(
                         padding: EdgeInsets.all(isMobile ? 10 : 12),
                         decoration: BoxDecoration(
-                          color: _getHealthColor(controller.estadoSalud).withAlpha(26),
+                          color: controller.estadoSalud.color.withAlpha(26),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: _getHealthColor(controller.estadoSalud).withAlpha(77),
+                            color: controller.estadoSalud.color.withAlpha(77),
                           ),
                         ),
                         child: Row(
                           children: [
                             Icon(
                               Icons.warning_amber_rounded,
-                              color: _getHealthColor(controller.estadoSalud),
+                              color: controller.estadoSalud.color,
                               size: isMobile ? 18 : 20,
                             ),
                             SizedBox(width: isMobile ? 8 : 12),
@@ -103,7 +86,7 @@ class HealthFormSection extends StatelessWidget {
                               child: Text(
                                 'Se requiere especificar el diagnóstico, tratamiento o situación del animal',
                                 style: TextStyle(
-                                  color: _getHealthColor(controller.estadoSalud).withAlpha(230),
+                                  color: controller.estadoSalud.color.withAlpha(230),
                                   fontSize: isMobile ? 11 : 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -142,45 +125,10 @@ class HealthFormSection extends StatelessWidget {
                       ),
                     ],
                   ],
-                ),
-              ),
-            );
+                );
           },
         );
       },
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, bool isMobile) {
-    return Row(
-      children: [
-        Icon(
-          Icons.health_and_safety,
-          color: Theme.of(context).primaryColor,
-          size: isMobile ? 20 : 24,
-        ),
-        SizedBox(width: isMobile ? 6 : 8),
-        Expanded(
-          child: Text(
-            'Estado de Salud',
-            style: TextStyle(
-              fontSize: isMobile ? 16 : 18,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDescription(BuildContext context, bool isMobile) {
-    return Text(
-      'Información sobre el estado de salud actual del animal',
-      style: TextStyle(
-        fontSize: isMobile ? 12 : 14,
-        color: Colors.grey.shade600,
-      ),
     );
   }
 
@@ -216,75 +164,4 @@ class HealthFormSection extends StatelessWidget {
     );
   }
 
-  Color _getHealthColor(EstadoSalud estado) {
-    switch (estado) {
-      case EstadoSalud.sano:
-        return Colors.green;
-      case EstadoSalud.enfermo:
-        return Colors.orange;
-      case EstadoSalud.critico:
-        return Colors.red;
-      case EstadoSalud.convaleciente:
-        return Colors.blue;
-      case EstadoSalud.enTratamiento:
-        return Colors.purple;
-      case EstadoSalud.enObservacion:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getHealthIcon(EstadoSalud estado) {
-    switch (estado) {
-      case EstadoSalud.sano:
-        return Icons.check_circle_outline;
-      case EstadoSalud.enfermo:
-        return Icons.sick_outlined;
-      case EstadoSalud.critico:
-        return Icons.warning_amber_rounded;
-      case EstadoSalud.convaleciente:
-        return Icons.health_and_safety_outlined;
-      case EstadoSalud.enTratamiento:
-        return Icons.medical_services_outlined;
-      case EstadoSalud.enObservacion:
-        return Icons.visibility_outlined;
-    }
-  }
-
-  String _getEstadoSaludName(EstadoSalud estado) {
-    switch (estado) {
-      case EstadoSalud.sano:
-        return 'Sano';
-      case EstadoSalud.enfermo:
-        return 'Enfermo';
-      case EstadoSalud.critico:
-        return 'Crítico';
-      case EstadoSalud.convaleciente:
-        return 'Convaleciente';
-      case EstadoSalud.enTratamiento:
-        return 'En Tratamiento';
-      case EstadoSalud.enObservacion:
-        return 'En Observación';
-    }
-  }
-
-  String _getEstadoAnimalName(EstadoAnimal estado) {
-    switch (estado) {
-      case EstadoAnimal.activo:
-        return 'Activo';
-      case EstadoAnimal.vendido:
-        return 'Vendido';
-      case EstadoAnimal.muerto:
-        return 'Muerto';
-      case EstadoAnimal.perdido:
-        return 'Perdido';
-      case EstadoAnimal.enfermo:
-        return 'Enfermo';
-      case EstadoAnimal.cuarentena:
-        return 'Cuarentena';
-      case EstadoAnimal.prestado:
-        return 'Prestado';
-      case EstadoAnimal.enTransito:
-        return 'En Tránsito';
-    }
-  }
 }

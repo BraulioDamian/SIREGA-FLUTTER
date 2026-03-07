@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/animal_form_controller.dart';
 import '../../../widgets/native_dropdown/native_dropdown.dart';
+import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/core/widgets/sirega_text_field.dart';
-import 'package:sirega_app/core/widgets/sirega_card.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
+import 'package:sirega_app/presentation/widgets/native_dropdown/dropdown_item_tile.dart';
 
 class BasicInfoFormSection extends StatelessWidget {
   const BasicInfoFormSection({super.key});
@@ -17,44 +18,10 @@ class BasicInfoFormSection extends StatelessWidget {
         return LayoutBuilder(
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
-            
-            return SiregaCard(
-              padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(context, isMobile),
-                    SizedBox(height: isMobile ? 12 : 16),
-                    _buildFormFields(context, controller, isMobile),
-                  ],
-                ),
-            );
+            return _buildFormFields(context, controller, isMobile);
           },
         );
       },
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, bool isMobile) {
-    return Row(
-      children: [
-        Icon(
-          Icons.info_outline,
-          color: Theme.of(context).primaryColor,
-          size: isMobile ? 20 : 24,
-        ),
-        SizedBox(width: isMobile ? 6 : 8),
-        Expanded(
-          child: Text(
-            'Información Básica',
-            style: TextStyle(
-              fontSize: isMobile ? 16 : 18,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -187,36 +154,17 @@ class BasicInfoFormSection extends StatelessWidget {
       labelText: 'Sexo',
       prefixIcon: Icons.pets,
       items: sexoOptions,
-      displayStringForOption: _getSexoDisplayName,
+      displayStringForOption: (s) => s.displayName,
       onSelected: (sexo) {
         controller.setSexo(sexo);
       },
       readOnly: true,
       initialSelection: controller.sexo,
-      itemBuilder: (context, sexo) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Icon(
-                sexo == Sexo.macho ? Icons.male :
-                sexo == Sexo.hembra ? Icons.female : Icons.content_cut,
-                color: sexo == Sexo.macho ? AppColors.info :
-                       sexo == Sexo.hembra ? AppColors.error : AppColors.textHint,
-                size: 24,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                _getSexoDisplayName(sexo),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 15,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      itemBuilder: (context, sexo) => DropdownItemTile(
+        icon: sexo.icon,
+        color: sexo.color,
+        text: sexo.displayName,
+      ),
     );
   }
 
@@ -251,14 +199,4 @@ class BasicInfoFormSection extends StatelessWidget {
     );
   }
 
-  String _getSexoDisplayName(Sexo sexo) {
-    switch (sexo) {
-      case Sexo.macho:
-        return 'Macho';
-      case Sexo.hembra:
-        return 'Hembra';
-      case Sexo.castrado:
-        return 'Castrado';
-    }
-  }
 }

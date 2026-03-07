@@ -15,54 +15,65 @@ class ProductionTab extends StatelessWidget {
     return ListView(
       padding: padding,
       physics: const BouncingScrollPhysics(),
-      children: [
-        AnimatedInfoCard(
-          title: 'Producción',
-          icon: Icons.ssid_chart,
-          color: Colors.lightBlue,
-          delay: 0,
-          child: Column(
-            children: [
-              SizedBox(
-                height: 200,
-                child: ProductionChart(type: ChartType.weight, animal: animal),
-              ),
-              const SizedBox(height: 16),
-              // Aquí iría un resumen de estadísticas
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildStatCard(
-                    context,
-                    'Promedio (30d)',
-                    '---',
-                    Colors.lightBlue,
-                  ),
-                  _buildStatCard(context, 'Tendencia', '+0%', Colors.green),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        AnimatedInfoCard(
-          title: 'Historial Productivo',
-          icon: Icons.list_alt,
-          color: Colors.brown,
-          delay: 100,
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Historial productivo completo próximamente'),
-              ),
-            );
-          },
-          child: AnimalDetailHelpers.buildEmptyState(
-            'Sin registros productivos en el sistema',
-          ),
-        ),
-      ],
+      children: _buildChildren(context),
     );
+  }
+
+  List<Widget> _buildChildren(BuildContext context) {
+    return [
+      AnimatedInfoCard(
+        title: 'Producción',
+        icon: Icons.ssid_chart,
+        color: Colors.lightBlue,
+        delay: 0,
+        child: Column(
+          children: [
+            SizedBox(
+              height: 200,
+              child: ProductionChart(type: ChartType.weight, animal: animal),
+            ),
+            const SizedBox(height: 16),
+            // Aquí iría un resumen de estadísticas
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildStatCard(
+                  context,
+                  'Promedio (30d)',
+                  '---',
+                  Colors.lightBlue,
+                ),
+                _buildStatCard(context, 'Tendencia', '+0%', Colors.green),
+              ],
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 16),
+      AnimatedInfoCard(
+        title: 'Historial Productivo',
+        icon: Icons.list_alt,
+        color: Colors.brown,
+        delay: 100,
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Historial productivo completo próximamente'),
+            ),
+          );
+        },
+        child: AnimalDetailHelpers.buildEmptyState(
+          'Sin registros productivos en el sistema',
+        ),
+      ),
+    ];
+  }
+
+  static List<Widget> buildChildrenStatic(BuildContext context, Animal animal) {
+    return ProductionTab(
+      animal: animal,
+      padding: EdgeInsets.zero,
+    )._buildChildren(context);
   }
 
   Widget _buildStatCard(
@@ -93,5 +104,15 @@ class ProductionTab extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class ProductionTabContent extends StatelessWidget {
+  final Animal animal;
+  const ProductionTabContent({super.key, required this.animal});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: ProductionTab.buildChildrenStatic(context, animal));
   }
 }

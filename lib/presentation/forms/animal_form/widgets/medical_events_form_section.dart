@@ -15,19 +15,10 @@ class MedicalEventsFormSection extends StatelessWidget {
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
 
-            return Card(
-              elevation: 2,
-              child: Padding(
-                padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(context, isMobile),
-                    SizedBox(height: isMobile ? 8 : 12),
-                    _buildDescription(context, isMobile),
-                    SizedBox(height: isMobile ? 12 : 16),
-
-                    // Lista de eventos médicos
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Lista de eventos médicos
                     if (controller.eventosMedicos.isEmpty)
                       _buildEmptyState(isMobile)
                     else
@@ -58,47 +49,14 @@ class MedicalEventsFormSection extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-              ),
-            );
+                );
           },
         );
       },
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isMobile) {
-    return Row(
-      children: [
-        Icon(
-          Icons.medical_services,
-          color: Theme.of(context).primaryColor,
-          size: isMobile ? 20 : 24,
-        ),
-        SizedBox(width: isMobile ? 6 : 8),
-        Expanded(
-          child: Text(
-            'Eventos Médicos',
-            style: TextStyle(
-              fontSize: isMobile ? 16 : 18,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildDescription(BuildContext context, bool isMobile) {
-    return Text(
-      'Desparasitaciones, tratamientos y otros eventos médicos',
-      style: TextStyle(
-        fontSize: isMobile ? 12 : 14,
-        color: Colors.grey.shade600,
-      ),
-    );
-  }
 
   Widget _buildEmptyState(bool isMobile) {
     return Container(

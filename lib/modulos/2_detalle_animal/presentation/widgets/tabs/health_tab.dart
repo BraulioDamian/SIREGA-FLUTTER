@@ -22,72 +22,81 @@ class HealthTab extends StatelessWidget {
     return ListView(
       padding: padding,
       physics: const BouncingScrollPhysics(),
-      children: [
-        AnimatedInfoCard(
-          title: 'Estado de Salud',
-          icon: Icons.favorite,
-          color: Colors.red,
-          delay: 0,
-          child: Column(
-            children: [
-              HealthStatusWidget(status: animal.estadoSalud.name),
-              const SizedBox(height: 20),
-              AnimalDetailHelpers.buildDetailRow(
-                context,
-                'Última Revisión',
-                animal.fechaUltimaRevision != null
-                    ? AnimalDetailHelpers.formatDate(
-                        animal.fechaUltimaRevision!,
-                      )
-                    : 'Sin registros',
-                Icons.medical_services,
-                valueColor: Colors.teal,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        AnimatedInfoCard(
-          title: 'Historial Médico',
-          icon: Icons.history,
-          color: Colors.teal,
-          delay: 100,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SanitaryHistoryScreen(
-                  animalId: animal.id,
-                  animalName: animal.nombre,
-                  initialFilter: 'Todos',
-                ),
-              ),
-            );
-          },
-          child: _buildMedicalHistory(context),
-        ),
-        const SizedBox(height: 16),
-        AnimatedInfoCard(
-          title: 'Vacunas Aplicadas',
-          icon: Icons.vaccines,
-          color: Colors.orange,
-          delay: 200,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SanitaryHistoryScreen(
-                  animalId: animal.id,
-                  animalName: animal.nombre,
-                  initialFilter: 'Vacunas',
-                ),
-              ),
-            );
-          },
-          child: _buildVaccinesList(context),
-        ),
-      ],
+      children: _buildChildren(context),
     );
+  }
+
+  List<Widget> _buildChildren(BuildContext context) {
+    return [
+      AnimatedInfoCard(
+        title: 'Estado de Salud',
+        icon: Icons.favorite,
+        color: Colors.red,
+        delay: 0,
+        child: Column(
+          children: [
+            HealthStatusWidget(status: animal.estadoSalud.name),
+            const SizedBox(height: 20),
+            AnimalDetailHelpers.buildDetailRow(
+              context,
+              'Última Revisión',
+              animal.fechaUltimaRevision != null
+                  ? AnimalDetailHelpers.formatDate(animal.fechaUltimaRevision!)
+                  : 'Sin registros',
+              Icons.medical_services,
+              valueColor: Colors.teal,
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 16),
+      AnimatedInfoCard(
+        title: 'Historial Médico',
+        icon: Icons.history,
+        color: Colors.teal,
+        delay: 100,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SanitaryHistoryScreen(
+                animalId: animal.id,
+                animalName: animal.nombre,
+                initialFilter: 'Todos',
+              ),
+            ),
+          );
+        },
+        child: _buildMedicalHistory(context),
+      ),
+      const SizedBox(height: 16),
+      AnimatedInfoCard(
+        title: 'Vacunas Aplicadas',
+        icon: Icons.vaccines,
+        color: Colors.orange,
+        delay: 200,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SanitaryHistoryScreen(
+                animalId: animal.id,
+                animalName: animal.nombre,
+                initialFilter: 'Vacunas',
+              ),
+            ),
+          );
+        },
+        child: _buildVaccinesList(context),
+      ),
+    ];
+  }
+
+  static List<Widget> buildChildrenStatic(BuildContext context, Animal animal) {
+    return HealthTab(
+      animal: animal,
+      padding: EdgeInsets.zero,
+    )._buildChildren(context);
   }
 
   Widget _buildMedicalHistory(BuildContext context) {
@@ -177,5 +186,15 @@ class HealthTab extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class HealthTabContent extends StatelessWidget {
+  final Animal animal;
+  const HealthTabContent({super.key, required this.animal});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: HealthTab.buildChildrenStatic(context, animal));
   }
 }

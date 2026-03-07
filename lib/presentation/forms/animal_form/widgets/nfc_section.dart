@@ -22,47 +22,10 @@ class _NfcSectionState extends State<NfcSection> {
         return LayoutBuilder(
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
-            
-            return Card(
-              elevation: 2,
-              child: Padding(
-                padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildHeader(context, isMobile),
-                    SizedBox(height: isMobile ? 12 : 16),
-                    _buildNfcContent(context, controller, hasNfc, isMobile),
-                  ],
-                ),
-              ),
-            );
+            return _buildNfcContent(context, controller, hasNfc, isMobile);
           },
         );
       },
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, bool isMobile) {
-    return Row(
-      children: [
-        Icon(
-          Icons.nfc,
-          color: Theme.of(context).primaryColor,
-          size: isMobile ? 20 : 24,
-        ),
-        SizedBox(width: isMobile ? 6 : 8),
-        Expanded(
-          child: Text(
-            'Chip NFC (Obligatorio)',
-            style: TextStyle(
-              fontSize: isMobile ? 16 : 18,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-        ),
-      ],
     );
   }
 

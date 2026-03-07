@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/modelos/siniga_model.dart';
+import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
 import 'package:sirega_app/presentation/widgets/shared/json_data_loader.dart';
 
 // Modelos locales para el formulario
@@ -88,6 +89,9 @@ class AnimalFormController extends ChangeNotifier {
   late final TextEditingController razaDisplayController;
   late final TextEditingController sexoDisplayController;
   late final TextEditingController estadoDisplayController;
+  late final TextEditingController estadoSaludDisplayController;
+  late final TextEditingController estadoAnimalDisplayController;
+  late final TextEditingController estadoReproductivoDisplayController;
 
   // Controllers adicionales para edición completa
   late final TextEditingController idAreteVisualController;
@@ -106,6 +110,9 @@ class AnimalFormController extends ChangeNotifier {
   final FocusNode razaFocus = FocusNode();
   final FocusNode sexoFocus = FocusNode();
   final FocusNode estadoDropdownFocus = FocusNode();
+  final FocusNode estadoSaludFocus = FocusNode();
+  final FocusNode estadoAnimalFocus = FocusNode();
+  final FocusNode estadoReproductivoFocus = FocusNode();
   
   // Control de navegación automática
   bool _autoNavigationEnabled = true;
@@ -219,10 +226,12 @@ class AnimalFormController extends ChangeNotifier {
       text: animalOriginal?.idAreteNFC ?? ''
     );
 
-    // Inicializar controllers de display
     razaDisplayController = TextEditingController();
-    sexoDisplayController = TextEditingController(text: _getSexoDisplayName(Sexo.hembra));
+    sexoDisplayController = TextEditingController(text: Sexo.hembra.displayName);
     estadoDisplayController = TextEditingController();
+    estadoSaludDisplayController = TextEditingController(text: EstadoSalud.sano.displayName);
+    estadoAnimalDisplayController = TextEditingController(text: EstadoAnimal.activo.displayName);
+    estadoReproductivoDisplayController = TextEditingController();
 
     // Inicializar controllers adicionales
     idAreteVisualController = TextEditingController(
@@ -273,7 +282,7 @@ class AnimalFormController extends ChangeNotifier {
 
     // Cargar datos básicos
     _sexo = animalOriginal!.sexo;
-    sexoDisplayController.text = _getSexoDisplayName(_sexo);
+    sexoDisplayController.text = _sexo.displayName;
     _fechaNacimiento = animalOriginal!.fechaNacimiento;
     _nfcId = animalOriginal!.idAreteNFC;
 
@@ -288,6 +297,12 @@ class AnimalFormController extends ChangeNotifier {
     _estadoSalud = animalOriginal!.estadoSalud;
     _estadoReproductivo = animalOriginal!.estadoReproductivo;
     _gestante = animalOriginal!.gestante;
+
+    estadoSaludDisplayController.text = _estadoSalud.displayName;
+    estadoAnimalDisplayController.text = _estadoAnimal.displayName;
+    if (_estadoReproductivo != null) {
+      estadoReproductivoDisplayController.text = _estadoReproductivo!.displayName;
+    }
   }
   
   Future<void> _loadData() async {
@@ -506,7 +521,7 @@ class AnimalFormController extends ChangeNotifier {
   
   void setSexo(Sexo sexo) {
     _sexo = sexo;
-    sexoDisplayController.text = _getSexoDisplayName(sexo);
+    sexoDisplayController.text = sexo.displayName;
     notifyListeners();
   }
   
@@ -551,11 +566,13 @@ class AnimalFormController extends ChangeNotifier {
   // Setters para campos adicionales
   void setEstadoAnimal(EstadoAnimal estado) {
     _estadoAnimal = estado;
+    estadoAnimalDisplayController.text = estado.displayName;
     notifyListeners();
   }
 
   void setEstadoSalud(EstadoSalud estado) {
     _estadoSalud = estado;
+    estadoSaludDisplayController.text = estado.displayName;
     // Limpiar la descripción si el nuevo estado no la requiere
     if (!requiereDescripcionSalud(estado)) {
       descripcionSaludController.clear();
@@ -573,6 +590,11 @@ class AnimalFormController extends ChangeNotifier {
 
   void setEstadoReproductivo(EstadoReproductivo? estado) {
     _estadoReproductivo = estado;
+    if (estado != null) {
+      estadoReproductivoDisplayController.text = estado.displayName;
+    } else {
+      estadoReproductivoDisplayController.clear();
+    }
     notifyListeners();
   }
 
@@ -668,16 +690,7 @@ class AnimalFormController extends ChangeNotifier {
     }
   }
 
-  String _getSexoDisplayName(Sexo sexo) {
-    switch (sexo) {
-      case Sexo.macho:
-        return 'Macho';
-      case Sexo.hembra:
-        return 'Hembra';
-      case Sexo.castrado:
-        return 'Castrado';
-    }
-  }
+
   
   // Método para construir el objeto Animal
   Animal buildAnimal() {
@@ -775,6 +788,9 @@ class AnimalFormController extends ChangeNotifier {
     razaDisplayController.dispose();
     sexoDisplayController.dispose();
     estadoDisplayController.dispose();
+    estadoSaludDisplayController.dispose();
+    estadoAnimalDisplayController.dispose();
+    estadoReproductivoDisplayController.dispose();
 
     // Dispose de controllers adicionales
     idAreteVisualController.dispose();
@@ -792,6 +808,9 @@ class AnimalFormController extends ChangeNotifier {
     razaFocus.dispose();
     sexoFocus.dispose();
     estadoDropdownFocus.dispose();
+    estadoSaludFocus.dispose();
+    estadoAnimalFocus.dispose();
+    estadoReproductivoFocus.dispose();
 
     super.dispose();
   }

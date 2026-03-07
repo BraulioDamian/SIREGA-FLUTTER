@@ -21,37 +21,42 @@ class DetailTabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final padding = _getListPadding();
+    final bottomPad = isPortrait ? 100.0 : 30.0;
 
-    switch (tabType) {
-      case TabType.general:
-        return GeneralTab(animal: animal, padding: padding);
-      case TabType.health:
-        return HealthTab(animal: animal, padding: padding);
-      case TabType.reproduction:
-        return ReproductionTab(animal: animal, padding: padding);
-      case TabType.production:
-        return ProductionTab(animal: animal, padding: padding);
-    }
-  }
-
-  EdgeInsets _getListPadding() {
-    return EdgeInsets.fromLTRB(
-      16,
-      24,
-      16,
-      // Padding dinámico para que la lista empiece con espacio desde arriba
-      // y no sea tapada por el FAB ni el bottom navbar al final
-      _calculateDynamicPadding(),
+    // Builder needed so NestedScrollView.sliverOverlapAbsorberHandleFor
+    // gets the correct inner ScrollController context.
+    return Builder(
+      builder: (context) {
+        return CustomScrollView(
+          // The key ties each tab to its own scroll position.
+          key: PageStorageKey<TabType>(tabType),
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // This pushes the content down by the height of pinned headers
+            // (collapsed SliverAppBar + TabBar) so it never hides behind them.
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPad),
+              sliver: SliverToBoxAdapter(child: _buildTabChild(context)),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  double _calculateDynamicPadding() {
-    // Si estamos en portrait, dejamos espacio para el bottom navbar (si lo hay)
-    if (isPortrait) {
-      return 100.0;
+  Widget _buildTabChild(BuildContext context) {
+    switch (tabType) {
+      case TabType.general:
+        return GeneralTabContent(animal: animal);
+      case TabType.health:
+        return HealthTabContent(animal: animal);
+      case TabType.reproduction:
+        return ReproductionTabContent(animal: animal);
+      case TabType.production:
+        return ProductionTabContent(animal: animal);
     }
-    // En landscape, el bottom navbar no ocupa tanto espacio vertical
-    return 30.0;
   }
 }

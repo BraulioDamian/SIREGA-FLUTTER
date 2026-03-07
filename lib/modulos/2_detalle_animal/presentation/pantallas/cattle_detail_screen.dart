@@ -1,17 +1,19 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/bloc/cattle_detail_bloc.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/detail_tab_content.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/custom_sliver_header.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/delete_animal_dialog.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/detail_loading_state.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/detail_error_state.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/detail_floating_buttons.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/detail_action_sheets.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/editar_animal/editar_animal_screen.dart';
 import 'package:sirega_app/modulos/3_registro_evento/presentation/pantallas/seleccionar_tipo_evento_screen.dart';
-import 'package:flutter/rendering.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
 
 class CattleDetailScreen extends StatefulWidget {
@@ -142,52 +144,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
         ),
         child: BlocListener<CattleDetailBloc, CattleDetailState>(
           listenWhen: (previous, current) => current is CattleDetailActionState,
-          listener: (context, state) {
-            if (state is ShowInfoSnackbar) {
-              try {
-                final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
-                if (scaffoldMessenger != null) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      behavior: SnackBarBehavior.fixed,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                }
-              } catch (e) {
-                debugPrint('Error mostrando snackbar: ${state.message}');
-              }
-            }
-            if (state is AnimalDeactivationSuccess) {
-              Navigator.of(context).pop(); // Pop after successful deactivation
-            }
-            if (state is NavigateToEditScreen) {
-              final bloc = context.read<CattleDetailBloc>();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      EditarAnimalScreen(animal: state.animal),
-                ),
-              ).then((result) {
-                if (result != null && result is Animal) {
-                  bloc.add(LoadCattleDetail(result.id));
-                }
-              });
-            }
-            if (state is NavigateToRegisterEvent) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SeleccionarTipoEventoScreen(),
-                ),
-              );
-            }
-            if (state is ShowImagePickerBottomSheet) {
-              _showImageSourcePicker(context, state.animal);
-            }
-          },
+          listener: _handleBlocAction,
           child: Scaffold(
             extendBodyBehindAppBar: true,
             backgroundColor: AppColors.background,
@@ -197,10 +154,10 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
               builder: (context, state) {
                 if (state is CattleDetailLoading ||
                     state is CattleDetailInitial) {
-                  return _buildLoadingState();
+                  return const DetailLoadingState();
                 }
                 if (state is CattleDetailError) {
-                  return _buildErrorState(state.message);
+                  return DetailErrorState(message: state.message);
                 }
                 if (state is CattleDetailLoaded) {
                   return _buildLoadedBody(context, state.animal);
@@ -208,189 +165,6 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                 return const SizedBox.shrink(); // Should not happen
               },
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).primaryColor.withAlpha(26), // withOpacity(0.1)
-            Theme.of(context).primaryColor.withAlpha(13), // withOpacity(0.05)
-          ],
-        ),
-      ),
-      child: Center(
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: const Duration(seconds: 1),
-          builder: (context, value, child) {
-            return Transform.scale(
-              scale: value,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(
-                            context,
-                          ).primaryColor.withAlpha(51), // withOpacity(0.2)
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Cargando información',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Por favor espere...',
-                    style: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).primaryColor.withAlpha(153), // withOpacity(0.6)
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorState(String message) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.error.withValues(alpha: 0.1),
-            AppColors.warning.withValues(alpha: 0.1),
-          ],
-        ),
-      ),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 600),
-                builder: (context, value, child) {
-                  return Transform.scale(
-                    scale: value,
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.error.withAlpha(
-                              51,
-                            ), // withOpacity(0.2)
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.error_outline,
-                        size: 50,
-                        color: AppColors.error,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-              Text(
-                '¡Ups! Algo salió mal',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: AppColors.error,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.error.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: AppColors.error),
-                ),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.arrow_back_rounded),
-                label: const Text('Regresar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.error,
-                  foregroundColor: AppColors.surface,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 5,
-                ),
-              ),
-            ],
           ),
         ),
       ),
@@ -435,8 +209,17 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             headerSliverBuilder:
                 (BuildContext context, bool innerBoxIsScrolled) {
                   return <Widget>[
-                    _buildSliverAppBar(context, animal, size),
-                    _buildSliverTabBar(context),
+                    SliverOverlapAbsorber(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        context,
+                      ),
+                      sliver: _buildSliverAppBar(
+                        context,
+                        animal,
+                        size,
+                        innerBoxIsScrolled,
+                      ),
+                    ),
                   ];
                 },
             body: FadeTransition(
@@ -469,31 +252,67 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
             ),
           ),
         ),
-        if (_showFloatingButtons) _buildFloatingActionButtons(context, animal),
+        if (_showFloatingButtons)
+          DetailFloatingButtons(
+            scaleAnimation: _floatingButtonAnimation,
+            onRegisterEvent: () => context
+                .read<CattleDetailBloc>()
+                .add(RegisterEventClicked(animal)),
+            onAddPhoto: () => context
+                .read<CattleDetailBloc>()
+                .add(AddPhotoClicked(animal)),
+          ),
       ],
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context, Animal animal, Size size) {
+  Widget _buildSliverAppBar(
+    BuildContext context,
+    Animal animal,
+    Size size,
+    bool innerBoxIsScrolled,
+  ) {
     return SliverAppBar(
       expandedHeight: size.height * 0.45,
       pinned: true,
       stretch: true,
+      forceElevated: innerBoxIsScrolled,
       backgroundColor: Theme.of(context).primaryColor,
       elevation: 0,
-      leading: _buildBackButton(context),
+      centerTitle: false,
+      titleSpacing: 0,
+      leadingWidth: 48,
+      leading: const _BackButton(),
+      title: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: _isScrolled ? 1.0 : 0.0,
+        child: Text(
+          animal.nombre,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+      ),
       actions: [
-        _buildActionButton(
-          Icons.edit_rounded,
-          () => _editAnimal(context, animal),
+        _AppBarAction(
+          icon: Icons.edit_rounded,
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            context.read<CattleDetailBloc>().add(EditAnimalClicked(animal));
+          },
         ),
-        _buildActionButton(
-          Icons.share_rounded,
-          () => _shareAnimal(context, animal),
+        _AppBarAction(
+          icon: Icons.share_rounded,
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            context.read<CattleDetailBloc>().add(ShareAnimalClicked(animal));
+          },
         ),
-        _buildActionButton(
-          Icons.more_vert_rounded,
-          () => _showMoreOptions(context, animal),
+        _AppBarAction(
+          icon: Icons.more_vert_rounded,
+          onPressed: () => _onMoreOptions(context, animal),
         ),
       ],
       flexibleSpace: ValueListenableBuilder<double>(
@@ -507,14 +326,124 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           );
         },
       ),
+      bottom: _buildTabBar(context),
     );
   }
 
-  Widget _buildBackButton(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(8),
+  // ── Actions ─────────────────────────────────────────────────────────────
+
+  void _handleBlocAction(BuildContext context, CattleDetailState state) {
+    if (state is ShowInfoSnackbar) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text(state.message),
+          behavior: SnackBarBehavior.fixed,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+    if (state is AnimalDeactivationSuccess) {
+      Navigator.of(context).pop();
+    }
+    if (state is NavigateToEditScreen) {
+      final bloc = context.read<CattleDetailBloc>();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EditarAnimalScreen(animal: state.animal),
+        ),
+      ).then((result) {
+        if (result != null && result is Animal) {
+          bloc.add(LoadCattleDetail(result.id));
+        }
+      });
+    }
+    if (state is NavigateToRegisterEvent) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const SeleccionarTipoEventoScreen(),
+        ),
+      );
+    }
+    if (state is ShowImagePickerBottomSheet) {
+      showImageSourceSheet(
+        context,
+        state.animal,
+        context.read<CattleDetailBloc>(),
+      );
+    }
+  }
+
+  void _onMoreOptions(BuildContext context, Animal animal) {
+    final bloc = context.read<CattleDetailBloc>();
+    showMoreOptionsSheet(
+      context,
+      animal,
+      onPrint: () => bloc.add(PrintAnimalCardClicked(animal)),
+      onQR: () => bloc.add(GenerateQRCodeClicked(animal)),
+      onArchive: () => bloc.add(ArchiveAnimalClicked(animal)),
+      onDelete: () => showDialog(
+        context: context,
+        builder: (_) => BlocProvider.value(
+          value: bloc,
+          child: DeleteAnimalDialog(animal: animal),
+        ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildTabBar(BuildContext context) {
+    final tabBar = TabBar(
+      controller: _tabController,
+      isScrollable: true,
+      indicatorSize: TabBarIndicatorSize.tab,
+      indicatorWeight: 0,
+      indicator: BoxDecoration(
+        borderRadius: BorderRadius.circular(50),
+        color: AppColors.surface.withValues(alpha: 0.2),
+      ),
+      dividerColor: Colors.transparent,
+      labelColor: AppColors.surface,
+      unselectedLabelColor: AppColors.surface.withValues(alpha: 0.7),
+      labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+      unselectedLabelStyle: const TextStyle(
+        fontWeight: FontWeight.normal,
+        fontSize: 14,
+      ),
+      labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      tabs: [
+        _TabItem(icon: Icons.info_outline_rounded, label: 'General'),
+        _TabItem(icon: Icons.favorite_outline_rounded, label: 'Salud'),
+        _TabItem(icon: Icons.child_care_rounded, label: 'Reproducción'),
+        _TabItem(icon: Icons.trending_up_rounded, label: 'Producción'),
+      ],
+    );
+
+    return PreferredSize(
+      preferredSize: tabBar.preferredSize,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.85),
+        ),
+        child: tabBar,
+      ),
+    );
+  }
+}
+
+// ── Small private widgets ─────────────────────────────────────────────────
+
+class _BackButton extends StatelessWidget {
+  const _BackButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
       child: Material(
-        color: AppColors.textPrimary.withValues(alpha: 0.2), // withOpacity(0.2)
+        color: AppColors.textPrimary.withValues(alpha: 0.2),
         shape: const CircleBorder(),
         child: InkWell(
           onTap: () {
@@ -534,12 +463,20 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
       ),
     );
   }
+}
 
-  Widget _buildActionButton(IconData icon, VoidCallback onPressed) {
+class _AppBarAction extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _AppBarAction({required this.icon, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(8),
       child: Material(
-        color: AppColors.textPrimary.withValues(alpha: 0.2), // withOpacity(0.2)
+        color: AppColors.textPrimary.withValues(alpha: 0.2),
         shape: const CircleBorder(),
         child: InkWell(
           onTap: () {
@@ -555,44 +492,16 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
       ),
     );
   }
+}
 
-  Widget _buildSliverTabBar(BuildContext context) {
-    return SliverPersistentHeader(
-      pinned: true,
-      delegate: _SliverTabBarDelegate(
-        TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorSize: TabBarIndicatorSize.label,
-          indicatorWeight: 3,
-          indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(50),
-            color: Theme.of(context).primaryColor,
-          ),
-          labelColor: AppColors.surface,
-          unselectedLabelColor: AppColors.textSecondary,
-          labelStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.normal,
-            fontSize: 14,
-          ),
-          labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          tabs: [
-            _buildTab(Icons.info_outline_rounded, 'General'),
-            _buildTab(Icons.favorite_outline_rounded, 'Salud'),
-            _buildTab(Icons.child_care_rounded, 'Reproducción'),
-            _buildTab(Icons.trending_up_rounded, 'Producción'),
-          ],
-        ),
-      ),
-    );
-  }
+class _TabItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
 
-  Tab _buildTab(IconData icon, String label) {
+  const _TabItem({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
     return Tab(
       height: 48,
       child: Container(
@@ -608,433 +517,4 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
       ),
     );
   }
-
-  Widget _buildFloatingActionButtons(BuildContext context, Animal animal) {
-    return Positioned(
-      bottom: 20,
-      right: 20,
-      child: ScaleTransition(
-        scale: _floatingButtonAnimation,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildSmallFAB(
-              Icons.medical_services_rounded,
-              AppColors.warning,
-              () => _registerEvent(context, animal),
-              'Registrar Evento',
-            ),
-            const SizedBox(height: 12),
-            _buildMainFAB(
-              Icons.add_a_photo_rounded,
-              Theme.of(context).primaryColor,
-              () => _addPhoto(context, animal),
-              'Añadir Foto',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSmallFAB(
-    IconData icon,
-    Color color,
-    VoidCallback onPressed,
-    String tooltip,
-  ) {
-    return Tooltip(
-      message: tooltip,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 300),
-        builder: (context, value, child) {
-          return Transform.scale(
-            scale: value,
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withAlpha(102), // withOpacity(0.4)
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    onPressed();
-                  },
-                  customBorder: const CircleBorder(),
-                  child: Icon(icon, color: AppColors.surface, size: 24),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildMainFAB(
-    IconData icon,
-    Color color,
-    VoidCallback onPressed,
-    String tooltip,
-  ) {
-    return Tooltip(
-      message: tooltip,
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color,
-              color.withAlpha(204), // withOpacity(0.8)
-            ],
-          ),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: color.withAlpha(102), // withOpacity(0.4)
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              HapticFeedback.heavyImpact();
-              onPressed();
-            },
-            customBorder: const CircleBorder(),
-            child: Icon(icon, color: AppColors.surface, size: 28),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- Métodos de Acción Refactorizados ---
-  // Ahora solo envían eventos al BLoC.
-
-  void _editAnimal(BuildContext context, Animal animal) {
-    HapticFeedback.mediumImpact();
-    context.read<CattleDetailBloc>().add(EditAnimalClicked(animal));
-  }
-
-  void _shareAnimal(BuildContext context, Animal animal) {
-    HapticFeedback.mediumImpact();
-    context.read<CattleDetailBloc>().add(ShareAnimalClicked(animal));
-  }
-
-  void _showMoreOptions(BuildContext context, Animal animal) {
-    HapticFeedback.mediumImpact();
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (modalContext) => Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 50,
-              height: 5,
-              margin: const EdgeInsets.symmetric(vertical: 15),
-              decoration: BoxDecoration(
-                color: AppColors.divider,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            _buildOptionTile(
-              Icons.print_rounded,
-              'Imprimir ficha',
-              AppColors.info,
-              () => _printAnimalCard(context, animal),
-            ),
-            _buildOptionTile(
-              Icons.qr_code_rounded,
-              'Generar código QR',
-              AppColors.secondary,
-              () => _generateQRCode(context, animal),
-            ),
-            _buildOptionTile(
-              Icons.archive_rounded,
-              'Archivar',
-              AppColors.textHint,
-              () => _archiveAnimal(context, animal),
-            ),
-            const Divider(height: 1),
-            _buildOptionTile(
-              Icons.delete_rounded,
-              'Eliminar',
-              AppColors.error,
-              () => _deleteAnimal(context, animal),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOptionTile(
-    IconData icon,
-    String title,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          Navigator.pop(context); // Cierra el BottomSheet
-          onTap();
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1), // withOpacity(0.1)
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: color),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: color == AppColors.error
-                      ? AppColors.error
-                      : AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _registerEvent(BuildContext context, Animal animal) {
-    context.read<CattleDetailBloc>().add(RegisterEventClicked(animal));
-  }
-
-  void _addPhoto(BuildContext context, Animal animal) {
-    context.read<CattleDetailBloc>().add(AddPhotoClicked(animal));
-  }
-
-  void _printAnimalCard(BuildContext context, Animal animal) {
-    context.read<CattleDetailBloc>().add(PrintAnimalCardClicked(animal));
-  }
-
-  void _generateQRCode(BuildContext context, Animal animal) {
-    context.read<CattleDetailBloc>().add(GenerateQRCodeClicked(animal));
-  }
-
-  void _archiveAnimal(BuildContext context, Animal animal) {
-    context.read<CattleDetailBloc>().add(ArchiveAnimalClicked(animal));
-  }
-
-  void _deleteAnimal(BuildContext context, Animal animal) {
-    showDialog(
-      context: context,
-      builder: (_) => BlocProvider.value(
-        value: context.read<CattleDetailBloc>(),
-        child: DeleteAnimalDialog(animal: animal),
-      ),
-    );
-  }
-
-  void _showImageSourcePicker(BuildContext context, Animal animal) {
-    final bloc = context.read<CattleDetailBloc>();
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (modalContext) => Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 50,
-              height: 5,
-              margin: const EdgeInsets.symmetric(vertical: 15),
-              decoration: BoxDecoration(
-                color: AppColors.divider,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Actualizar foto de ${animal.nombre}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildImageOption(
-              Icons.camera_alt_rounded,
-              'Tomar foto',
-              AppColors.primary,
-              () async {
-                Navigator.pop(modalContext);
-                await _pickAndSaveImage(ImageSource.camera, animal, bloc);
-              },
-            ),
-            _buildImageOption(
-              Icons.photo_library_rounded,
-              'Elegir de galería',
-              AppColors.secondary,
-              () async {
-                Navigator.pop(modalContext);
-                await _pickAndSaveImage(ImageSource.gallery, animal, bloc);
-              },
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImageOption(
-    IconData icon,
-    String title,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 26),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _pickAndSaveImage(
-    ImageSource source,
-    Animal animal,
-    CattleDetailBloc bloc,
-  ) async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: source,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        bloc.add(UpdateAnimalPhoto(animal, File(image.path)));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al seleccionar imagen: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-  }
-}
-
-class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar _tabBar;
-
-  _SliverTabBarDelegate(this._tabBar);
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height + 24; // +24 para el padding vertical (12 + 12)
-
-  @override
-  double get maxExtent => _tabBar.preferredSize.height + 24;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          boxShadow: overlapsContent
-              ? [
-                  BoxShadow(
-                    color: AppColors.textPrimary.withValues(
-                      alpha: 0.05,
-                    ), // withOpacity(0.05)
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: _tabBar,
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverTabBarDelegate oldDelegate) => false;
 }

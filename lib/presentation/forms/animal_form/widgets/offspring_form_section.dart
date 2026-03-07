@@ -16,19 +16,10 @@ class OffspringFormSection extends StatelessWidget {
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
 
-            return Card(
-              elevation: 2,
-              child: Padding(
-                padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(context, isMobile),
-                    SizedBox(height: isMobile ? 8 : 12),
-                    _buildDescription(context, isMobile),
-                    SizedBox(height: isMobile ? 12 : 16),
-
-                    // Lista de partos/crías
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Lista de partos/crías
                     if (controller.registrosPartos.isEmpty)
                       _buildEmptyState(isMobile)
                     else
@@ -59,47 +50,14 @@ class OffspringFormSection extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-              ),
-            );
+                );
           },
         );
       },
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isMobile) {
-    return Row(
-      children: [
-        Icon(
-          Icons.child_care,
-          color: Theme.of(context).primaryColor,
-          size: isMobile ? 20 : 24,
-        ),
-        SizedBox(width: isMobile ? 6 : 8),
-        Expanded(
-          child: Text(
-            'Historial de Partos',
-            style: TextStyle(
-              fontSize: isMobile ? 16 : 18,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildDescription(BuildContext context, bool isMobile) {
-    return Text(
-      'Registro de crías y nacimientos',
-      style: TextStyle(
-        fontSize: isMobile ? 12 : 14,
-        color: Colors.grey.shade600,
-      ),
-    );
-  }
 
   Widget _buildEmptyState(bool isMobile) {
     return Container(
