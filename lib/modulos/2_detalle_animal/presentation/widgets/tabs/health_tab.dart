@@ -35,7 +35,7 @@ class HealthTab extends StatelessWidget {
         delay: 0,
         child: Column(
           children: [
-            HealthStatusWidget(status: animal.estadoSalud.name),
+            HealthStatusWidget(status: animal.estadoSalud),
             const SizedBox(height: 20),
             AnimalDetailHelpers.buildDetailRow(
               context,

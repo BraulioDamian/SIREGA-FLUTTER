@@ -106,12 +106,16 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
         appBar: AppBar(
           title: const Text(
             'Registrar Vacuno',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.surface,
+            ),
           ),
           centerTitle: true,
           elevation: 0,
           backgroundColor: theme.primaryColor,
           foregroundColor: AppColors.surface,
+          iconTheme: const IconThemeData(color: AppColors.surface),
           bottom: TabBar(
             controller: _tabController,
             isScrollable: true,
@@ -131,8 +135,8 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
             tabs: const [
               _TabItem(icon: Icons.info_outline_rounded, label: 'General'),
               _TabItem(icon: Icons.favorite_outline_rounded, label: 'Salud'),
-              _TabItem(icon: Icons.child_care_rounded, label: 'Reprod.'),
-              _TabItem(icon: Icons.trending_up_rounded, label: 'Produc.'),
+              _TabItem(icon: Icons.child_care_rounded, label: 'Reproducción'),
+              _TabItem(icon: Icons.trending_up_rounded, label: 'Producción'),
             ],
           ),
         ),
@@ -215,6 +219,7 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
 
   Widget _buildGeneralTab() {
     return ListView(
+      key: const PageStorageKey('general_tab'),
       padding: const EdgeInsets.all(16),
       children: [
         const FormSectionCard(
@@ -262,6 +267,7 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
 
   Widget _buildSaludTab() {
     return ListView(
+      key: const PageStorageKey('salud_tab'),
       padding: const EdgeInsets.all(16),
       children: [
         const FormSectionCard(
@@ -288,6 +294,7 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
 
   Widget _buildReproduccionTab() {
     return ListView(
+      key: const PageStorageKey('reproduccion_tab'),
       padding: const EdgeInsets.all(16),
       children: [
         const FormSectionCard(
@@ -308,6 +315,7 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
 
   Widget _buildProduccionTab() {
     return ListView(
+      key: const PageStorageKey('produccion_tab'),
       padding: const EdgeInsets.all(16),
       children: [
         const ProductionFormSection(),

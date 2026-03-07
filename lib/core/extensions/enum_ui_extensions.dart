@@ -31,6 +31,24 @@ extension EstadoSaludUI on EstadoSalud {
     EstadoSalud.enTratamiento => Colors.purple,
     EstadoSalud.enObservacion => Colors.grey,
   };
+
+  String get message => switch (this) {
+    EstadoSalud.sano => 'El animal se encuentra en perfectas condiciones de salud',
+    EstadoSalud.enfermo => 'Requiere atención médica y seguimiento constante',
+    EstadoSalud.critico => 'Estado crítico - Atención veterinaria urgente',
+    EstadoSalud.convaleciente => 'En proceso de recuperación y mejora',
+    EstadoSalud.enTratamiento => 'Recibiendo tratamiento médico activo',
+    EstadoSalud.enObservacion => 'Bajo observación veterinaria',
+  };
+
+  double get healthPercentage => switch (this) {
+    EstadoSalud.sano => 1.0,
+    EstadoSalud.enfermo => 0.5,
+    EstadoSalud.critico => 0.2,
+    EstadoSalud.convaleciente => 0.7,
+    EstadoSalud.enTratamiento => 0.4,
+    EstadoSalud.enObservacion => 0.6,
+  };
 }
 
 // ─── EstadoAnimal ───────────────────────────────────────
@@ -126,5 +144,72 @@ extension SexoUI on Sexo {
     Sexo.macho => AppColors.info,
     Sexo.hembra => AppColors.error,
     Sexo.castrado => AppColors.textHint,
+  };
+}
+
+// ─── TipoEvento ─────────────────────────────────────────
+
+extension TipoEventoUI on TipoEvento {
+  String get eventName => switch (this) {
+    TipoEvento.vacuna => 'VACUNA',
+    TipoEvento.desparasitante => 'DESPARASITANTE',
+    TipoEvento.tratamiento => 'TRATAMIENTO',
+    TipoEvento.revisionVeterinaria => 'REVISIÓN',
+    TipoEvento.castracion => 'CIRUGÍA',
+    TipoEvento.parto => 'PARTO',
+    TipoEvento.pesaje => 'PESAJE',
+    TipoEvento.inseminacion => 'INSEMINACIÓN',
+    TipoEvento.diagnosticoGestacion => 'DIAGNÓSTICO',
+    TipoEvento.descorne => 'DESCORNE',
+    TipoEvento.herraje => 'HERRAJE',
+    TipoEvento.muestraLaboratorio => 'LABORATORIO',
+    TipoEvento.cambioAlimentacion => 'ALIMENTACIÓN',
+    TipoEvento.movimiento => 'MOVIMIENTO',
+    TipoEvento.venta => 'VENTA',
+    TipoEvento.compra => 'COMPRA',
+    TipoEvento.muerte => 'MUERTE',
+    TipoEvento.otro => 'OTRO',
+  };
+
+  IconData get icon => switch (this) {
+    TipoEvento.vacuna => Icons.vaccines,
+    TipoEvento.desparasitante => Icons.bug_report,
+    TipoEvento.tratamiento => Icons.medication,
+    TipoEvento.revisionVeterinaria => Icons.health_and_safety,
+    TipoEvento.castracion => Icons.healing,
+    TipoEvento.parto => Icons.child_friendly,
+    TipoEvento.pesaje => Icons.monitor_weight,
+    TipoEvento.inseminacion => Icons.science,
+    TipoEvento.diagnosticoGestacion => Icons.pregnant_woman,
+    TipoEvento.descorne => Icons.content_cut,
+    TipoEvento.herraje => Icons.local_fire_department,
+    TipoEvento.muestraLaboratorio => Icons.biotech,
+    TipoEvento.cambioAlimentacion => Icons.restaurant,
+    TipoEvento.movimiento => Icons.swap_horiz,
+    TipoEvento.venta => Icons.sell,
+    TipoEvento.compra => Icons.shopping_cart,
+    TipoEvento.muerte => Icons.cancel_outlined,
+    TipoEvento.otro => Icons.medical_services,
+  };
+
+  Color get color => switch (this) {
+    TipoEvento.vacuna => AppColors.info,
+    TipoEvento.desparasitante => AppColors.success,
+    TipoEvento.tratamiento => AppColors.warning,
+    TipoEvento.revisionVeterinaria => AppColors.secondary,
+    TipoEvento.castracion => AppColors.error,
+    TipoEvento.parto => Colors.pink,
+    TipoEvento.pesaje => Colors.indigo,
+    TipoEvento.inseminacion => Colors.purple,
+    TipoEvento.diagnosticoGestacion => Colors.teal,
+    TipoEvento.descorne => Colors.brown,
+    TipoEvento.herraje => Colors.deepOrange,
+    TipoEvento.muestraLaboratorio => Colors.cyan,
+    TipoEvento.cambioAlimentacion => Colors.lime,
+    TipoEvento.movimiento => Colors.blueGrey,
+    TipoEvento.venta => Colors.green,
+    TipoEvento.compra => Colors.blue,
+    TipoEvento.muerte => Colors.red,
+    TipoEvento.otro => AppColors.textHint,
   };
 }

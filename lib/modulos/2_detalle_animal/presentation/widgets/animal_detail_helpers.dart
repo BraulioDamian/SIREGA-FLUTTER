@@ -88,22 +88,15 @@ class AnimalDetailHelpers {
     );
   }
 
-  /// Maps an animal status string to a standard UI color.
-  static Color getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'activo':
-        return AppColors.success;
-      case 'enfermo':
-        return AppColors.warning;
-      case 'muerto':
-        return AppColors.error;
-      default:
-        return AppColors.textHint;
-    }
-  }
-
-  /// Centralized standard date formatter.
   static String formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  static String formatDateVerbose(DateTime date) {
+    const months = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    return '${date.day} de ${months[date.month - 1]}, ${date.year}';
   }
 }

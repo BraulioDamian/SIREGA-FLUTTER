@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
+import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
+import 'package:sirega_app/nucleo/modelos/enums.dart';
 
 class HealthStatusWidget extends StatelessWidget {
-  final String status;
+  final EstadoSalud status;
 
   const HealthStatusWidget({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final color = _getStatusColor();
-    final icon = _getStatusIcon();
-    final message = _getStatusMessage();
+    final color = status.color;
+    final icon = status.icon;
+    final message = status.message;
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
@@ -65,7 +67,7 @@ class HealthStatusWidget extends StatelessWidget {
                 const SizedBox(height: 20),
                 // Texto del estado
                 Text(
-                  status.toUpperCase(),
+                  status.displayName.toUpperCase(),
                   style: TextStyle(
                     color: color,
                     fontSize: 24,
@@ -95,7 +97,7 @@ class HealthStatusWidget extends StatelessWidget {
   }
 
   Widget _buildHealthBar(Color color) {
-    double percentage = _getHealthPercentage();
+    double percentage = status.healthPercentage;
 
     return Column(
       children: [
@@ -158,63 +160,4 @@ class HealthStatusWidget extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor() {
-    switch (status.toLowerCase()) {
-      case 'sano':
-        return AppColors.success;
-      case 'enfermo':
-        return AppColors.warning;
-      case 'critico':
-        return AppColors.error;
-      case 'recuperacion':
-        return AppColors.info;
-      default:
-        return AppColors.textHint;
-    }
-  }
-
-  IconData _getStatusIcon() {
-    switch (status.toLowerCase()) {
-      case 'sano':
-        return Icons.check_circle_outline;
-      case 'enfermo':
-        return Icons.warning_amber_rounded;
-      case 'critico':
-        return Icons.error_outline;
-      case 'recuperacion':
-        return Icons.healing;
-      default:
-        return Icons.help_outline;
-    }
-  }
-
-  String _getStatusMessage() {
-    switch (status.toLowerCase()) {
-      case 'sano':
-        return 'El animal se encuentra en perfectas condiciones de salud';
-      case 'enfermo':
-        return 'Requiere atención médica y seguimiento constante';
-      case 'critico':
-        return 'Estado crítico - Atención veterinaria urgente';
-      case 'recuperacion':
-        return 'En proceso de recuperación y mejora';
-      default:
-        return 'Estado de salud no especificado';
-    }
-  }
-
-  double _getHealthPercentage() {
-    switch (status.toLowerCase()) {
-      case 'sano':
-        return 1.0;
-      case 'enfermo':
-        return 0.5;
-      case 'critico':
-        return 0.2;
-      case 'recuperacion':
-        return 0.7;
-      default:
-        return 0.3;
-    }
-  }
 }

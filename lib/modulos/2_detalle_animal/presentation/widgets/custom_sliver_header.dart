@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
+import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
 
 class CustomSliverHeader extends StatelessWidget {
   final Animal animal;
@@ -107,20 +108,18 @@ class CustomSliverHeader extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _getHealthColor(animal.estadoSalud.name),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: _getHealthColor(
-                        animal.estadoSalud.name,
-                      ).withValues(alpha: 0.5),
+                color: animal.estadoSalud.color,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: animal.estadoSalud.color.withValues(alpha: 0.5),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Icon(
-                  _getHealthIcon(animal.estadoSalud.name),
+                  animal.estadoSalud.icon,
                   color: Colors.white,
                   size: 24,
                 ),
@@ -180,32 +179,6 @@ class CustomSliverHeader extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _getHealthColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'sano':
-        return AppColors.success;
-      case 'enfermo':
-        return AppColors.warning;
-      case 'critico':
-        return AppColors.error;
-      default:
-        return AppColors.textHint;
-    }
-  }
-
-  IconData _getHealthIcon(String status) {
-    switch (status.toLowerCase()) {
-      case 'sano':
-        return Icons.favorite;
-      case 'enfermo':
-        return Icons.warning;
-      case 'critico':
-        return Icons.error;
-      default:
-        return Icons.help_outline;
-    }
   }
 }
 

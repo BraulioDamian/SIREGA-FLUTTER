@@ -1,8 +1,9 @@
 // lib/modulos/2_detalle_animal/presentation/widgets/medical_event_card.dart
 import 'package:flutter/material.dart';
 import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
-import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
+import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animal_detail_helpers.dart';
 
 class MedicalEventCard extends StatelessWidget {
   final EventoSanitario evento;
@@ -18,7 +19,7 @@ class MedicalEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final eventInfo = _getEventInfo(evento.tipo);
+    final tipo = evento.tipo;
 
     return TweenAnimationBuilder<double>(
       duration: Duration(milliseconds: 400 + (index * 100)),
@@ -48,8 +49,8 @@ class MedicalEventCard extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      eventInfo.color.withValues(alpha: 0.3),
-                      eventInfo.color.withValues(alpha: 0.1),
+                      tipo.color.withValues(alpha: 0.3),
+                      tipo.color.withValues(alpha: 0.1),
                     ],
                   ),
                 ),
@@ -73,21 +74,21 @@ class MedicalEventCard extends StatelessWidget {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            eventInfo.color,
-                            eventInfo.color.withValues(alpha: 0.7),
+                            tipo.color,
+                            tipo.color.withValues(alpha: 0.7),
                           ],
                         ),
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: eventInfo.color.withValues(alpha: 0.3),
+                            color: tipo.color.withValues(alpha: 0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Icon(
-                        eventInfo.icon,
+                        tipo.icon,
                         color: AppColors.surface,
                         size: 28,
                       ),
@@ -105,7 +106,7 @@ class MedicalEventCard extends StatelessWidget {
                         end: Alignment.bottomRight,
                         colors: [
                           AppColors.surface,
-                          eventInfo.color.withValues(alpha: 0.03),
+                          tipo.color.withValues(alpha: 0.03),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(16),
@@ -117,7 +118,7 @@ class MedicalEventCard extends StatelessWidget {
                         ),
                       ],
                       border: Border.all(
-                        color: eventInfo.color.withValues(alpha: 0.2),
+                        color: tipo.color.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),
@@ -144,20 +145,20 @@ class MedicalEventCard extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [
-                                          eventInfo.color.withValues(alpha: 0.2),
-                                          eventInfo.color.withValues(alpha: 0.1),
+                                          tipo.color.withValues(alpha: 0.2),
+                                          tipo.color.withValues(alpha: 0.1),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: eventInfo.color.withValues(alpha: 0.3),
+                                        color: tipo.color.withValues(alpha: 0.3),
                                         width: 1,
                                       ),
                                     ),
                                     child: Text(
-                                      eventInfo.name,
+                                      tipo.eventName,
                                       style: TextStyle(
-                                        color: eventInfo.color,
+                                        color: tipo.color,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 0.5,
@@ -185,7 +186,7 @@ class MedicalEventCard extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
-                                          _formatDate(evento.fecha),
+                                          AnimalDetailHelpers.formatDate(evento.fecha),
                                           style: TextStyle(
                                             color: Colors.grey.shade700,
                                             fontSize: 12,
@@ -308,55 +309,6 @@ class MedicalEventCard extends StatelessWidget {
     );
   }
 
-  EventInfo _getEventInfo(TipoEvento tipo) {
-    switch (tipo) {
-      case TipoEvento.vacuna:
-        return EventInfo(
-          name: 'VACUNA',
-          icon: Icons.vaccines,
-          color: AppColors.info,
-        );
-      case TipoEvento.desparasitante:
-        return EventInfo(
-          name: 'DESPARASITANTE',
-          icon: Icons.bug_report,
-          color: AppColors.success,
-        );
-      case TipoEvento.tratamiento:
-        return EventInfo(
-          name: 'TRATAMIENTO',
-          icon: Icons.medication,
-          color: AppColors.warning,
-        );
-      case TipoEvento.revisionVeterinaria:
-        return EventInfo(
-          name: 'REVISIÓN',
-          icon: Icons.health_and_safety,
-          color: AppColors.secondary,
-        );
-      case TipoEvento.castracion:
-        return EventInfo(
-          name: 'CIRUGÍA',
-          icon: Icons.healing,
-          color: AppColors.error,
-        );
-      default:
-        return EventInfo(
-          name: tipo.name.toUpperCase(),
-          icon: Icons.medical_services,
-          color: AppColors.textHint,
-        );
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    const months = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
-    ];
-    return '${date.day} ${months[date.month - 1]}, ${date.year}';
-  }
-
   void _showEventDetails(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -367,14 +319,6 @@ class MedicalEventCard extends StatelessWidget {
   }
 }
 
-class EventInfo {
-  final String name;
-  final IconData icon;
-  final Color color;
-
-  EventInfo({required this.name, required this.icon, required this.color});
-}
-
 // Bottom sheet para mostrar detalles completos del evento
 class _EventDetailsSheet extends StatelessWidget {
   final EventoSanitario evento;
@@ -383,7 +327,7 @@ class _EventDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final eventInfo = _getEventInfo(evento.tipo);
+    final tipo = evento.tipo;
 
     return Container(
       decoration: const BoxDecoration(
@@ -414,8 +358,8 @@ class _EventDetailsSheet extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    eventInfo.color.withValues(alpha: 0.1),
-                    eventInfo.color.withValues(alpha: 0.05),
+                    tipo.color.withValues(alpha: 0.1),
+                    tipo.color.withValues(alpha: 0.05),
                   ],
                 ),
               ),
@@ -424,11 +368,11 @@ class _EventDetailsSheet extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: eventInfo.color,
+                      color: tipo.color,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      eventInfo.icon,
+                      tipo.icon,
                       color: Colors.white,
                       size: 32,
                     ),
@@ -439,9 +383,9 @@ class _EventDetailsSheet extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          eventInfo.name,
+                          tipo.eventName,
                           style: TextStyle(
-                            color: eventInfo.color,
+                            color: tipo.color,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
@@ -467,7 +411,7 @@ class _EventDetailsSheet extends StatelessWidget {
                 children: [
                   _buildDetailRow(
                     'Fecha',
-                    _formatDate(evento.fecha),
+                    AnimalDetailHelpers.formatDateVerbose(evento.fecha),
                     Icons.calendar_today,
                   ),
                   if (evento.dosis != null && evento.unidadDosis != null)
@@ -502,7 +446,7 @@ class _EventDetailsSheet extends StatelessWidget {
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: eventInfo.color,
+                    backgroundColor: tipo.color,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -569,52 +513,4 @@ class _EventDetailsSheet extends StatelessWidget {
     );
   }
 
-  EventInfo _getEventInfo(TipoEvento tipo) {
-    switch (tipo) {
-      case TipoEvento.vacuna:
-        return EventInfo(
-          name: 'VACUNA',
-          icon: Icons.vaccines,
-          color: AppColors.info,
-        );
-      case TipoEvento.desparasitante:
-        return EventInfo(
-          name: 'DESPARASITANTE',
-          icon: Icons.bug_report,
-          color: AppColors.success,
-        );
-      case TipoEvento.tratamiento:
-        return EventInfo(
-          name: 'TRATAMIENTO',
-          icon: Icons.medication,
-          color: AppColors.warning,
-        );
-      case TipoEvento.revisionVeterinaria:
-        return EventInfo(
-          name: 'REVISIÓN',
-          icon: Icons.health_and_safety,
-          color: AppColors.secondary,
-        );
-      case TipoEvento.castracion:
-        return EventInfo(
-          name: 'CIRUGÍA',
-          icon: Icons.healing,
-          color: AppColors.error,
-        );
-      default:
-        return EventInfo(
-          name: tipo.name.toUpperCase(),
-          icon: Icons.medical_services,
-          color: AppColors.textHint,
-        );
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    const months = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
-    return '${date.day} de ${months[date.month - 1]}, ${date.year}';
-  }
 }

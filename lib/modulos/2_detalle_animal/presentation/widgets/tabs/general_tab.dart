@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
+import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animated_info_card.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animal_detail_helpers.dart';
 import 'package:sirega_app/core/widgets/ear_tag_icon.dart';
@@ -57,9 +58,7 @@ class GeneralTab extends StatelessWidget {
               'Sexo',
               animal.sexo.name.toUpperCase(),
               animal.sexo.name == 'macho' ? Icons.male : Icons.female,
-              valueColor: animal.sexo.name == 'macho'
-                  ? Colors.blue
-                  : Colors.pink,
+              valueColor: animal.sexo.color,
             ),
             AnimalDetailHelpers.buildDetailRow(
               context,
@@ -79,9 +78,7 @@ class GeneralTab extends StatelessWidget {
               'Estado',
               animal.estado.name.toUpperCase(),
               Icons.check_circle,
-              valueColor: AnimalDetailHelpers.getStatusColor(
-                animal.estado.name,
-              ),
+              valueColor: animal.estado.color,
             ),
           ],
         ),

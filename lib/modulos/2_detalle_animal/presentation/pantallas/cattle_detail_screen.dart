@@ -173,7 +173,6 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
 
   Widget _buildLoadedBody(BuildContext context, Animal animal) {
     final size = MediaQuery.of(context).size;
-    final double expandedHeight = size.height * 0.45;
 
     return Stack(
       children: [
@@ -181,14 +180,17 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
           onNotification: (notification) {
             final ScrollDirection direction = notification.direction;
             final double scrollOffset = _scrollController.offset;
+            final double maxExtent =
+                _scrollController.position.maxScrollExtent;
 
             if (direction == ScrollDirection.idle) {
-              if (scrollOffset > 0 && scrollOffset < expandedHeight) {
-                final double snapThreshold = expandedHeight * 0.5;
+              // Only snap when header is partially visible, not fully collapsed
+              if (scrollOffset > 0 && scrollOffset < maxExtent) {
+                final double snapThreshold = maxExtent * 0.5;
 
                 if (scrollOffset > snapThreshold) {
                   _scrollController.animateTo(
-                    expandedHeight,
+                    maxExtent,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,
                   );
@@ -201,7 +203,7 @@ class _CattleDetailScreenState extends State<CattleDetailScreen>
                 }
               }
             }
-            return true;
+            return false;
           },
           child: NestedScrollView(
             controller: _scrollController,

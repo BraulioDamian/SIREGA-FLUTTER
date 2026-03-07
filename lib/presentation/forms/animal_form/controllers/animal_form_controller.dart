@@ -303,6 +303,14 @@ class AnimalFormController extends ChangeNotifier {
     if (_estadoReproductivo != null) {
       estadoReproductivoDisplayController.text = _estadoReproductivo!.displayName;
     }
+
+    // Cargar foto de perfil
+    if (animalOriginal!.fotoPerfilUrl != null && animalOriginal!.fotoPerfilUrl!.isNotEmpty) {
+      final file = File(animalOriginal!.fotoPerfilUrl!);
+      if (file.existsSync()) {
+        _imageFile = file;
+      }
+    }
   }
   
   Future<void> _loadData() async {
