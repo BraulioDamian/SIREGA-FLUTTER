@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'dart:math' as math;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
@@ -7,6 +8,9 @@ import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
 
 enum ChartType { milk, weight }
+
+/// Filtro de período temporal
+enum _PeriodFilter { oneMonth, threeMonths, sixMonths, oneYear, all }
 
 class ProductionChart extends StatefulWidget {
   final ChartType type;
@@ -22,6 +26,9 @@ class _ProductionChartState extends State<ProductionChart>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+  int? _selectedIndex;
+  _PeriodFilter _period = _PeriodFilter.all;
+  late Future<List<RegistroProduccion>> _dataFuture;
 
   @override
   void initState() {
@@ -34,12 +41,40 @@ class _ProductionChartState extends State<ProductionChart>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.forward();
+    _loadData();
+  }
+
+  @override
+  void didUpdateWidget(covariant ProductionChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animal.id != widget.animal.id || oldWidget.type != widget.type) {
+      _loadData();
+    }
+  }
+
+  void _loadData() {
+    final isarService = RepositoryProvider.of<IsarService>(context);
+    _dataFuture = isarService.obtenerProduccionPorAnimal(widget.animal.id);
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  /// Filtra registros por período seleccionado
+  List<RegistroProduccion> _filterByPeriod(List<RegistroProduccion> registros) {
+    if (_period == _PeriodFilter.all || registros.isEmpty) return registros;
+    final now = DateTime.now();
+    final cutoff = switch (_period) {
+      _PeriodFilter.oneMonth => DateTime(now.year, now.month - 1, now.day),
+      _PeriodFilter.threeMonths => DateTime(now.year, now.month - 3, now.day),
+      _PeriodFilter.sixMonths => DateTime(now.year, now.month - 6, now.day),
+      _PeriodFilter.oneYear => DateTime(now.year - 1, now.month, now.day),
+      _PeriodFilter.all => now, // no se alcanza
+    };
+    return registros.where((r) => r.fecha.isAfter(cutoff)).toList();
   }
 
   @override
@@ -51,14 +86,12 @@ class _ProductionChartState extends State<ProductionChart>
         ? 'Producción de Leche (L/día)'
         : 'Evolución del Peso (kg)';
 
-    final isarService = RepositoryProvider.of<IsarService>(context);
-
     return FutureBuilder<List<RegistroProduccion>>(
-      future: isarService.obtenerProduccionPorAnimal(widget.animal.id),
+      future: _dataFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
-            height: 250,
+            height: 380,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
@@ -71,33 +104,37 @@ class _ProductionChartState extends State<ProductionChart>
         final registros = snapshot.data ?? [];
 
         // Filtrar registros según el tipo de gráfico
-        final registrosFiltrados = registros.where((r) {
+        var registrosFiltrados = registros.where((r) {
           if (widget.type == ChartType.milk) {
-            return r.tipo == 'Producción de Leche';
+            return r.tipo == 'Producción de Leche' && r.litrosPorDia != null;
           } else {
-            return r.tipo == 'Pesaje' || r.pesoKg != null;
+            return r.tipo == 'Pesaje' && r.pesoKg != null;
           }
         }).toList();
 
         // Ordenar por fecha
         registrosFiltrados.sort((a, b) => a.fecha.compareTo(b.fecha));
 
-        // Extraer datos para el gráfico
-        final data = registrosFiltrados
-            .map((r) {
-              if (widget.type == ChartType.milk) {
-                return r.litrosPorDia ?? 0.0;
-              } else {
-                return r.pesoKg ?? 0.0;
-              }
-            })
-            .where((value) => value > 0)
-            .toList();
+        // Aplicar filtro de período
+        registrosFiltrados = _filterByPeriod(registrosFiltrados);
 
-        // Si no hay datos suficientes, mostrar estado vacío
-        if (data.isEmpty || data.length < 2) {
+        // Extraer datos y fechas
+        final data = <double>[];
+        final dates = <DateTime>[];
+        for (final r in registrosFiltrados) {
+          final v = widget.type == ChartType.milk
+              ? (r.litrosPorDia ?? 0.0)
+              : (r.pesoKg ?? 0.0);
+          if (v > 0) {
+            data.add(v);
+            dates.add(r.fecha);
+          }
+        }
+
+        // Si no hay datos, mostrar estado vacío
+        if (data.isEmpty) {
           return Container(
-            height: 250,
+            height: 380,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
@@ -124,11 +161,6 @@ class _ProductionChartState extends State<ProductionChart>
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Registra al menos 2 mediciones',
-                    style: TextStyle(fontSize: 12, color: AppColors.textHint),
-                  ),
                 ],
               ),
             ),
@@ -140,13 +172,22 @@ class _ProductionChartState extends State<ProductionChart>
         final maxValue = data.reduce(math.max);
         final avgValue = data.reduce((a, b) => a + b) / data.length;
 
-        // Calcular tendencia (comparar último valor con promedio)
+        // Calcular tendencia
         final lastValue = data.last;
-        final trend = lastValue - avgValue;
-        final trendPercent = (trend / avgValue * 100).abs();
+        final trend = data.length >= 2 ? lastValue - avgValue : 0.0;
+        final trendPercent = avgValue > 0 ? (trend / avgValue * 100).abs() : 0.0;
+        final showTrend = data.length >= 2 && trend != 0;
+
+        // Total de registros sin filtro para mostrar en chips
+        final totalRegistros = registros.where((r) {
+          if (widget.type == ChartType.milk) {
+            return r.tipo == 'Producción de Leche' && r.litrosPorDia != null && (r.litrosPorDia ?? 0) > 0;
+          } else {
+            return r.tipo == 'Pesaje' && r.pesoKg != null && (r.pesoKg ?? 0) > 0;
+          }
+        }).length;
 
         return Container(
-          height: 250,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16),
@@ -161,25 +202,27 @@ class _ProductionChartState extends State<ProductionChart>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${data.length} registros',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
+                          Text(
+                            '${data.length} registros',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -190,54 +233,102 @@ class _ProductionChartState extends State<ProductionChart>
                         color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            trend >= 0
-                                ? Icons.trending_up
-                                : Icons.trending_down,
-                            color: trend >= 0
-                                ? AppColors.success
-                                : AppColors.error,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            widget.type == ChartType.milk
-                                ? '${trend >= 0 ? '+' : ''}${trendPercent.toStringAsFixed(1)}%'
-                                : '${trend >= 0 ? '+' : ''}${trend.toStringAsFixed(1)}kg',
-                            style: TextStyle(
-                              color: trend >= 0
-                                  ? AppColors.success
-                                  : AppColors.error,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                      child: showTrend
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  trend >= 0
+                                      ? Icons.trending_up
+                                      : Icons.trending_down,
+                                  color: trend >= 0
+                                      ? AppColors.success
+                                      : AppColors.error,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  widget.type == ChartType.milk
+                                      ? '${trend >= 0 ? '+' : ''}${trendPercent.toStringAsFixed(1)}%'
+                                      : '${trend >= 0 ? '+' : ''}${trend.toStringAsFixed(1)}kg',
+                                  style: TextStyle(
+                                    color: trend >= 0
+                                        ? AppColors.success
+                                        : AppColors.error,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Text(
+                              '${data.length} reg.',
+                              style: TextStyle(
+                                color: color,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                // Gráfico
+                // Filtros de período (solo si hay suficientes registros)
+                if (totalRegistros >= 3) ...[
+                  const SizedBox(height: 12),
+                  _buildPeriodChips(color),
+                ],
+                const SizedBox(height: 12),
+                // Gráfico interactivo
                 Expanded(
-                  child: AnimatedBuilder(
-                    animation: _animation,
-                    builder: (context, child) {
-                      return CustomPaint(
-                        size: Size.infinite,
-                        painter: ChartPainter(
-                          color: color,
-                          progress: _animation.value,
-                          type: widget.type,
-                          data: data,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTapDown: (details) => _onTouch(details.localPosition, constraints.biggest, data),
+                        onPanUpdate: (details) => _onTouch(details.localPosition, constraints.biggest, data),
+                        onPanEnd: (_) => _clearSelection(),
+                        onTapUp: (_) {
+                          // Mantener selección visible 2s después de tap
+                          Future.delayed(const Duration(seconds: 2), () {
+                            if (mounted) setState(() => _selectedIndex = null);
+                          });
+                        },
+                        child: AnimatedBuilder(
+                          animation: _animation,
+                          builder: (context, child) {
+                            return CustomPaint(
+                              size: Size.infinite,
+                              painter: ChartPainter(
+                                color: color,
+                                progress: _animation.value,
+                                type: widget.type,
+                                data: data,
+                                dates: dates,
+                                selectedIndex: _selectedIndex,
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+                // Hint de interacción
+                if (_selectedIndex == null)
+                  Center(
+                    child: Text(
+                      'Toca o desliza sobre el gráfico',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textHint,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  )
+                else
+                  const SizedBox(height: 14),
+                const SizedBox(height: 8),
                 // Leyenda con datos reales
                 _buildLegendWithData(color, minValue, avgValue, maxValue),
               ],
@@ -248,8 +339,97 @@ class _ProductionChartState extends State<ProductionChart>
     );
   }
 
+  /// Determina el punto más cercano al toque
+  void _onTouch(Offset localPosition, Size size, List<double> data) {
+    if (data.isEmpty) return;
+    final chartWidth = size.width;
+    final touchX = localPosition.dx.clamp(0.0, chartWidth);
+
+    int closest = 0;
+    double minDist = double.infinity;
+    for (int i = 0; i < data.length; i++) {
+      final x = data.length == 1
+          ? chartWidth / 2
+          : (chartWidth / (data.length - 1)) * i;
+      final dist = (x - touchX).abs();
+      if (dist < minDist) {
+        minDist = dist;
+        closest = i;
+      }
+    }
+    if (_selectedIndex != closest) {
+      setState(() => _selectedIndex = closest);
+    }
+  }
+
+  void _clearSelection() {
+    // Dejar tooltip visible un momento tras soltar
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _selectedIndex = null);
+    });
+  }
+
+  Widget _buildPeriodChips(Color color) {
+    const labels = {
+      _PeriodFilter.oneMonth: '1M',
+      _PeriodFilter.threeMonths: '3M',
+      _PeriodFilter.sixMonths: '6M',
+      _PeriodFilter.oneYear: '1A',
+      _PeriodFilter.all: 'Todo',
+    };
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: _PeriodFilter.values.map((p) {
+        final selected = _period == p;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3),
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _period = p;
+                _selectedIndex = null;
+              });
+              // Re-animar el gráfico al cambiar período
+              _animationController.reset();
+              _animationController.forward();
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: selected ? color : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: selected ? color : color.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                labels[p]!,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                  color: selected ? Colors.white : color,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   Widget _buildLegendWithData(Color color, double min, double avg, double max) {
     final suffix = widget.type == ChartType.milk ? 'L' : 'kg';
+    if (min == max) {
+      return Center(
+        child: _buildLegendItem(
+          'Valor actual',
+          '${avg.toStringAsFixed(1)}$suffix',
+          color,
+        ),
+      );
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -294,24 +474,34 @@ class _ProductionChartState extends State<ProductionChart>
   }
 }
 
+// ─────────────────────────────────────────────
+// ChartPainter — ahora con soporte de selección
+// ─────────────────────────────────────────────
+
 class ChartPainter extends CustomPainter {
   final Color color;
   final double progress;
   final ChartType type;
   final List<double> data;
+  final List<DateTime> dates;
+  final int? selectedIndex;
 
   ChartPainter({
     required this.color,
     required this.progress,
     required this.type,
     required this.data,
+    required this.dates,
+    this.selectedIndex,
   });
+
+  static final _dateFormat = DateFormat('d MMM yyyy', 'es');
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
+    final linePaint = Paint()
       ..color = color
-      ..strokeWidth = 3
+      ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
@@ -319,185 +509,223 @@ class ChartPainter extends CustomPainter {
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [color.withValues(alpha: 0.3), color.withValues(alpha: 0.0)],
+        colors: [color.withValues(alpha: 0.25), color.withValues(alpha: 0.0)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     final gridPaint = Paint()
       ..color = AppColors.divider
       ..strokeWidth = 0.5;
 
-    // Dibujar líneas de cuadrícula
+    // Reservar espacio arriba para tooltip
+    const double topPadding = 34;
+    final chartHeight = size.height - topPadding;
+
+    // Líneas de cuadrícula
     const int gridLines = 4;
     for (int i = 0; i <= gridLines; i++) {
-      final y = (size.height / gridLines) * i;
+      final y = topPadding + (chartHeight / gridLines) * i;
       canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
 
-    // Usar los datos reales pasados como parámetro
+    // Calcular puntos
     final maxValue = data.reduce(math.max);
     final minValue = data.reduce(math.min);
+    final range = maxValue - minValue;
     final points = <Offset>[];
 
     for (int i = 0; i < data.length; i++) {
-      final x = (size.width / (data.length - 1)) * i;
-      final normalizedValue = (data[i] - minValue) / (maxValue - minValue);
-      final y = size.height - (normalizedValue * size.height * 0.8) - 10;
+      final x = data.length == 1
+          ? size.width / 2
+          : (size.width / (data.length - 1)) * i;
+      final normalizedValue = range > 0
+          ? (data[i] - minValue) / range
+          : 0.5;
+      final y = topPadding + chartHeight - (normalizedValue * chartHeight * 0.85) - 8;
       points.add(Offset(x, y));
     }
 
-    // Dibujar área bajo la curva con gradiente
+    // Área bajo la curva
     if (points.isNotEmpty && progress > 0) {
       final path = Path();
-      final lastIndex = (points.length * progress).round().clamp(
-        1,
-        points.length,
-      );
-
+      final lastIdx = (points.length * progress).round().clamp(1, points.length);
       path.moveTo(points.first.dx, size.height);
       path.lineTo(points.first.dx, points.first.dy);
-
-      // Usar curvas de Bézier para suavizar la línea
-      for (int i = 1; i < lastIndex; i++) {
+      for (int i = 1; i < lastIdx; i++) {
         final xMid = (points[i - 1].dx + points[i].dx) / 2;
-        final cp1 = Offset(xMid, points[i - 1].dy);
-        path.quadraticBezierTo(cp1.dx, cp1.dy, points[i].dx, points[i].dy);
+        path.quadraticBezierTo(xMid, points[i - 1].dy, points[i].dx, points[i].dy);
       }
-
-      path.lineTo(points[lastIndex - 1].dx, size.height);
+      path.lineTo(points[lastIdx - 1].dx, size.height);
       path.close();
       canvas.drawPath(path, fillPaint);
     }
 
-    // Dibujar línea principal con suavizado
+    // Línea principal
     if (points.length > 1 && progress > 0) {
-      final progressPath = Path();
-      final lastIndex = (points.length * progress).round().clamp(
-        1,
-        points.length,
-      );
-
-      progressPath.moveTo(points.first.dx, points.first.dy);
-
-      for (int i = 1; i < lastIndex; i++) {
+      final curvePath = Path();
+      final lastIdx = (points.length * progress).round().clamp(1, points.length);
+      curvePath.moveTo(points.first.dx, points.first.dy);
+      for (int i = 1; i < lastIdx; i++) {
         final xMid = (points[i - 1].dx + points[i].dx) / 2;
-        final cp1 = Offset(xMid, points[i - 1].dy);
-        progressPath.quadraticBezierTo(
-          cp1.dx,
-          cp1.dy,
-          points[i].dx,
-          points[i].dy,
-        );
+        curvePath.quadraticBezierTo(xMid, points[i - 1].dy, points[i].dx, points[i].dy);
       }
-
-      canvas.drawPath(progressPath, paint);
+      canvas.drawPath(curvePath, linePaint);
     }
 
-    // Dibujar puntos con animación
+    // Dibujar puntos
     for (int i = 0; i < points.length; i++) {
-      if (i / points.length <= progress) {
-        final pointProgress = ((progress * points.length) - i).clamp(0.0, 1.0);
-        final pointSize = 6.0 * pointProgress;
+      if (i / points.length > progress) continue;
+      final isSelected = selectedIndex == i;
+      final pointProgress = ((progress * points.length) - i).clamp(0.0, 1.0);
+      final baseSize = isSelected ? 8.0 : 5.0;
+      final pointSize = baseSize * pointProgress;
 
-        // Sombra del punto
-        canvas.drawCircle(
-          points[i],
-          pointSize + 2,
+      if (isSelected) {
+        // Línea guía vertical
+        canvas.drawLine(
+          Offset(points[i].dx, topPadding),
+          Offset(points[i].dx, size.height),
           Paint()
             ..color = color.withValues(alpha: 0.2)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+            ..strokeWidth = 1,
         );
 
-        // Círculo exterior
+        // Glow del punto seleccionado
         canvas.drawCircle(
-          points[i],
-          pointSize,
+          points[i], pointSize + 4,
           Paint()
-            ..color = color.withValues(alpha: 0.3)
-            ..style = PaintingStyle.fill,
-        );
-
-        // Círculo interior blanco
-        canvas.drawCircle(
-          points[i],
-          pointSize - 2,
-          Paint()
-            ..color = AppColors.surface
-            ..style = PaintingStyle.fill,
-        );
-
-        // Borde del círculo
-        canvas.drawCircle(
-          points[i],
-          pointSize - 2,
-          Paint()
-            ..color = color
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 2,
+            ..color = color.withValues(alpha: 0.15)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
         );
       }
+
+      // Punto exterior
+      canvas.drawCircle(
+        points[i], pointSize,
+        Paint()
+          ..color = isSelected ? color : color.withValues(alpha: 0.3)
+          ..style = PaintingStyle.fill,
+      );
+      // Punto interior blanco
+      canvas.drawCircle(
+        points[i], math.max(pointSize - 2, 0),
+        Paint()
+          ..color = AppColors.surface
+          ..style = PaintingStyle.fill,
+      );
+      // Borde
+      canvas.drawCircle(
+        points[i], math.max(pointSize - 2, 0),
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = isSelected ? 2.5 : 1.5,
+      );
     }
 
-    // Dibujar el valor actual en el último punto visible
-    if (points.isNotEmpty && progress > 0) {
-      final lastIndex = ((points.length - 1) * progress).round();
-      if (lastIndex < data.length) {
-        final value = data[lastIndex];
-        final textPainter = TextPainter(
-          text: TextSpan(
-            text: type == ChartType.milk
-                ? '${value.toStringAsFixed(0)}L'
-                : '${value.toStringAsFixed(0)}kg',
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+    // Tooltip del punto seleccionado (o último si no hay selección)
+    final tooltipIdx = selectedIndex ?? ((points.length - 1) * progress).round();
+    if (tooltipIdx >= 0 && tooltipIdx < data.length && points.isNotEmpty && progress > 0) {
+      _drawTooltip(canvas, size, points, tooltipIdx);
+    }
+  }
+
+  void _drawTooltip(Canvas canvas, Size size, List<Offset> points, int idx) {
+    final value = data[idx];
+    final suffix = type == ChartType.milk ? 'L' : 'kg';
+    final valueStr = '${value.toStringAsFixed(value == value.roundToDouble() ? 0 : 1)}$suffix';
+    final hasDate = idx < dates.length;
+    final dateStr = hasDate ? _dateFormat.format(dates[idx]) : '';
+
+    // Línea 1: valor   Línea 2: fecha
+    final valuePainter = TextPainter(
+      text: TextSpan(
+        text: valueStr,
+        style: TextStyle(
+          color: color,
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    final datePainter = hasDate
+        ? (TextPainter(
+            text: TextSpan(
+              text: dateStr,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 10,
+              ),
             ),
-          ),
-          textDirection: TextDirection.ltr,
-        );
-        textPainter.layout();
+            textDirection: TextDirection.ltr,
+          )..layout())
+        : null;
 
-        final offset = points[lastIndex];
-        final boxRect = RRect.fromRectAndRadius(
-          Rect.fromCenter(
-            center: Offset(offset.dx, offset.dy - 25),
-            width: textPainter.width + 16,
-            height: textPainter.height + 8,
-          ),
-          const Radius.circular(8),
-        );
+    final boxW = math.max(
+      valuePainter.width,
+      datePainter?.width ?? 0,
+    ) + 20;
+    final boxH = valuePainter.height + (datePainter != null ? datePainter.height + 2 : 0) + 12;
 
-        // Fondo del tooltip
-        canvas.drawRRect(
-          boxRect,
-          Paint()
-            ..color = AppColors.surface
-            ..style = PaintingStyle.fill,
-        );
+    final offset = points[idx];
 
-        // Borde del tooltip
-        canvas.drawRRect(
-          boxRect,
-          Paint()
-            ..color = color
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.5,
-        );
+    // Posicionar tooltip arriba del punto, clamped
+    var tooltipY = offset.dy - 26;
+    if (tooltipY - boxH / 2 < 0) tooltipY = boxH / 2 + 2;
+    var tooltipX = offset.dx;
+    if (tooltipX - boxW / 2 < 0) tooltipX = boxW / 2 + 2;
+    if (tooltipX + boxW / 2 > size.width) tooltipX = size.width - boxW / 2 - 2;
 
-        // Texto del valor
-        textPainter.paint(
-          canvas,
-          Offset(
-            offset.dx - textPainter.width / 2,
-            offset.dy - 25 - textPainter.height / 2,
-          ),
-        );
-      }
+    final rect = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: Offset(tooltipX, tooltipY),
+        width: boxW,
+        height: boxH,
+      ),
+      const Radius.circular(10),
+    );
+
+    // Sombra
+    canvas.drawRRect(
+      rect.shift(const Offset(0, 2)),
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.08)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+    );
+
+    // Fondo
+    canvas.drawRRect(rect, Paint()..color = AppColors.surface);
+
+    // Borde
+    canvas.drawRRect(
+      rect,
+      Paint()
+        ..color = color.withValues(alpha: 0.4)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+
+    // Valor
+    final textStartY = tooltipY - boxH / 2 + 6;
+    valuePainter.paint(
+      canvas,
+      Offset(tooltipX - valuePainter.width / 2, textStartY),
+    );
+
+    // Fecha
+    if (datePainter != null) {
+      datePainter.paint(
+        canvas,
+        Offset(tooltipX - datePainter.width / 2, textStartY + valuePainter.height + 1),
+      );
     }
   }
 
   @override
   bool shouldRepaint(ChartPainter oldDelegate) {
-    return oldDelegate.progress != progress || oldDelegate.data != data;
+    return oldDelegate.progress != progress
+        || oldDelegate.data != data
+        || oldDelegate.selectedIndex != selectedIndex;
   }
 }

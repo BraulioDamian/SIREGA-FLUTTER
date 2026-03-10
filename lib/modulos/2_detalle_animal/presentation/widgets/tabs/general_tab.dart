@@ -1,8 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
+import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animated_info_card.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animal_detail_helpers.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/bloc/cattle_detail_bloc.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/cattle_detail_screen.dart';
 import 'package:sirega_app/core/widgets/ear_tag_icon.dart';
 
 class GeneralTab extends StatelessWidget {
@@ -120,24 +125,24 @@ class GeneralTab extends StatelessWidget {
         delay: 200,
         child: Column(
           children: [
-            if (animal.madre.value?.id != null)
-              AnimalDetailHelpers.buildDetailRow(
+            if (animal.madre.value != null)
+              _buildParentRow(
                 context,
                 'Madre',
-                'ID: ${animal.madre.value?.id}',
+                animal.madre.value!,
                 Icons.female,
-                valueColor: Colors.pink,
+                Colors.pink,
               ),
-            if (animal.padre.value?.id != null)
-              AnimalDetailHelpers.buildDetailRow(
+            if (animal.padre.value != null)
+              _buildParentRow(
                 context,
                 'Padre',
-                'ID: ${animal.padre.value?.id}',
+                animal.padre.value!,
                 Icons.male,
-                valueColor: Colors.blue,
+                Colors.blue,
               ),
-            if (animal.madre.value?.id == null &&
-                animal.padre.value?.id == null)
+            if (animal.madre.value == null &&
+                animal.padre.value == null)
               AnimalDetailHelpers.buildEmptyState(
                 'Sin información genealógica',
               ),
@@ -152,6 +157,126 @@ class GeneralTab extends StatelessWidget {
       animal: animal,
       padding: EdgeInsets.zero,
     )._buildChildren(context);
+  }
+
+  Widget _buildParentRow(
+    BuildContext context,
+    String label,
+    Animal parent,
+    IconData icon,
+    Color color,
+  ) {
+    final nombre = parent.nombre.isNotEmpty ? parent.nombre : 'Sin nombre';
+    final fotoPath = parent.fotoPerfilUrl ?? parent.fotoUrl;
+    final hasPhoto = fotoPath != null && fotoPath.isNotEmpty && File(fotoPath).existsSync();
+
+    // Calcular edad
+    final now = DateTime.now();
+    final diff = now.difference(parent.fechaNacimiento);
+    final years = diff.inDays ~/ 365;
+    final months = (diff.inDays % 365) ~/ 30;
+    final edad = years > 0
+        ? '$years año${years > 1 ? 's' : ''}${months > 0 ? ' $months m' : ''}'
+        : '$months mes${months != 1 ? 'es' : ''}';
+
+    // Info chips
+    final chips = <String>[
+      if (parent.raza.isNotEmpty) parent.raza,
+      edad,
+      if (parent.idAreteVisual != null && parent.idAreteVisual!.isNotEmpty)
+        parent.idAreteVisual!,
+    ];
+
+    return InkWell(
+      onTap: () {
+        final isarService = RepositoryProvider.of<IsarService>(context);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (_) => CattleDetailBloc(isarService: isarService)
+                ..add(LoadCattleDetail(parent.id)),
+              child: CattleDetailScreen(id: parent.id),
+            ),
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            // Foto o ícono
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(14),
+                image: hasPhoto
+                    ? DecorationImage(
+                        image: FileImage(File(fotoPath)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: !hasPhoto
+                  ? Icon(icon, size: 26, color: color)
+                  : null,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Label
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: color.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  // Nombre
+                  Text(
+                    nombre,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: color,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Info chips
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: chips.map((chip) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        chip,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: color.withValues(alpha: 0.8),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    )).toList(),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400, size: 22),
+          ],
+        ),
+      ),
+    );
   }
 }
 

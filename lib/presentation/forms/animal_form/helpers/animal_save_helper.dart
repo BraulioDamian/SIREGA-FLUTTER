@@ -2,6 +2,7 @@ import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
 import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/nucleo/modelos/catalogo_vacunas.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/presentation/forms/animal_form/controllers/animal_form_controller.dart';
 
@@ -25,10 +26,16 @@ class AnimalSaveHelper {
 
   Future<void> guardarVacunas(Animal animal) async {
     for (final nombreVacuna in formController.vacunasAplicadas) {
+      final vacunaInfo = CatalogoVacunas.buscarPorNombre(nombreVacuna);
+      final fechaAplicacion = formController.fechasVacunas[nombreVacuna] ?? DateTime.now();
+
       final evento = EventoSanitario()
         ..tipo = TipoEvento.vacuna
-        ..fecha = formController.fechasVacunas[nombreVacuna] ?? DateTime.now()
+        ..fecha = fechaAplicacion
         ..nombreProducto = nombreVacuna
+        ..esAplicacionUnica = vacunaInfo?.esAplicacionUnica ?? false
+        ..intervaloDiasRecomendado = vacunaInfo?.intervaloDias
+        ..fechaProximaAplicacion = vacunaInfo?.proximaAplicacion(fechaAplicacion)
         ..notas = null
         ..prioridad = Prioridad.media;
 

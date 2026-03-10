@@ -22,77 +22,92 @@ const EventoSanitarioSchema = CollectionSchema(
       name: r'dosis',
       type: IsarType.double,
     ),
-    r'estadoSync': PropertySchema(
+    r'esAplicacionUnica': PropertySchema(
       id: 1,
+      name: r'esAplicacionUnica',
+      type: IsarType.bool,
+    ),
+    r'estadoSync': PropertySchema(
+      id: 2,
       name: r'estadoSync',
       type: IsarType.string,
       enumMap: _EventoSanitarioestadoSyncEnumValueMap,
     ),
     r'fecha': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'fecha',
       type: IsarType.dateTime,
     ),
     r'fechaCreacion': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'fechaCreacion',
       type: IsarType.dateTime,
     ),
     r'fechaProximaAplicacion': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'fechaProximaAplicacion',
       type: IsarType.dateTime,
     ),
+    r'intervaloDiasRecomendado': PropertySchema(
+      id: 6,
+      name: r'intervaloDiasRecomendado',
+      type: IsarType.long,
+    ),
     r'loteId': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'loteId',
       type: IsarType.string,
     ),
     r'nombreProducto': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'nombreProducto',
       type: IsarType.string,
     ),
     r'notas': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'notas',
       type: IsarType.string,
     ),
     r'prioridad': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'prioridad',
       type: IsarType.string,
       enumMap: _EventoSanitarioprioridadEnumValueMap,
     ),
     r'serverId': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'serverId',
       type: IsarType.string,
     ),
     r'tipo': PropertySchema(
-      id: 10,
+      id: 12,
       name: r'tipo',
       type: IsarType.string,
       enumMap: _EventoSanitariotipoEnumValueMap,
     ),
     r'totalAnimalesLote': PropertySchema(
-      id: 11,
+      id: 13,
       name: r'totalAnimalesLote',
       type: IsarType.long,
     ),
     r'ultimaActualizacion': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'ultimaActualizacion',
       type: IsarType.dateTime,
     ),
     r'unidadDosis': PropertySchema(
-      id: 13,
+      id: 15,
       name: r'unidadDosis',
       type: IsarType.string,
     ),
     r'veterinario': PropertySchema(
-      id: 14,
+      id: 16,
       name: r'veterinario',
+      type: IsarType.string,
+    ),
+    r'viaAplicacion': PropertySchema(
+      id: 17,
+      name: r'viaAplicacion',
       type: IsarType.string,
     )
   },
@@ -176,6 +191,12 @@ int _eventoSanitarioEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.viaAplicacion;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -186,20 +207,23 @@ void _eventoSanitarioSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDouble(offsets[0], object.dosis);
-  writer.writeString(offsets[1], object.estadoSync.name);
-  writer.writeDateTime(offsets[2], object.fecha);
-  writer.writeDateTime(offsets[3], object.fechaCreacion);
-  writer.writeDateTime(offsets[4], object.fechaProximaAplicacion);
-  writer.writeString(offsets[5], object.loteId);
-  writer.writeString(offsets[6], object.nombreProducto);
-  writer.writeString(offsets[7], object.notas);
-  writer.writeString(offsets[8], object.prioridad.name);
-  writer.writeString(offsets[9], object.serverId);
-  writer.writeString(offsets[10], object.tipo.name);
-  writer.writeLong(offsets[11], object.totalAnimalesLote);
-  writer.writeDateTime(offsets[12], object.ultimaActualizacion);
-  writer.writeString(offsets[13], object.unidadDosis);
-  writer.writeString(offsets[14], object.veterinario);
+  writer.writeBool(offsets[1], object.esAplicacionUnica);
+  writer.writeString(offsets[2], object.estadoSync.name);
+  writer.writeDateTime(offsets[3], object.fecha);
+  writer.writeDateTime(offsets[4], object.fechaCreacion);
+  writer.writeDateTime(offsets[5], object.fechaProximaAplicacion);
+  writer.writeLong(offsets[6], object.intervaloDiasRecomendado);
+  writer.writeString(offsets[7], object.loteId);
+  writer.writeString(offsets[8], object.nombreProducto);
+  writer.writeString(offsets[9], object.notas);
+  writer.writeString(offsets[10], object.prioridad.name);
+  writer.writeString(offsets[11], object.serverId);
+  writer.writeString(offsets[12], object.tipo.name);
+  writer.writeLong(offsets[13], object.totalAnimalesLote);
+  writer.writeDateTime(offsets[14], object.ultimaActualizacion);
+  writer.writeString(offsets[15], object.unidadDosis);
+  writer.writeString(offsets[16], object.veterinario);
+  writer.writeString(offsets[17], object.viaAplicacion);
 }
 
 EventoSanitario _eventoSanitarioDeserialize(
@@ -210,27 +234,30 @@ EventoSanitario _eventoSanitarioDeserialize(
 ) {
   final object = EventoSanitario();
   object.dosis = reader.readDoubleOrNull(offsets[0]);
+  object.esAplicacionUnica = reader.readBool(offsets[1]);
   object.estadoSync = _EventoSanitarioestadoSyncValueEnumMap[
-          reader.readStringOrNull(offsets[1])] ??
+          reader.readStringOrNull(offsets[2])] ??
       EstadoSync.pendiente;
-  object.fecha = reader.readDateTime(offsets[2]);
-  object.fechaCreacion = reader.readDateTime(offsets[3]);
-  object.fechaProximaAplicacion = reader.readDateTimeOrNull(offsets[4]);
+  object.fecha = reader.readDateTime(offsets[3]);
+  object.fechaCreacion = reader.readDateTime(offsets[4]);
+  object.fechaProximaAplicacion = reader.readDateTimeOrNull(offsets[5]);
   object.id = id;
-  object.loteId = reader.readStringOrNull(offsets[5]);
-  object.nombreProducto = reader.readStringOrNull(offsets[6]);
-  object.notas = reader.readStringOrNull(offsets[7]);
+  object.intervaloDiasRecomendado = reader.readLongOrNull(offsets[6]);
+  object.loteId = reader.readStringOrNull(offsets[7]);
+  object.nombreProducto = reader.readStringOrNull(offsets[8]);
+  object.notas = reader.readStringOrNull(offsets[9]);
   object.prioridad = _EventoSanitarioprioridadValueEnumMap[
-          reader.readStringOrNull(offsets[8])] ??
+          reader.readStringOrNull(offsets[10])] ??
       Prioridad.baja;
-  object.serverId = reader.readStringOrNull(offsets[9]);
+  object.serverId = reader.readStringOrNull(offsets[11]);
   object.tipo =
-      _EventoSanitariotipoValueEnumMap[reader.readStringOrNull(offsets[10])] ??
+      _EventoSanitariotipoValueEnumMap[reader.readStringOrNull(offsets[12])] ??
           TipoEvento.vacuna;
-  object.totalAnimalesLote = reader.readLongOrNull(offsets[11]);
-  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[12]);
-  object.unidadDosis = reader.readStringOrNull(offsets[13]);
-  object.veterinario = reader.readStringOrNull(offsets[14]);
+  object.totalAnimalesLote = reader.readLongOrNull(offsets[13]);
+  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[14]);
+  object.unidadDosis = reader.readStringOrNull(offsets[15]);
+  object.veterinario = reader.readStringOrNull(offsets[16]);
+  object.viaAplicacion = reader.readStringOrNull(offsets[17]);
   return object;
 }
 
@@ -244,38 +271,44 @@ P _eventoSanitarioDeserializeProp<P>(
     case 0:
       return (reader.readDoubleOrNull(offset)) as P;
     case 1:
+      return (reader.readBool(offset)) as P;
+    case 2:
       return (_EventoSanitarioestadoSyncValueEnumMap[
               reader.readStringOrNull(offset)] ??
           EstadoSync.pendiente) as P;
-    case 2:
-      return (reader.readDateTime(offset)) as P;
     case 3:
       return (reader.readDateTime(offset)) as P;
     case 4:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 7:
       return (reader.readStringOrNull(offset)) as P;
     case 8:
-      return (_EventoSanitarioprioridadValueEnumMap[
-              reader.readStringOrNull(offset)] ??
-          Prioridad.baja) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 9:
       return (reader.readStringOrNull(offset)) as P;
     case 10:
+      return (_EventoSanitarioprioridadValueEnumMap[
+              reader.readStringOrNull(offset)] ??
+          Prioridad.baja) as P;
+    case 11:
+      return (reader.readStringOrNull(offset)) as P;
+    case 12:
       return (_EventoSanitariotipoValueEnumMap[
               reader.readStringOrNull(offset)] ??
           TipoEvento.vacuna) as P;
-    case 11:
-      return (reader.readLongOrNull(offset)) as P;
-    case 12:
-      return (reader.readDateTimeOrNull(offset)) as P;
     case 13:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 14:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 15:
+      return (reader.readStringOrNull(offset)) as P;
+    case 16:
+      return (reader.readStringOrNull(offset)) as P;
+    case 17:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -596,6 +629,16 @@ extension EventoSanitarioQueryFilter
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      esAplicacionUnicaEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'esAplicacionUnica',
+        value: value,
       ));
     });
   }
@@ -970,6 +1013,80 @@ extension EventoSanitarioQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      intervaloDiasRecomendadoIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'intervaloDiasRecomendado',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      intervaloDiasRecomendadoIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'intervaloDiasRecomendado',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      intervaloDiasRecomendadoEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'intervaloDiasRecomendado',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      intervaloDiasRecomendadoGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'intervaloDiasRecomendado',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      intervaloDiasRecomendadoLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'intervaloDiasRecomendado',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      intervaloDiasRecomendadoBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'intervaloDiasRecomendado',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -2321,6 +2438,160 @@ extension EventoSanitarioQueryFilter
       ));
     });
   }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'viaAplicacion',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'viaAplicacion',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'viaAplicacion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'viaAplicacion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'viaAplicacion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'viaAplicacion',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'viaAplicacion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'viaAplicacion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'viaAplicacion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'viaAplicacion',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'viaAplicacion',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterFilterCondition>
+      viaAplicacionIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'viaAplicacion',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension EventoSanitarioQueryObject
@@ -2355,6 +2626,20 @@ extension EventoSanitarioQuerySortBy
       sortByDosisDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dosis', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByEsAplicacionUnica() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'esAplicacionUnica', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByEsAplicacionUnicaDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'esAplicacionUnica', Sort.desc);
     });
   }
 
@@ -2410,6 +2695,20 @@ extension EventoSanitarioQuerySortBy
       sortByFechaProximaAplicacionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'fechaProximaAplicacion', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByIntervaloDiasRecomendado() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intervaloDiasRecomendado', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByIntervaloDiasRecomendadoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intervaloDiasRecomendado', Sort.desc);
     });
   }
 
@@ -2549,6 +2848,20 @@ extension EventoSanitarioQuerySortBy
       return query.addSortBy(r'veterinario', Sort.desc);
     });
   }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByViaAplicacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'viaAplicacion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      sortByViaAplicacionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'viaAplicacion', Sort.desc);
+    });
+  }
 }
 
 extension EventoSanitarioQuerySortThenBy
@@ -2563,6 +2876,20 @@ extension EventoSanitarioQuerySortThenBy
       thenByDosisDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dosis', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByEsAplicacionUnica() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'esAplicacionUnica', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByEsAplicacionUnicaDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'esAplicacionUnica', Sort.desc);
     });
   }
 
@@ -2630,6 +2957,20 @@ extension EventoSanitarioQuerySortThenBy
   QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByIntervaloDiasRecomendado() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intervaloDiasRecomendado', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByIntervaloDiasRecomendadoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intervaloDiasRecomendado', Sort.desc);
     });
   }
 
@@ -2769,6 +3110,20 @@ extension EventoSanitarioQuerySortThenBy
       return query.addSortBy(r'veterinario', Sort.desc);
     });
   }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByViaAplicacion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'viaAplicacion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QAfterSortBy>
+      thenByViaAplicacionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'viaAplicacion', Sort.desc);
+    });
+  }
 }
 
 extension EventoSanitarioQueryWhereDistinct
@@ -2776,6 +3131,13 @@ extension EventoSanitarioQueryWhereDistinct
   QueryBuilder<EventoSanitario, EventoSanitario, QDistinct> distinctByDosis() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'dosis');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct>
+      distinctByEsAplicacionUnica() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'esAplicacionUnica');
     });
   }
 
@@ -2803,6 +3165,13 @@ extension EventoSanitarioQueryWhereDistinct
       distinctByFechaProximaAplicacion() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'fechaProximaAplicacion');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct>
+      distinctByIntervaloDiasRecomendado() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'intervaloDiasRecomendado');
     });
   }
 
@@ -2876,6 +3245,14 @@ extension EventoSanitarioQueryWhereDistinct
       return query.addDistinctBy(r'veterinario', caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<EventoSanitario, EventoSanitario, QDistinct>
+      distinctByViaAplicacion({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'viaAplicacion',
+          caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension EventoSanitarioQueryProperty
@@ -2889,6 +3266,13 @@ extension EventoSanitarioQueryProperty
   QueryBuilder<EventoSanitario, double?, QQueryOperations> dosisProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'dosis');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, bool, QQueryOperations>
+      esAplicacionUnicaProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'esAplicacionUnica');
     });
   }
 
@@ -2916,6 +3300,13 @@ extension EventoSanitarioQueryProperty
       fechaProximaAplicacionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'fechaProximaAplicacion');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, int?, QQueryOperations>
+      intervaloDiasRecomendadoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'intervaloDiasRecomendado');
     });
   }
 
@@ -2982,6 +3373,13 @@ extension EventoSanitarioQueryProperty
       veterinarioProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'veterinario');
+    });
+  }
+
+  QueryBuilder<EventoSanitario, String?, QQueryOperations>
+      viaAplicacionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'viaAplicacion');
     });
   }
 }

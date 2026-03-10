@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:sirega_app/modulos/4_escaneo_nfc/domain/repositories/esp32_repository.dart';
 
 abstract class Esp32ScannerEvent extends Equatable {
   const Esp32ScannerEvent();
@@ -25,3 +26,12 @@ class ResetScannerEvent extends Esp32ScannerEvent {}
 class CheckConnectionStatusEvent extends Esp32ScannerEvent {}
 
 class OpenWifiSettingsEvent extends Esp32ScannerEvent {}
+
+class ChangeConnectionModeEvent extends Esp32ScannerEvent {
+  final Esp32ConnectionMode mode;
+
+  const ChangeConnectionModeEvent(this.mode);
+
+  @override
+  List<Object> get props => [mode];
+}

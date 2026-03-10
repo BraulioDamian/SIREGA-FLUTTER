@@ -22,7 +22,14 @@ class EventoSanitario {
   double? dosis;
   String? unidadDosis; // ml, mg, tabletas
   String? veterinario;
+  String? viaAplicacion; // Subcutánea, Intramuscular, Oral, etc.
   String? notas;
+
+  /// true = vacuna de dosis única (ej. Brucelosis), false = periódica con refuerzos
+  bool esAplicacionUnica = false;
+
+  /// Intervalo recomendado en días entre aplicaciones (null si es única)
+  int? intervaloDiasRecomendado;
 
   DateTime? fechaProximaAplicacion; // Para refuerzos
 

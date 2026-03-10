@@ -17,6 +17,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/scan_nfc_use_c
 import 'package:sirega_app/modulos/4_escaneo_nfc/bloc/esp32_scanner_bloc.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/repositories/esp32_repository_impl.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/esp32_service.dart';
+import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/esp32_ble_service.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/connect_to_esp32_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/disconnect_from_esp32_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/find_animal_by_uid_use_case.dart';
@@ -63,6 +64,9 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
   String? _selectedVia;
   String? _selectedMetodo;
   int? _condicionCorporal;
+  bool _requiereRefuerzo = false;
+  DateTime? _fechaProximaAplicacion;
+  final _fechaRefuerzoController = TextEditingController();
 
   // ── Field visibility helpers ──
   bool get _showProducto =>
@@ -102,6 +106,7 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
     _veterinarioController.dispose();
     _notasController.dispose();
     _diagnosticoController.dispose();
+    _fechaRefuerzoController.dispose();
     super.dispose();
   }
 
@@ -179,7 +184,6 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
 
   String _buildStructuredNotes() {
     final parts = <String>[];
-    if (_selectedVia != null) parts.add('Vía: $_selectedVia');
     if (_diagnosticoController.text.isNotEmpty) {
       parts.add('Diagnóstico: ${_diagnosticoController.text}');
     }
@@ -342,6 +346,83 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
                 const SizedBox(height: 20),
               ],
 
+              // ── ¿Requiere refuerzo? (solo vacunas) ──
+              if (widget.tipoEvento == TipoEvento.vacuna) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: _requiereRefuerzo ? accentColor.withValues(alpha: 0.4) : AppColors.divider),
+                  ),
+                  child: SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: Row(
+                      children: [
+                        Icon(
+                          _requiereRefuerzo ? Icons.event_repeat_rounded : Icons.check_circle_outline_rounded,
+                          color: _requiereRefuerzo ? accentColor : AppColors.textHint,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          '¿Requiere refuerzo?',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: _requiereRefuerzo ? AppColors.textPrimary : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    value: _requiereRefuerzo,
+                    activeTrackColor: accentColor,
+                    onChanged: (v) => setState(() {
+                      _requiereRefuerzo = v;
+                      if (!v) {
+                        _fechaProximaAplicacion = null;
+                        _fechaRefuerzoController.clear();
+                      }
+                    }),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // ── Fecha de próximo refuerzo ──
+                if (_requiereRefuerzo) ...[                  
+                  TextFormField(
+                    controller: _fechaRefuerzoController,
+                    decoration: _inputDecoration(
+                      label: 'Fecha próximo refuerzo *',
+                      hint: 'Seleccionar fecha',
+                      icon: Icons.event_repeat_rounded,
+                      accentColor: accentColor,
+                    ),
+                    readOnly: true,
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _fechaProximaAplicacion ?? DateTime.now().add(const Duration(days: 180)),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2101),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          _fechaProximaAplicacion = picked;
+                          _fechaRefuerzoController.text = DateFormat('dd/MM/yyyy').format(picked);
+                        });
+                      }
+                    },
+                    validator: (value) {
+                      if (_requiereRefuerzo && (value == null || value.isEmpty)) {
+                        return 'Selecciona la fecha del próximo refuerzo';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ],
+
               // ── Vía de Aplicación ──
               if (_showViaAplicacion) ...[
                 ChipSelector(
@@ -459,12 +540,16 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
               create: (context) {
                 final isarService = IsarService();
                 final animalDbService = AnimalDatabaseService(isarService);
-                final esp32Repository = Esp32RepositoryImpl(Esp32Service());
+                final esp32Repository = Esp32RepositoryImpl(
+                  Esp32Service(),
+                  Esp32BleService(),
+                );
                 return Esp32ScannerBloc(
                   ConnectToEsp32UseCase(esp32Repository),
                   DisconnectFromEsp32UseCase(esp32Repository),
                   FindAnimalByUidUseCase(animalDbService),
                   OpenWifiSettingsUseCase(esp32Repository),
+                  esp32Repository,
                 );
               },
             ),
@@ -476,6 +561,8 @@ class _DatosEventoScreenState extends State<DatosEventoScreen> {
             dosis: _showDosis ? double.tryParse(_dosisController.text) : null,
             unidadDosis: _showDosis ? _selectedUnit : null,
             veterinario: _veterinarioController.text,
+            viaAplicacion: _selectedVia,
+            fechaProximaAplicacion: _fechaProximaAplicacion,
             notas: structuredNotes,
           ),
         ),

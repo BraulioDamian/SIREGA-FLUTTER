@@ -18,6 +18,8 @@ class RegistroEventoService {
     double? dosis,
     String? unidadDosis,
     String? veterinario,
+    String? viaAplicacion,
+    DateTime? fechaProximaAplicacion,
     String? notas,
   }) async {
     final loteId = const Uuid().v4();
@@ -44,6 +46,8 @@ class RegistroEventoService {
           ..dosis = dosis
           ..unidadDosis = unidadDosis
           ..veterinario = veterinario
+          ..viaAplicacion = viaAplicacion
+          ..fechaProximaAplicacion = fechaProximaAplicacion
           ..notas = notas
           ..loteId = loteId
           ..totalAnimalesLote = animalesValidos.length

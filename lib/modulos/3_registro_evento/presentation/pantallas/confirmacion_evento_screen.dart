@@ -13,6 +13,8 @@ class ConfirmacionEventoScreen extends StatefulWidget {
   final double? dosis;
   final String? unidadDosis;
   final String? veterinario;
+  final String? viaAplicacion;
+  final DateTime? fechaProximaAplicacion;
   final String? notas;
   final List<int> animalesIds;
 
@@ -24,6 +26,8 @@ class ConfirmacionEventoScreen extends StatefulWidget {
     this.dosis,
     this.unidadDosis,
     this.veterinario,
+    this.viaAplicacion,
+    this.fechaProximaAplicacion,
     this.notas,
     required this.animalesIds,
   });
@@ -66,6 +70,8 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
         dosis: widget.dosis,
         unidadDosis: widget.unidadDosis,
         veterinario: widget.veterinario,
+        viaAplicacion: widget.viaAplicacion,
+        fechaProximaAplicacion: widget.fechaProximaAplicacion,
         notas: widget.notas,
       );
 
@@ -207,6 +213,14 @@ class _ConfirmacionEventoScreenState extends State<ConfirmacionEventoScreen> {
                     if (widget.dosis != null) ...[
                       const Divider(height: 24),
                       _buildSummaryRow('Dosis por Animal', '${widget.dosis} ${widget.unidadDosis ?? ''}', Icons.vaccines_rounded),
+                    ],
+                    if (widget.viaAplicacion != null && widget.viaAplicacion!.isNotEmpty) ...[
+                      const Divider(height: 24),
+                      _buildSummaryRow('Vía de Administración', widget.viaAplicacion!, Icons.vaccines_outlined),
+                    ],
+                    if (widget.fechaProximaAplicacion != null) ...[
+                      const Divider(height: 24),
+                      _buildSummaryRow('Próximo Refuerzo', DateFormat('dd/MM/yyyy').format(widget.fechaProximaAplicacion!), Icons.event_repeat_rounded),
                     ],
                     if (widget.veterinario != null && widget.veterinario!.isNotEmpty) ...[
                       const Divider(height: 24),

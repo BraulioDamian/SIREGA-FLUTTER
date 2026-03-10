@@ -6,6 +6,7 @@ import 'package:sirega_app/modulos/4_escaneo_nfc/data/repositories/esp32_reposit
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/repositories/nfc_repository_impl.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/animal_database_service.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/esp32_service.dart';
+import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/esp32_ble_service.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/data/services/nfc_service.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/connect_to_esp32_use_case.dart';
 import 'package:sirega_app/modulos/4_escaneo_nfc/domain/use_cases/disconnect_from_esp32_use_case.dart';
@@ -22,7 +23,6 @@ class EscaneoNfcScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Esto normally se haría con un inyector de dependencias como GetIt o Provider
     final isarService = IsarService();
     final animalDbService = AnimalDatabaseService(isarService);
     final nfcRepository = NfcRepositoryImpl(NfcService(), animalDbService);
@@ -37,12 +37,16 @@ class EscaneoNfcScreen extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) {
-            final esp32Repository = Esp32RepositoryImpl(Esp32Service());
+            final esp32Repository = Esp32RepositoryImpl(
+              Esp32Service(),
+              Esp32BleService(),
+            );
             return Esp32ScannerBloc(
               ConnectToEsp32UseCase(esp32Repository),
               DisconnectFromEsp32UseCase(esp32Repository),
               FindAnimalByUidUseCase(animalDbService),
               OpenWifiSettingsUseCase(esp32Repository),
+              esp32Repository,
             );
           },
         ),

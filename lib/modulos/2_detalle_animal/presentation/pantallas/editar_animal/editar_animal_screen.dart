@@ -86,7 +86,10 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
     setState(() {
       // Verificar si los campos básicos están completos
       _generalCompleto = _formController.isFormValid;
-      _hasUnsavedChanges = true;
+      // Solo marcar cambios después de la carga inicial
+      if (_formController.initialLoadComplete) {
+        _hasUnsavedChanges = true;
+      }
     });
   }
 

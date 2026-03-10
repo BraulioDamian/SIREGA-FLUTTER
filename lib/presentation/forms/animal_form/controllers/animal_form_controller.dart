@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/nucleo/modelos/catalogo_vacunas.dart';
 import 'package:sirega_app/nucleo/modelos/siniga_model.dart';
 import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
 import 'package:sirega_app/presentation/widgets/shared/json_data_loader.dart';
@@ -165,6 +166,7 @@ class AnimalFormController extends ChangeNotifier {
   // Estado de carga
   bool _isLoading = false;
   final bool _isSaving = false;
+  bool _initialLoadComplete = false;
   
   // Getters
   RazaBovina? get razaSeleccionada => _razaSeleccionada;
@@ -180,6 +182,7 @@ class AnimalFormController extends ChangeNotifier {
   List<EstadoMexico> get estados => _estados;
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
+  bool get initialLoadComplete => _initialLoadComplete;
 
   // Getters adicionales para campos extendidos
   EstadoAnimal get estadoAnimal => _estadoAnimal;
@@ -340,6 +343,9 @@ class AnimalFormController extends ChangeNotifier {
           orElse: () => _razas.first,
         );
         razaDisplayController.text = _razaSeleccionada?.nombre ?? '';
+
+        // Cargar datos relacionados desde Isar (IsarLinks)
+        await _loadLinkedData();
       }
       
       // Auto-seleccionar estado si ya hay un código
@@ -351,7 +357,105 @@ class AnimalFormController extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+      _initialLoadComplete = true;
     }
+  }
+
+  /// Carga los datos relacionados del animal desde IsarLinks
+  /// (vacunas, eventos médicos, pesajes, producción de leche, partos)
+  Future<void> _loadLinkedData() async {
+    final animal = animalOriginal!;
+
+    // Cargar eventos sanitarios (vacunas + eventos médicos)
+    await animal.eventos.load();
+    for (final evento in animal.eventos) {
+      if (evento.tipo == TipoEvento.vacuna) {
+        final nombre = evento.nombreProducto ?? 'Vacuna sin nombre';
+        if (!_vacunasAplicadas.contains(nombre)) {
+          _vacunasAplicadas.add(nombre);
+        }
+        _fechasVacunas[nombre] = evento.fecha;
+        // Si no es una vacuna estándar, agregarla como personalizada
+        if (!_esVacunaEstandar(nombre) && !_vacunasPersonalizadas.contains(nombre)) {
+          _vacunasPersonalizadas.add(nombre);
+        }
+      } else {
+        // Convertir TipoEvento a string del formulario
+        final tipoStr = _tipoEventoToFormString(evento.tipo);
+        _eventosMedicos.add({
+          'tipo': tipoStr,
+          'fecha': evento.fecha,
+          'producto': evento.nombreProducto ?? '',
+          'notas': evento.notas,
+        });
+      }
+    }
+
+    // Cargar registros de producción (pesajes, leche, partos)
+    await animal.producciones.load();
+    for (final registro in animal.producciones) {
+      switch (registro.tipo) {
+        case 'Pesaje':
+          _registrosPesajes.add({
+            'fecha': registro.fecha,
+            'peso': registro.pesoKg ?? 0.0,
+            'notas': registro.notas,
+          });
+          break;
+        case 'Producción de Leche':
+          _registrosProduccionLeche.add({
+            'fecha': registro.fecha,
+            'litros': registro.litrosPorDia ?? 0.0,
+            'notas': registro.notas,
+          });
+          break;
+        case 'Parto':
+          _registrosPartos.add({
+            'idCria': registro.idCria,
+            'fecha': registro.fecha,
+            'sexoCria': _parseSexoFromNotas(registro.notas),
+            'pesoKg': registro.pesoKg,
+            'notas': _limpiarNotasSexo(registro.notas),
+          });
+          break;
+      }
+    }
+  }
+
+  bool _esVacunaEstandar(String nombre) {
+    return CatalogoVacunas.buscarPorNombre(nombre) != null;
+  }
+
+  String _tipoEventoToFormString(TipoEvento tipo) {
+    switch (tipo) {
+      case TipoEvento.desparasitante:
+        return 'desparasitacion';
+      case TipoEvento.tratamiento:
+        return 'tratamiento';
+      case TipoEvento.revisionVeterinaria:
+        return 'diagnostico';
+      case TipoEvento.castracion:
+        return 'cirugia';
+      default:
+        return 'tratamiento';
+    }
+  }
+
+  /// Extrae el sexo de la cría de las notas (formato: "Sexo: Macho. ...")
+  Sexo? _parseSexoFromNotas(String? notas) {
+    if (notas == null) return null;
+    if (notas.contains('Sexo: Macho')) return Sexo.macho;
+    if (notas.contains('Sexo: Hembra')) return Sexo.hembra;
+    return null;
+  }
+
+  /// Remueve el prefijo "Sexo: Macho/Hembra. " de las notas
+  String? _limpiarNotasSexo(String? notas) {
+    if (notas == null) return null;
+    final cleaned = notas
+        .replaceFirst(RegExp(r'^Sexo: (Macho|Hembra)\. '), '')
+        .replaceFirst(RegExp(r'^Sexo: (Macho|Hembra)$'), '');
+    return cleaned.isEmpty ? null : cleaned;
   }
   
   void _setupListeners() {

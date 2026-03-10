@@ -5,6 +5,9 @@ import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animated_info_card.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animal_detail_helpers.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/quick_add_dialogs.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/bloc/cattle_detail_bloc.dart';
+import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/cattle_detail_screen.dart';
 
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 
@@ -36,19 +39,16 @@ class ReproductionTab extends StatelessWidget {
         delay: 0,
         child: _buildReproductiveStatus(context),
       ),
+      if (animal.sexo == Sexo.hembra) ...[        
+        const SizedBox(height: 16),
+        _buildQuickAction(context),
+      ],
       const SizedBox(height: 16),
       AnimatedInfoCard(
         title: 'Historial de Crías',
         icon: Icons.pets,
         color: Colors.indigo,
         delay: 100,
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Historial de crías completo próximamente'),
-            ),
-          );
-        },
         child: _buildOffspringHistory(context),
       ),
     ];
@@ -59,6 +59,49 @@ class ReproductionTab extends StatelessWidget {
       animal: animal,
       padding: EdgeInsets.zero,
     )._buildChildren(context);
+  }
+
+  Widget _buildQuickAction(BuildContext context) {
+    return Material(
+      color: Colors.pink.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: () => QuickAddDialogs.mostrarRegistroParto(context, animal),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.pink.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.child_care_rounded,
+                    color: Colors.pink, size: 24),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Registrar Parto',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 15)),
+                    Text('Agregar nuevo registro de cría',
+                        style:
+                            TextStyle(fontSize: 12, color: Colors.grey)),
+                  ],
+                ),
+              ),
+              Icon(Icons.add_circle_rounded,
+                  color: Colors.pink, size: 28),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildReproductiveStatus(BuildContext context) {
@@ -128,10 +171,8 @@ class ReproductionTab extends StatelessWidget {
   }
 
   Widget _buildOffspringHistory(BuildContext context) {
-    final isarService = RepositoryProvider.of<IsarService>(context);
-
-    return FutureBuilder<List<RegistroProduccion>>(
-      future: isarService.obtenerProduccionPorAnimal(animal.id),
+    return FutureBuilder<List<Animal>>(
+      future: _loadCrias(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -139,112 +180,113 @@ class ReproductionTab extends StatelessWidget {
 
         if (snapshot.hasError) {
           return AnimalDetailHelpers.buildEmptyState(
-            'Error al cargar historial de partos',
+            'Error al cargar historial de crías',
           );
         }
 
-        final registros = snapshot.data ?? [];
+        final crias = snapshot.data ?? [];
 
-        // Filtrar solo los partos
-        final partos = registros.where((r) => r.tipo == 'Parto').toList();
-
-        if (partos.isEmpty) {
+        if (crias.isEmpty) {
           return AnimalDetailHelpers.buildEmptyState('Sin crías registradas');
         }
 
-        // Ordenar por fecha descendente
-        partos.sort((a, b) => b.fecha.compareTo(a.fecha));
-
         return Column(
-          children: partos.map((parto) {
-            // Extraer el sexo de las notas si existe
-            bool esMacho = false;
-            if (parto.notas != null && parto.notas!.contains('Sexo:')) {
-              esMacho = parto.notas!.contains('Macho');
-            }
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: Material(
-                color: Colors.brown.shade50,
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  onTap: () {},
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.brown.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            esMacho ? Icons.male : Icons.female,
-                            color: esMacho ? Colors.blue : Colors.pink,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                parto.idCria ?? 'Cría sin identificar',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Nacido: ${parto.fecha.day.toString().padLeft(2, '0')}/${parto.fecha.month.toString().padLeft(2, '0')}/${parto.fecha.year}',
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              if (parto.pesoKg != null) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Peso al nacer: ${parto.pesoKg!.toStringAsFixed(1)} kg',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                        if (parto.notas != null && parto.notas!.isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.brown.withAlpha(26),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Icon(
-                              Icons.notes,
-                              color: Colors.brown,
-                              size: 16,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+          children: crias.map((cria) => _buildCriaCard(context, cria)).toList(),
+        );
+      },
+    );
+  }
+
+  Future<List<Animal>> _loadCrias() async {
+    await animal.crias.load();
+    final lista = animal.crias.toList();
+    lista.sort((a, b) => b.fechaNacimiento.compareTo(a.fechaNacimiento));
+    return lista;
+  }
+
+  Widget _buildCriaCard(BuildContext context, Animal cria) {
+    final esMacho = cria.sexo == Sexo.macho;
+    final fecha = cria.fechaNacimiento;
+    final fechaStr =
+        '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year}';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.brown.shade50,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: () {
+            final isarService = RepositoryProvider.of<IsarService>(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider(
+                  create: (_) => CattleDetailBloc(isarService: isarService)
+                    ..add(LoadCattleDetail(cria.id)),
+                  child: CattleDetailScreen(id: cria.id),
                 ),
               ),
             );
-          }).toList(),
-        );
-      },
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.brown.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    esMacho ? Icons.male : Icons.female,
+                    color: esMacho ? Colors.blue : Colors.pink,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        cria.nombre,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Nacido: $fechaStr',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      if (cria.pesoNacimiento != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          'Peso al nacer: ${cria.pesoNacimiento!.toStringAsFixed(1)} kg',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded,
+                    color: Colors.grey.shade400, size: 24),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

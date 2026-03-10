@@ -64,6 +64,9 @@ dependencies:
   provider: ^6.1.2
   uuid: ^4.4.0
 
+  # BLE para comunicación con ESP32
+  flutter_blue_plus: ^1.35.2
+
   # Firebase (para sincronización en la nube)
   firebase_core: ^3.3.0
   firebase_auth: ^5.1.4

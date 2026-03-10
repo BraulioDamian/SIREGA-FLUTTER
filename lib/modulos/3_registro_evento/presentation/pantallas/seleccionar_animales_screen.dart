@@ -23,6 +23,8 @@ class SeleccionarAnimalesScreen extends StatefulWidget {
   final double? dosis;
   final String? unidadDosis;
   final String? veterinario;
+  final String? viaAplicacion;
+  final DateTime? fechaProximaAplicacion;
   final String? notas;
 
   const SeleccionarAnimalesScreen({
@@ -33,6 +35,8 @@ class SeleccionarAnimalesScreen extends StatefulWidget {
     this.dosis,
     this.unidadDosis,
     this.veterinario,
+    this.viaAplicacion,
+    this.fechaProximaAplicacion,
     this.notas,
   });
 
@@ -275,6 +279,8 @@ class _SeleccionarAnimalesScreenState extends State<SeleccionarAnimalesScreen> {
                                       dosis: widget.dosis,
                                       unidadDosis: widget.unidadDosis,
                                       veterinario: widget.veterinario,
+                                      viaAplicacion: widget.viaAplicacion,
+                                      fechaProximaAplicacion: widget.fechaProximaAplicacion,
                                       notas: widget.notas,
                                       animalesIds: _selectedAnimalIds.toList(),
                                     ),
