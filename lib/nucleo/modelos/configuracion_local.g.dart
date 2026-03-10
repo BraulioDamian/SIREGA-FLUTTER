@@ -358,18 +358,23 @@ const ConfiguracionLocalSchema = CollectionSchema(
       name: r'unidadTemperatura',
       type: IsarType.string,
     ),
-    r'vibracionActiva': PropertySchema(
+    r'versionMigracion': PropertySchema(
       id: 68,
+      name: r'versionMigracion',
+      type: IsarType.long,
+    ),
+    r'vibracionActiva': PropertySchema(
+      id: 69,
       name: r'vibracionActiva',
       type: IsarType.bool,
     ),
     r'vibracionLecturaExitosa': PropertySchema(
-      id: 69,
+      id: 70,
       name: r'vibracionLecturaExitosa',
       type: IsarType.bool,
     ),
     r'vistaListaDefecto': PropertySchema(
-      id: 70,
+      id: 71,
       name: r'vistaListaDefecto',
       type: IsarType.string,
     )
@@ -568,9 +573,10 @@ void _configuracionLocalSerialize(
   writer.writeLong(offsets[65], object.umbralMinimoMedicamentos);
   writer.writeString(offsets[66], object.unidadPeso);
   writer.writeString(offsets[67], object.unidadTemperatura);
-  writer.writeBool(offsets[68], object.vibracionActiva);
-  writer.writeBool(offsets[69], object.vibracionLecturaExitosa);
-  writer.writeString(offsets[70], object.vistaListaDefecto);
+  writer.writeLong(offsets[68], object.versionMigracion);
+  writer.writeBool(offsets[69], object.vibracionActiva);
+  writer.writeBool(offsets[70], object.vibracionLecturaExitosa);
+  writer.writeString(offsets[71], object.vistaListaDefecto);
 }
 
 ConfiguracionLocal _configuracionLocalDeserialize(
@@ -649,9 +655,10 @@ ConfiguracionLocal _configuracionLocalDeserialize(
   object.umbralMinimoMedicamentos = reader.readLong(offsets[65]);
   object.unidadPeso = reader.readString(offsets[66]);
   object.unidadTemperatura = reader.readString(offsets[67]);
-  object.vibracionActiva = reader.readBool(offsets[68]);
-  object.vibracionLecturaExitosa = reader.readBool(offsets[69]);
-  object.vistaListaDefecto = reader.readString(offsets[70]);
+  object.versionMigracion = reader.readLong(offsets[68]);
+  object.vibracionActiva = reader.readBool(offsets[69]);
+  object.vibracionLecturaExitosa = reader.readBool(offsets[70]);
+  object.vistaListaDefecto = reader.readString(offsets[71]);
   return object;
 }
 
@@ -799,10 +806,12 @@ P _configuracionLocalDeserializeProp<P>(
     case 67:
       return (reader.readString(offset)) as P;
     case 68:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 69:
       return (reader.readBool(offset)) as P;
     case 70:
+      return (reader.readBool(offset)) as P;
+    case 71:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -5866,6 +5875,62 @@ extension ConfiguracionLocalQueryFilter
   }
 
   QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterFilterCondition>
+      versionMigracionEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'versionMigracion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterFilterCondition>
+      versionMigracionGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'versionMigracion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterFilterCondition>
+      versionMigracionLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'versionMigracion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterFilterCondition>
+      versionMigracionBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'versionMigracion',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterFilterCondition>
       vibracionActivaEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -6983,6 +7048,20 @@ extension ConfiguracionLocalQuerySortBy
   }
 
   QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterSortBy>
+      sortByVersionMigracion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'versionMigracion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterSortBy>
+      sortByVersionMigracionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'versionMigracion', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterSortBy>
       sortByVibracionActiva() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'vibracionActiva', Sort.asc);
@@ -7994,6 +8073,20 @@ extension ConfiguracionLocalQuerySortThenBy
   }
 
   QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterSortBy>
+      thenByVersionMigracion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'versionMigracion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterSortBy>
+      thenByVersionMigracionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'versionMigracion', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QAfterSortBy>
       thenByVibracionActiva() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'vibracionActiva', Sort.asc);
@@ -8522,6 +8615,13 @@ extension ConfiguracionLocalQueryWhereDistinct
   }
 
   QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QDistinct>
+      distinctByVersionMigracion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'versionMigracion');
+    });
+  }
+
+  QueryBuilder<ConfiguracionLocal, ConfiguracionLocal, QDistinct>
       distinctByVibracionActiva() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'vibracionActiva');
@@ -9021,6 +9121,13 @@ extension ConfiguracionLocalQueryProperty
       unidadTemperaturaProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'unidadTemperatura');
+    });
+  }
+
+  QueryBuilder<ConfiguracionLocal, int, QQueryOperations>
+      versionMigracionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'versionMigracion');
     });
   }
 

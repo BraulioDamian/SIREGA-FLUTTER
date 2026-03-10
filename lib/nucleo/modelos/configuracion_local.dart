@@ -99,4 +99,7 @@ class ConfiguracionLocal {
   DateTime? fechaInstalacion;
   int diasUsoConsecutivos = 0;
   DateTime? fechaUltimoUso;
+
+  // ===== MIGRACIONES =====
+  int versionMigracion = 0;
 }

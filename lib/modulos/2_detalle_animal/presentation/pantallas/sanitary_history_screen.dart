@@ -164,6 +164,12 @@ class _SanitaryHistoryScreenState extends State<SanitaryHistoryScreen>
                   eventos: _filterEvents(allEventos, t.tipo),
                   groupByMonth: _groupByMonth,
                   tab: t,
+                  onRefresh: () {
+                    setState(() {
+                      _dataFuture = RepositoryProvider.of<IsarService>(context)
+                          .obtenerEventosPorAnimal(widget.animalId);
+                    });
+                  },
                 ),
             ],
           );
@@ -247,11 +253,13 @@ class _EventListPage extends StatelessWidget {
   final List<EventoSanitario> eventos;
   final Map<String, List<EventoSanitario>> Function(List<EventoSanitario>) groupByMonth;
   final _TabDef tab;
+  final VoidCallback? onRefresh;
 
   const _EventListPage({
     required this.eventos,
     required this.groupByMonth,
     required this.tab,
+    this.onRefresh,
   });
 
   @override
@@ -338,6 +346,7 @@ class _EventListPage extends StatelessWidget {
                       index: index,
                       isLast: index == unicaAplicacion.length - 1,
                       showTypeBadge: false,
+                      onDeleted: onRefresh,
                     ),
                   );
                 },
@@ -381,6 +390,7 @@ class _EventListPage extends StatelessWidget {
                   index: index,
                   isLast: isLast,
                   showTypeBadge: tab.tipo == null,
+                  onDeleted: onRefresh,
                 ),
               );
             },

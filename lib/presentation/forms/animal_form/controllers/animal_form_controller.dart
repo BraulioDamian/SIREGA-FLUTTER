@@ -138,17 +138,29 @@ class AnimalFormController extends ChangeNotifier {
   final List<String> _vacunasPersonalizadas = [];
   final Map<String, DateTime> _fechasVacunas = {};
 
+  // Vacunas originales (para detectar cambios en modo edición)
+  final Set<String> _vacunasOriginales = {};
+  final Map<String, DateTime> _fechasVacunasOriginales = {};
+
   // Datos de eventos médicos
   final List<Map<String, dynamic>> _eventosMedicos = [];
+  int _eventosMedicosOriginalesCount = 0;
+  final Set<int> _idsOriginalesEventosMedicos = {};
 
   // Datos de partos/crías
   final List<Map<String, dynamic>> _registrosPartos = [];
+  int _registrosPartosOriginalesCount = 0;
+  final Set<int> _idsOriginalesPartos = {};
 
   // Datos de pesajes
   final List<Map<String, dynamic>> _registrosPesajes = [];
+  int _registrosPesajesOriginalesCount = 0;
+  final Set<int> _idsOriginalesPesajes = {};
 
   // Datos de producción de leche
   final List<Map<String, dynamic>> _registrosProduccionLeche = [];
+  int _registrosProduccionLecheOriginalesCount = 0;
+  final Set<int> _idsOriginalesProduccionLeche = {};
   
   // Validación SINIGA
   SinigaId? _sinigaId;
@@ -194,10 +206,20 @@ class AnimalFormController extends ChangeNotifier {
   List<String> get vacunasAplicadas => _vacunasAplicadas;
   List<String> get vacunasPersonalizadas => _vacunasPersonalizadas;
   Map<String, DateTime> get fechasVacunas => _fechasVacunas;
+  Set<String> get vacunasOriginales => _vacunasOriginales;
+  Map<String, DateTime> get fechasVacunasOriginales => _fechasVacunasOriginales;
   List<Map<String, dynamic>> get eventosMedicos => _eventosMedicos;
+  int get eventosMedicosOriginalesCount => _eventosMedicosOriginalesCount;
+  Set<int> get idsOriginalesEventosMedicos => _idsOriginalesEventosMedicos;
   List<Map<String, dynamic>> get registrosPartos => _registrosPartos;
+  int get registrosPartosOriginalesCount => _registrosPartosOriginalesCount;
+  Set<int> get idsOriginalesPartos => _idsOriginalesPartos;
   List<Map<String, dynamic>> get registrosPesajes => _registrosPesajes;
+  int get registrosPesajesOriginalesCount => _registrosPesajesOriginalesCount;
+  Set<int> get idsOriginalesPesajes => _idsOriginalesPesajes;
   List<Map<String, dynamic>> get registrosProduccionLeche => _registrosProduccionLeche;
+  int get registrosProduccionLecheOriginalesCount => _registrosProduccionLecheOriginalesCount;
+  Set<int> get idsOriginalesProduccionLeche => _idsOriginalesProduccionLeche;
   
   // Validación general del formulario
   bool get isFormValid => 
@@ -383,6 +405,7 @@ class AnimalFormController extends ChangeNotifier {
         // Convertir TipoEvento a string del formulario
         final tipoStr = _tipoEventoToFormString(evento.tipo);
         _eventosMedicos.add({
+          'isarId': evento.id,
           'tipo': tipoStr,
           'fecha': evento.fecha,
           'producto': evento.nombreProducto ?? '',
@@ -391,12 +414,18 @@ class AnimalFormController extends ChangeNotifier {
       }
     }
 
+    // Snapshot de vacunas originales para detectar cambios al guardar
+    _vacunasOriginales.addAll(_vacunasAplicadas);
+    _fechasVacunasOriginales.addAll(_fechasVacunas);
+    _eventosMedicosOriginalesCount = _eventosMedicos.length;
+
     // Cargar registros de producción (pesajes, leche, partos)
     await animal.producciones.load();
     for (final registro in animal.producciones) {
       switch (registro.tipo) {
         case 'Pesaje':
           _registrosPesajes.add({
+            'isarId': registro.id,
             'fecha': registro.fecha,
             'peso': registro.pesoKg ?? 0.0,
             'notas': registro.notas,
@@ -404,6 +433,7 @@ class AnimalFormController extends ChangeNotifier {
           break;
         case 'Producción de Leche':
           _registrosProduccionLeche.add({
+            'isarId': registro.id,
             'fecha': registro.fecha,
             'litros': registro.litrosPorDia ?? 0.0,
             'notas': registro.notas,
@@ -411,6 +441,7 @@ class AnimalFormController extends ChangeNotifier {
           break;
         case 'Parto':
           _registrosPartos.add({
+            'isarId': registro.id,
             'idCria': registro.idCria,
             'fecha': registro.fecha,
             'sexoCria': _parseSexoFromNotas(registro.notas),
@@ -420,6 +451,24 @@ class AnimalFormController extends ChangeNotifier {
           break;
       }
     }
+
+    // Snapshot de conteos e IDs originales para detectar eliminaciones al guardar
+    _registrosPartosOriginalesCount = _registrosPartos.length;
+    _registrosPesajesOriginalesCount = _registrosPesajes.length;
+    _registrosProduccionLecheOriginalesCount = _registrosProduccionLeche.length;
+
+    _idsOriginalesEventosMedicos.addAll(
+      _eventosMedicos.where((e) => e['isarId'] != null).map((e) => e['isarId'] as int),
+    );
+    _idsOriginalesPesajes.addAll(
+      _registrosPesajes.where((e) => e['isarId'] != null).map((e) => e['isarId'] as int),
+    );
+    _idsOriginalesProduccionLeche.addAll(
+      _registrosProduccionLeche.where((e) => e['isarId'] != null).map((e) => e['isarId'] as int),
+    );
+    _idsOriginalesPartos.addAll(
+      _registrosPartos.where((e) => e['isarId'] != null).map((e) => e['isarId'] as int),
+    );
   }
 
   bool _esVacunaEstandar(String nombre) {

@@ -12,22 +12,35 @@ import 'package:sirega_app/modulos/2_detalle_animal/presentation/pantallas/sanit
 
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 
-class HealthTab extends StatelessWidget {
+class HealthTab extends StatefulWidget {
   final Animal animal;
   final EdgeInsets padding;
 
   const HealthTab({super.key, required this.animal, required this.padding});
 
   @override
+  State<HealthTab> createState() => _HealthTabState();
+
+  static List<Widget> buildChildrenStatic(BuildContext context, Animal animal) {
+    return _HealthTabState._buildChildrenFrom(context, animal, null);
+  }
+}
+
+class _HealthTabState extends State<HealthTab> {
+  void _refresh() {
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: padding,
+      padding: widget.padding,
       physics: const BouncingScrollPhysics(),
-      children: _buildChildren(context),
+      children: _buildChildrenFrom(context, widget.animal, _refresh),
     );
   }
 
-  List<Widget> _buildChildren(BuildContext context) {
+  static List<Widget> _buildChildrenFrom(BuildContext context, Animal animal, VoidCallback? onRefresh) {
     return [
       AnimatedInfoCard(
         title: 'Estado de Salud',
@@ -52,7 +65,7 @@ class HealthTab extends StatelessWidget {
       ),
       const SizedBox(height: 16),
       // Próximas vacunas / alertas
-      _buildProximasVacunasCard(context),
+      _buildProximasVacunasCard(context, animal),
       const SizedBox(height: 16),
       AnimatedInfoCard(
         title: 'Historial Médico',
@@ -71,7 +84,7 @@ class HealthTab extends StatelessWidget {
             ),
           );
         },
-        child: _buildMedicalHistory(context),
+        child: _buildMedicalHistory(context, animal, onRefresh),
       ),
       const SizedBox(height: 16),
       AnimatedInfoCard(
@@ -91,7 +104,7 @@ class HealthTab extends StatelessWidget {
             ),
           );
         },
-        child: _buildVacunasPeriodicasList(context),
+        child: _buildVacunasPeriodicasList(context, animal),
       ),
       const SizedBox(height: 16),
       AnimatedInfoCard(
@@ -99,19 +112,12 @@ class HealthTab extends StatelessWidget {
         icon: Icons.verified,
         color: Colors.orange,
         delay: 300,
-        child: _buildVacunasUnicasList(context),
+        child: _buildVacunasUnicasList(context, animal),
       ),
     ];
   }
 
-  static List<Widget> buildChildrenStatic(BuildContext context, Animal animal) {
-    return HealthTab(
-      animal: animal,
-      padding: EdgeInsets.zero,
-    )._buildChildren(context);
-  }
-
-  Widget _buildMedicalHistory(BuildContext context) {
+  static Widget _buildMedicalHistory(BuildContext context, Animal animal, VoidCallback? onRefresh) {
     final isarService = RepositoryProvider.of<IsarService>(context);
 
     return FutureBuilder<List<EventoSanitario>>(
@@ -152,6 +158,7 @@ class HealthTab extends StatelessWidget {
               evento: evento,
               index: index,
               isLast: isLast,
+              onDeleted: onRefresh,
             );
           }).toList(),
         );
@@ -159,7 +166,7 @@ class HealthTab extends StatelessWidget {
     );
   }
 
-  Widget _buildVacunasPeriodicasList(BuildContext context) {
+  static Widget _buildVacunasPeriodicasList(BuildContext context, Animal animal) {
     final isarService = RepositoryProvider.of<IsarService>(context);
 
     return FutureBuilder<List<EventoSanitario>>(
@@ -211,7 +218,7 @@ class HealthTab extends StatelessWidget {
     );
   }
 
-  Widget _buildVacunaPeriodicaItem({
+  static Widget _buildVacunaPeriodicaItem({
     required String nombre,
     required DateTime ultimaAplicacion,
     DateTime? proximaAplicacion,
@@ -308,7 +315,7 @@ class HealthTab extends StatelessWidget {
     );
   }
 
-  Widget _buildVacunasUnicasList(BuildContext context) {
+  static Widget _buildVacunasUnicasList(BuildContext context, Animal animal) {
     final isarService = RepositoryProvider.of<IsarService>(context);
 
     return FutureBuilder<List<EventoSanitario>>(
@@ -402,7 +409,7 @@ class HealthTab extends StatelessWidget {
     );
   }
 
-  Widget _buildProximasVacunasCard(BuildContext context) {
+  static Widget _buildProximasVacunasCard(BuildContext context, Animal animal) {
     final isarService = RepositoryProvider.of<IsarService>(context);
 
     return FutureBuilder<List<EventoSanitario>>(

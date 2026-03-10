@@ -1,11 +1,13 @@
 // lib/modulos/2_detalle_animal/presentation/widgets/medical_event_card.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
 import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animal_detail_helpers.dart';
 import 'package:sirega_app/nucleo/modelos/catalogo_vacunas.dart';
+import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 
 class MedicalEventCard extends StatelessWidget {
   final EventoSanitario evento;
@@ -13,6 +15,8 @@ class MedicalEventCard extends StatelessWidget {
   final bool isLast;
   /// When false, hides the type badge (e.g. inside a filtered tab where it's redundant).
   final bool showTypeBadge;
+  /// Called after a successful deletion so the parent can refresh.
+  final VoidCallback? onDeleted;
 
   const MedicalEventCard({
     super.key,
@@ -20,6 +24,7 @@ class MedicalEventCard extends StatelessWidget {
     this.index = 0,
     this.isLast = false,
     this.showTypeBadge = true,
+    this.onDeleted,
   });
 
   @override
@@ -279,7 +284,11 @@ class MedicalEventCard extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => _EventDetailsSheet(evento: evento),
+      builder: (sheetContext) => _EventDetailsSheet(
+        evento: evento,
+        parentContext: context,
+        onDeleted: onDeleted,
+      ),
     );
   }
 }
@@ -287,8 +296,14 @@ class MedicalEventCard extends StatelessWidget {
 // Bottom sheet para mostrar detalles completos del evento
 class _EventDetailsSheet extends StatelessWidget {
   final EventoSanitario evento;
+  final BuildContext parentContext;
+  final VoidCallback? onDeleted;
 
-  const _EventDetailsSheet({required this.evento});
+  const _EventDetailsSheet({
+    required this.evento,
+    required this.parentContext,
+    this.onDeleted,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -417,34 +432,175 @@ class _EventDetailsSheet extends StatelessWidget {
               ),
             ),
 
-            // Close button
+            // Action buttons
             Padding(
-              padding: const EdgeInsets.all(20),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: tipo.color,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Row(
+                children: [
+                  // Delete button
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showDeleteConfirmation(context),
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      label: const Text('Eliminar'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.red),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
                   ),
-                  child: const Text(
-                    'Cerrar',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(width: 12),
+                  // Close button
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: tipo.color,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Cerrar',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void _showDeleteConfirmation(BuildContext sheetContext) {
+    final esUnica = evento.esAplicacionUnica;
+    final nombre = evento.nombreProducto ?? 'este registro';
+    final fechaStr = AnimalDetailHelpers.formatDateVerbose(evento.fecha);
+
+    showDialog(
+      context: sheetContext,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red.shade400, size: 28),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text('Eliminar registro', style: TextStyle(fontSize: 18)),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
+              text: TextSpan(
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade800, height: 1.5),
+                children: [
+                  const TextSpan(text: '¿Eliminar '),
+                  TextSpan(
+                    text: nombre,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: ' del $fechaStr?'),
+                ],
+              ),
+            ),
+            if (esUnica) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 16, color: Colors.orange.shade700),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Esta vacuna es de aplicación única. Al eliminarla, se marcará como NO aplicada.',
+                        style: TextStyle(fontSize: 12, color: Colors.orange.shade800),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              'Esta acción no se puede deshacer.',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              Navigator.pop(dialogContext); // Cerrar diálogo
+              await _performDelete(sheetContext);
+            },
+            icon: const Icon(Icons.delete_outline, size: 16),
+            label: const Text('Eliminar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _performDelete(BuildContext sheetContext) async {
+    try {
+      final isarService = RepositoryProvider.of<IsarService>(parentContext);
+      await isarService.eliminarEventoSanitario(evento.id);
+
+      if (sheetContext.mounted) {
+        Navigator.pop(sheetContext); // Cerrar bottom sheet
+        ScaffoldMessenger.of(parentContext).showSnackBar(
+          SnackBar(
+            content: Text('${evento.nombreProducto ?? "Registro"} eliminado'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+
+      onDeleted?.call();
+    } catch (e) {
+      if (sheetContext.mounted) {
+        ScaffoldMessenger.of(parentContext).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildVacunaInfoSection() {

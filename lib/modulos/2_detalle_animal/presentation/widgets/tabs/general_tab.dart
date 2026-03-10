@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
+import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animated_info_card.dart';
@@ -141,8 +142,31 @@ class GeneralTab extends StatelessWidget {
                 Icons.male,
                 Colors.blue,
               ),
+            if (animal.crias.isNotEmpty) ...[
+              if (animal.madre.value != null || animal.padre.value != null)
+                const Divider(height: 24),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.child_care, size: 16, color: Colors.brown.shade400),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Crías (${animal.crias.length})',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.brown.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ..._buildCriasRows(context),
+            ],
             if (animal.madre.value == null &&
-                animal.padre.value == null)
+                animal.padre.value == null &&
+                animal.crias.isEmpty)
               AnimalDetailHelpers.buildEmptyState(
                 'Sin información genealógica',
               ),
@@ -277,6 +301,18 @@ class GeneralTab extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<Widget> _buildCriasRows(BuildContext context) {
+    final crias = animal.crias.toList()
+      ..sort((a, b) => b.fechaNacimiento.compareTo(a.fechaNacimiento));
+    return crias.map((cria) => _buildParentRow(
+      context,
+      cria.sexo == Sexo.macho ? 'Hijo' : 'Hija',
+      cria,
+      cria.sexo == Sexo.macho ? Icons.male : Icons.female,
+      Colors.brown,
+    )).toList();
   }
 }
 
