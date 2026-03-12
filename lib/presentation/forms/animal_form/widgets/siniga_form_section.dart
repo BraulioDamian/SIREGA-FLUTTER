@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../controllers/animal_form_controller.dart';
 import '../../../widgets/native_dropdown/native_dropdown.dart';
-import 'package:sirega_app/core/widgets/sirega_text_field.dart';
+import 'package:sirega_app/core/widgets/app_text_field.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
 
 class SinigaFormSection extends StatelessWidget {
@@ -16,8 +16,9 @@ class SinigaFormSection extends StatelessWidget {
         return LayoutBuilder(
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
-            final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 1024;
-            
+            final isTablet =
+                constraints.maxWidth >= 600 && constraints.maxWidth < 1024;
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -44,7 +45,12 @@ class SinigaFormSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSinigaFields(AnimalFormController controller, bool isMobile, bool isTablet, BuildContext context) {
+  Widget _buildSinigaFields(
+    AnimalFormController controller,
+    bool isMobile,
+    bool isTablet,
+    BuildContext context,
+  ) {
     if (isMobile) {
       return Column(
         children: [
@@ -73,7 +79,7 @@ class SinigaFormSection extends StatelessWidget {
   }
 
   Widget _buildEspecieField(AnimalFormController controller) {
-    return SiregaTextField(
+    return AppTextField(
       controller: controller.especieController,
       label: 'Especie',
       helperText: '00 = Bovinos',
@@ -87,38 +93,41 @@ class SinigaFormSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEstadoField(AnimalFormController controller, BuildContext context) {
-    final bool isValid = controller.estadoController.text.length == 2 &&
-                         controller.estadoSeleccionado != null;
+  Widget _buildEstadoField(
+    AnimalFormController controller,
+    BuildContext context,
+  ) {
+    final bool isValid =
+        controller.estadoController.text.length == 2 &&
+        controller.estadoSeleccionado != null;
 
-    final errorText = controller.estadoController.text.isNotEmpty &&
-                  !isValid &&
-                  controller.estadoController.text.length == 2
-            ? 'Código inválido'
-            : null;
+    final errorText =
+        controller.estadoController.text.isNotEmpty &&
+            !isValid &&
+            controller.estadoController.text.length == 2
+        ? 'Código inválido'
+        : null;
 
-    return SiregaTextField(
+    return AppTextField(
       controller: controller.estadoController,
       label: 'Estado',
       helperText: isValid
-            ? '✓ ${controller.estadoSeleccionado?.nombre ?? ''}'
-            : 'Código 01-32',
+          ? '✓ ${controller.estadoSeleccionado?.name ?? ''}'
+          : 'Código 01-32',
       errorText: errorText,
       maxLength: 2,
       keyboardType: TextInputType.number,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(2),
-        TextInputFormatter.withFunction(
-          (oldValue, newValue) {
-            if (newValue.text.isEmpty) return newValue;
-            final value = int.tryParse(newValue.text) ?? 0;
-            if (value > 32) {
-              return oldValue;
-            }
-            return newValue;
-          },
-        ),
+        TextInputFormatter.withFunction((oldValue, newValue) {
+          if (newValue.text.isEmpty) return newValue;
+          final value = int.tryParse(newValue.text) ?? 0;
+          if (value > 32) {
+            return oldValue;
+          }
+          return newValue;
+        }),
       ],
       style: const TextStyle(
         fontFamily: 'monospace',
@@ -134,15 +143,16 @@ class SinigaFormSection extends StatelessWidget {
     );
   }
 
-  Widget _buildNumeroField(AnimalFormController controller, BuildContext context) {
+  Widget _buildNumeroField(
+    AnimalFormController controller,
+    BuildContext context,
+  ) {
     final bool isValid = controller.numeroController.text.length == 8;
 
-    return SiregaTextField(
+    return AppTextField(
       controller: controller.numeroController,
       label: 'Número Nacional',
-      helperText: isValid
-            ? '✓ Completo'
-            : '8 dígitos únicos',
+      helperText: isValid ? '✓ Completo' : '8 dígitos únicos',
       maxLength: 8,
       keyboardType: TextInputType.number,
       inputFormatters: [
@@ -158,7 +168,10 @@ class SinigaFormSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEstadoDropdown(BuildContext context, AnimalFormController controller) {
+  Widget _buildEstadoDropdown(
+    BuildContext context,
+    AnimalFormController controller,
+  ) {
     return NativeDropdown<EstadoMexico>(
       controller: controller.estadoDisplayController,
       focusNode: controller.estadoDropdownFocus,
@@ -166,7 +179,7 @@ class SinigaFormSection extends StatelessWidget {
       prefixIcon: Icons.location_on,
       helperText: 'Toque para seleccionar o escriba el código arriba',
       items: controller.estados,
-      displayStringForOption: (estado) => '${estado.clave} - ${estado.nombre}',
+      displayStringForOption: (estado) => '${estado.clave} - ${estado.name}',
       onSelected: (estado) {
         controller.setEstadoSeleccionado(estado);
         // Enfocar en número nacional después de seleccionar
@@ -177,17 +190,20 @@ class SinigaFormSection extends StatelessWidget {
       readOnly: true,
       initialSelection: controller.estadoSeleccionado,
       itemBuilder: (context, estado) {
-        final bool isSelected = controller.estadoSeleccionado?.clave == estado.clave;
+        final bool isSelected =
+            controller.estadoSeleccionado?.clave == estado.clave;
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : null,
+          color: isSelected
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+              : null,
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isSelected 
-                      ? Theme.of(context).primaryColor 
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
                       : Theme.of(context).primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -203,7 +219,7 @@ class SinigaFormSection extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  estado.nombre,
+                  estado.name,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: isSelected ? FontWeight.bold : null,
@@ -211,10 +227,7 @@ class SinigaFormSection extends StatelessWidget {
                 ),
               ),
               if (isSelected)
-                Icon(
-                  Icons.check,
-                  color: Theme.of(context).primaryColor,
-                ),
+                Icon(Icons.check, color: Theme.of(context).primaryColor),
             ],
           ),
         );
@@ -222,7 +235,10 @@ class SinigaFormSection extends StatelessWidget {
     );
   }
 
-  Widget _buildValidationMessage(AnimalFormController controller, bool isMobile) {
+  Widget _buildValidationMessage(
+    AnimalFormController controller,
+    bool isMobile,
+  ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 10 : 12),
@@ -240,7 +256,9 @@ class SinigaFormSection extends StatelessWidget {
         children: [
           Icon(
             controller.sinigaIsValid ? Icons.check_circle : Icons.error,
-            color: controller.sinigaIsValid ? AppColors.success : AppColors.error,
+            color: controller.sinigaIsValid
+                ? AppColors.success
+                : AppColors.error,
             size: isMobile ? 20 : 24,
           ),
           SizedBox(width: isMobile ? 6 : 8),
@@ -258,7 +276,8 @@ class SinigaFormSection extends StatelessWidget {
                         : AppColors.error,
                   ),
                 ),
-                if (controller.sinigaIsValid && controller.sinigaId != null) ...[
+                if (controller.sinigaIsValid &&
+                    controller.sinigaId != null) ...[
                   const SizedBox(height: 4),
                   Text(
                     'ID Completo: ${controller.sinigaId!.formatoVisual}',

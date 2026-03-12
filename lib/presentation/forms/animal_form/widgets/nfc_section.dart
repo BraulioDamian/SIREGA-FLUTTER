@@ -18,7 +18,7 @@ class _NfcSectionState extends State<NfcSection> {
     return Consumer<AnimalFormController>(
       builder: (context, controller, child) {
         final hasNfc = controller.nfcId != null && controller.nfcId!.isNotEmpty;
-        
+
         return LayoutBuilder(
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
@@ -93,10 +93,7 @@ class _NfcSectionState extends State<NfcSection> {
     );
   }
 
-  Widget _buildNfcDetected(
-    AnimalFormController controller,
-    bool isMobile,
-  ) {
+  Widget _buildNfcDetected(AnimalFormController controller, bool isMobile) {
     return Column(
       children: [
         Container(
@@ -147,7 +144,7 @@ class _NfcSectionState extends State<NfcSection> {
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: _isReading ? null : () => _startNfcReading(controller),
-            icon: _isReading 
+            icon: _isReading
                 ? const SizedBox(
                     width: 18,
                     height: 18,
@@ -173,7 +170,7 @@ class _NfcSectionState extends State<NfcSection> {
     bool isMobile,
   ) {
     final canRead = controller.sinigaIsValid;
-    
+
     return Column(
       children: [
         if (!canRead)
@@ -209,7 +206,7 @@ class _NfcSectionState extends State<NfcSection> {
           width: double.infinity,
           height: isMobile ? 48 : 56,
           child: ElevatedButton.icon(
-            onPressed: canRead && !_isReading 
+            onPressed: canRead && !_isReading
                 ? () => _startNfcReading(controller)
                 : null,
             icon: _isReading
@@ -237,12 +234,15 @@ class _NfcSectionState extends State<NfcSection> {
         if (canRead) ...[
           const SizedBox(height: 8),
           TextButton.icon(
-            onPressed: !_isReading ? () => _simulateNfcReading(controller) : null,
+            onPressed: !_isReading
+                ? () => _simulateNfcReading(controller)
+                : null,
             icon: const Icon(Icons.bug_report, size: 18),
-            label: const Text('Simular lectura (Dev)', style: TextStyle(fontSize: 12)),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.grey,
+            label: const Text(
+              'Simular lectura (Dev)',
+              style: TextStyle(fontSize: 12),
             ),
+            style: TextButton.styleFrom(foregroundColor: Colors.grey),
           ),
         ],
       ],
@@ -253,16 +253,17 @@ class _NfcSectionState extends State<NfcSection> {
     try {
       // Verificar disponibilidad de NFC con flutter_nfc_kit
       NFCAvailability availability = await FlutterNfcKit.nfcAvailability;
-      
+
       if (availability != NFCAvailability.available) {
         if (mounted) {
           String message = 'NFC no está disponible';
           if (availability == NFCAvailability.disabled) {
-            message = 'NFC está deshabilitado. Por favor actívelo en configuración';
+            message =
+                'NFC está deshabilitado. Por favor actívelo en configuración';
           } else if (availability == NFCAvailability.not_supported) {
             message = 'Este dispositivo no soporta NFC';
           }
-          
+
           _mostrarMensajeSeguro(message, esError: true);
         }
         return;
@@ -281,7 +282,7 @@ class _NfcSectionState extends State<NfcSection> {
 
       // Generar ID único basado en el tag
       String nfcId = '';
-      
+
       // Obtener el ID del tag - id nunca es null según la documentación
       if (tag.id.isNotEmpty) {
         // El ID ya viene en formato hexadecimal
@@ -293,13 +294,14 @@ class _NfcSectionState extends State<NfcSection> {
         // Generar un ID basado en timestamp
         nfcId = 'NFC-${DateTime.now().millisecondsSinceEpoch}';
       }
-      
+
       // Si tenemos SINIGA, combinar para hacer único usando fullId
       String fullAreteId = nfcId; // ID puro del NFC
       if (controller.sinigaId != null && nfcId.isNotEmpty) {
-        fullAreteId = '${controller.sinigaId!.fullId}-$nfcId'; // ID completo del arete
+        fullAreteId =
+            '${controller.sinigaId!.fullId}-$nfcId'; // ID completo del arete
       }
-      
+
       // Intentar leer datos NDEF si están disponibles
       if (tag.ndefAvailable ?? false) {
         try {
@@ -315,24 +317,21 @@ class _NfcSectionState extends State<NfcSection> {
           debugPrint('Error leyendo NDEF: $e');
         }
       }
-      
+
       // Finalizar la sesión NFC
       await FlutterNfcKit.finish(iosAlertMessage: "Lectura completada");
-      
+
       if (mounted) {
         setState(() {
           _isReading = false;
         });
-        
+
         controller.setNfcIds(
           pureNfcId: nfcId, // ID puro del NFC
           fullAreteId: fullAreteId, // ID completo del arete
         );
-        
-        _mostrarMensajeSeguro(
-          'Chip NFC leído exitosamente',
-          esError: false,
-        );
+
+        _mostrarMensajeSeguro('Chip NFC leído exitosamente', esError: false);
       }
     } on Exception catch (e) {
       // Manejar timeout y otros errores
@@ -340,57 +339,54 @@ class _NfcSectionState extends State<NfcSection> {
         setState(() {
           _isReading = false;
         });
-        
+
         String errorMessage = 'Error al leer NFC';
         if (e.toString().contains('timeout')) {
           errorMessage = 'Tiempo de espera agotado. Intente nuevamente';
         } else if (e.toString().contains('user_canceled')) {
           errorMessage = 'Lectura cancelada';
         }
-        
+
         _mostrarMensajeSeguro(
           errorMessage,
           esError: !e.toString().contains('user_canceled'),
         );
       }
-      
+
       // Asegurar que la sesión NFC se cierre
       try {
         await FlutterNfcKit.finish();
       } catch (_) {}
     }
   }
-  
+
   // Método de simulación para desarrollo
   void _simulateNfcReading(AnimalFormController controller) {
     setState(() {
       _isReading = true;
     });
-    
+
     // Simular delay de lectura
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
           _isReading = false;
         });
-        
+
         // Generar ID simulado usando fullId correcto
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         final randomId = (timestamp % 10000).toString().padLeft(4, '0');
         final pureSimulatedId = 'SIM-$randomId';
-        final fullSimulatedId = controller.sinigaId != null 
+        final fullSimulatedId = controller.sinigaId != null
             ? '${controller.sinigaId!.fullId}-$pureSimulatedId'
             : 'NFC-$pureSimulatedId';
-        
+
         controller.setNfcIds(
           pureNfcId: pureSimulatedId,
           fullAreteId: fullSimulatedId,
         );
-        
-        _mostrarMensajeSeguro(
-          'Chip NFC simulado (Desarrollo)',
-          esError: false,
-        );
+
+        _mostrarMensajeSeguro('Chip NFC simulado (Desarrollo)', esError: false);
       }
     });
   }
@@ -398,11 +394,11 @@ class _NfcSectionState extends State<NfcSection> {
   /// Método seguro para mostrar mensajes que verifica el estado del widget
   void _mostrarMensajeSeguro(String mensaje, {required bool esError}) {
     if (!mounted) return;
-    
+
     try {
       final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
       if (scaffoldMessenger == null) return;
-      
+
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Row(

@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../controllers/animal_form_controller.dart';
 import '../../../widgets/native_dropdown/native_dropdown.dart';
 import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
-import 'package:sirega_app/nucleo/modelos/enums.dart';
-import 'package:sirega_app/core/widgets/sirega_text_field.dart';
+import 'package:sirega_app/core/models/enums.dart';
+import 'package:sirega_app/core/widgets/app_text_field.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
 import 'package:sirega_app/presentation/widgets/native_dropdown/dropdown_item_tile.dart';
 
@@ -25,7 +25,11 @@ class BasicInfoFormSection extends StatelessWidget {
     );
   }
 
-  Widget _buildFormFields(BuildContext context, AnimalFormController controller, bool isMobile) {
+  Widget _buildFormFields(
+    BuildContext context,
+    AnimalFormController controller,
+    bool isMobile,
+  ) {
     if (isMobile) {
       return Column(
         children: [
@@ -66,26 +70,32 @@ class BasicInfoFormSection extends StatelessWidget {
     }
   }
 
-  Widget _buildNombreField(BuildContext context, AnimalFormController controller) {
-    return SiregaTextField(
-      controller: controller.nombreController,
+  Widget _buildNombreField(
+    BuildContext context,
+    AnimalFormController controller,
+  ) {
+    return AppTextField(
+      controller: controller.nameController,
       label: 'Nombre del Animal',
       hint: 'Nombre único identificativo',
       helperText: 'Nombre único identificativo',
       prefixIcon: const Icon(Icons.pets),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'El nombre es requerido';
+          return 'El name es requerido';
         }
         if (value.length < 2) {
-          return 'El nombre debe tener al menos 2 caracteres';
+          return 'El name debe tener al menos 2 caracteres';
         }
         return null;
       },
     );
   }
 
-  Widget _buildRazaDropdown(BuildContext context, AnimalFormController controller) {
+  Widget _buildRazaDropdown(
+    BuildContext context,
+    AnimalFormController controller,
+  ) {
     return NativeSearchableDropdown<RazaBovina>(
       controller: controller.razaDisplayController,
       focusNode: controller.razaFocus,
@@ -93,18 +103,18 @@ class BasicInfoFormSection extends StatelessWidget {
       prefixIcon: Icons.category,
       helperText: 'Busque y seleccione',
       items: controller.razas,
-      displayStringForOption: (raza) => raza.nombre,
-      onSelected: (raza) {
-        controller.setRaza(raza);
+      displayStringForOption: (breed) => breed.name,
+      onSelected: (breed) {
+        controller.setRaza(breed);
       },
-      itemBuilder: (context, raza) {
+      itemBuilder: (context, breed) {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                raza.nombre,
+                breed.name,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
@@ -114,13 +124,16 @@ class BasicInfoFormSection extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.info.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
-                      raza.tipo,
+                      breed.tipo,
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -130,7 +143,7 @@ class BasicInfoFormSection extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    raza.origen,
+                    breed.origen,
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
@@ -145,7 +158,10 @@ class BasicInfoFormSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSexoDropdown(BuildContext context, AnimalFormController controller) {
+  Widget _buildSexoDropdown(
+    BuildContext context,
+    AnimalFormController controller,
+  ) {
     final sexoOptions = Sexo.values;
 
     return NativeDropdown<Sexo>(
@@ -155,21 +171,24 @@ class BasicInfoFormSection extends StatelessWidget {
       prefixIcon: Icons.pets,
       items: sexoOptions,
       displayStringForOption: (s) => s.displayName,
-      onSelected: (sexo) {
-        controller.setSexo(sexo);
+      onSelected: (sex) {
+        controller.setSexo(sex);
       },
       readOnly: true,
-      initialSelection: controller.sexo,
-      itemBuilder: (context, sexo) => DropdownItemTile(
-        icon: sexo.icon,
-        color: sexo.color,
-        text: sexo.displayName,
+      initialSelection: controller.sex,
+      itemBuilder: (context, sex) => DropdownItemTile(
+        icon: sex.icon,
+        color: sex.color,
+        text: sex.displayName,
       ),
     );
   }
 
-  Widget _buildFechaField(BuildContext context, AnimalFormController controller) {
-    return SiregaTextField(
+  Widget _buildFechaField(
+    BuildContext context,
+    AnimalFormController controller,
+  ) {
+    return AppTextField(
       controller: controller.fechaController,
       label: 'Fecha de Nacimiento',
       helperText: 'Toque para seleccionar',
@@ -179,8 +198,9 @@ class BasicInfoFormSection extends StatelessWidget {
       onTap: () async {
         final picked = await showDatePicker(
           context: context,
-          initialDate: controller.fechaNacimiento ??
-                      DateTime.now().subtract(const Duration(days: 30)),
+          initialDate:
+              controller.birthDate ??
+              DateTime.now().subtract(const Duration(days: 30)),
           firstDate: DateTime(2000),
           lastDate: DateTime.now(),
           locale: const Locale('es', 'ES'),
@@ -191,12 +211,11 @@ class BasicInfoFormSection extends StatelessWidget {
         }
       },
       validator: (value) {
-        if (controller.fechaNacimiento == null) {
-          return 'La fecha es requerida';
+        if (controller.birthDate == null) {
+          return 'La date es requerida';
         }
         return null;
       },
     );
   }
-
 }

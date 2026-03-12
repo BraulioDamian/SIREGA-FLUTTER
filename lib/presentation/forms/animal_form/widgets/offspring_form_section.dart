@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sirega_app/nucleo/modelos/enums.dart';
-import 'package:sirega_app/nucleo/modelos/form_dtos.dart';
+import 'package:sirega_app/core/models/enums.dart';
+import 'package:sirega_app/core/models/form_dtos.dart';
 import '../controllers/animal_form_controller.dart';
 
 /// Sección del formulario para registrar partos y crías
@@ -21,44 +21,43 @@ class OffspringFormSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Lista de partos/crías
-                    if (controller.birthRecords.isEmpty)
-                      _buildEmptyState(isMobile)
-                    else
-                      ...controller.birthRecords.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final parto = entry.value;
-                        return _buildOffspringCard(
-                          context,
-                          controller,
-                          parto,
-                          index,
-                          isMobile,
-                        );
-                      }),
+                if (controller.birthRecords.isEmpty)
+                  _buildEmptyState(isMobile)
+                else
+                  ...controller.birthRecords.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final parto = entry.value;
+                    return _buildOffspringCard(
+                      context,
+                      controller,
+                      parto,
+                      index,
+                      isMobile,
+                    );
+                  }),
 
-                    SizedBox(height: isMobile ? 12 : 16),
+                SizedBox(height: isMobile ? 12 : 16),
 
-                    // Botón para agregar parto
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _mostrarDialogoAgregarParto(context, controller),
-                        icon: const Icon(Icons.child_care),
-                        label: const Text('Registrar Parto'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                      ),
+                // Botón para agregar parto
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () =>
+                        _mostrarDialogoAgregarParto(context, controller),
+                    icon: const Icon(Icons.child_care),
+                    label: const Text('Registrar Parto'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                  ],
-                );
+                  ),
+                ),
+              ],
+            );
           },
         );
       },
     );
   }
-
-
 
   Widget _buildEmptyState(bool isMobile) {
     return Container(
@@ -98,10 +97,10 @@ class OffspringFormSection extends StatelessWidget {
     bool isMobile,
   ) {
     final idCria = parto.offspringId;
-    final fecha = parto.date;
+    final date = parto.date;
     final sexoCria = parto.offspringSex;
     final pesoKg = parto.weightKg;
-    final notas = parto.notes;
+    final notes = parto.notes;
 
     final color = sexoCria == Sexo.macho ? Colors.blue : Colors.pink;
     final icon = sexoCria == Sexo.macho ? Icons.male : Icons.female;
@@ -125,7 +124,7 @@ class OffspringFormSection extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icono del sexo
+            // Icono del sex
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -153,10 +152,14 @@ class OffspringFormSection extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 12, color: Colors.grey.shade500),
+                      Icon(
+                        Icons.calendar_today,
+                        size: 12,
+                        color: Colors.grey.shade500,
+                      ),
                       const SizedBox(width: 4),
                       Text(
-                        'Nacimiento: ${_formatDate(fecha)}',
+                        'Nacimiento: ${_formatDate(date)}',
                         style: TextStyle(
                           fontSize: isMobile ? 11 : 12,
                           color: Colors.grey.shade600,
@@ -168,7 +171,11 @@ class OffspringFormSection extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.monitor_weight, size: 12, color: Colors.grey.shade500),
+                        Icon(
+                          Icons.monitor_weight,
+                          size: 12,
+                          color: Colors.grey.shade500,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Peso al nacer: ${pesoKg.toStringAsFixed(1)} kg',
@@ -180,10 +187,10 @@ class OffspringFormSection extends StatelessWidget {
                       ],
                     ),
                   ],
-                  if (notas != null && notas.isNotEmpty) ...[
+                  if (notes != null && notes.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Text(
-                      notas,
+                      notes,
                       style: TextStyle(
                         fontSize: isMobile ? 11 : 12,
                         color: Colors.grey.shade600,
@@ -229,10 +236,7 @@ class OffspringFormSection extends StatelessWidget {
               Icon(Icons.child_care, color: Colors.purple),
               SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  'Registrar Parto',
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: Text('Registrar Parto', style: TextStyle(fontSize: 18)),
               ),
             ],
           ),
@@ -277,15 +281,15 @@ class OffspringFormSection extends StatelessWidget {
                   subtitle: Text(_formatDate(fechaSeleccionada)),
                   leading: const Icon(Icons.calendar_today),
                   onTap: () async {
-                    final fecha = await showDatePicker(
+                    final date = await showDatePicker(
                       context: context,
                       initialDate: fechaSeleccionada,
                       firstDate: DateTime(2020),
                       lastDate: DateTime.now(),
                       locale: const Locale('es', 'ES'),
                     );
-                    if (fecha != null) {
-                      setState(() => fechaSeleccionada = fecha);
+                    if (date != null) {
+                      setState(() => fechaSeleccionada = date);
                     }
                   },
                   shape: RoundedRectangleBorder(
@@ -303,7 +307,9 @@ class OffspringFormSection extends StatelessWidget {
                     hintText: 'Ej: 35.5',
                     border: OutlineInputBorder(),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -328,17 +334,19 @@ class OffspringFormSection extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                controller.addBirthRecord(BirthRecord(
-                  date: fechaSeleccionada,
-                  offspringId: idCriaController.text.trim().isEmpty
-                      ? null
-                      : idCriaController.text.trim(),
-                  offspringSex: sexoSeleccionado,
-                  weightKg: double.tryParse(pesoController.text.trim()),
-                  notes: notasController.text.trim().isEmpty
-                      ? null
-                      : notasController.text.trim(),
-                ));
+                controller.addBirthRecord(
+                  BirthRecord(
+                    date: fechaSeleccionada,
+                    offspringId: idCriaController.text.trim().isEmpty
+                        ? null
+                        : idCriaController.text.trim(),
+                    offspringSex: sexoSeleccionado,
+                    weightKg: double.tryParse(pesoController.text.trim()),
+                    notes: notasController.text.trim().isEmpty
+                        ? null
+                        : notasController.text.trim(),
+                  ),
+                );
 
                 Navigator.pop(context);
               },

@@ -1,9 +1,9 @@
-import 'package:sirega_app/nucleo/modelos/animal_model.dart';
-import 'package:sirega_app/nucleo/modelos/evento_sanitario_model.dart';
-import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
-import 'package:sirega_app/nucleo/modelos/enums.dart';
-import 'package:sirega_app/nucleo/modelos/catalogo_vacunas.dart';
-import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/core/models/animal_model.dart';
+import 'package:sirega_app/core/models/medical_event_model.dart';
+import 'package:sirega_app/core/models/production_model.dart';
+import 'package:sirega_app/core/models/enums.dart';
+import 'package:sirega_app/core/models/vaccines_catalog.dart';
+import 'package:sirega_app/core/services/isar_service.dart';
 import 'package:sirega_app/presentation/forms/animal_form/controllers/animal_form_controller.dart';
 
 class AnimalSaveHelper {
@@ -35,16 +35,17 @@ class AnimalSaveHelper {
   Future<void> _saveVaccinesNew(Animal animal) async {
     for (final nombreVacuna in formController.vacunasAplicadas) {
       final vacunaInfo = CatalogoVacunas.buscarPorNombre(nombreVacuna);
-      final fechaAplicacion = formController.fechasVacunas[nombreVacuna] ?? DateTime.now();
+      final fechaAplicacion =
+          formController.fechasVacunas[nombreVacuna] ?? DateTime.now();
 
-      final evento = EventoSanitario()
+      final evento = MedicalEventRecord()
         ..tipo = TipoEvento.vacuna
-        ..fecha = fechaAplicacion
-        ..nombreProducto = nombreVacuna
+        ..date = fechaAplicacion
+        ..productName = nombreVacuna
         ..esAplicacionUnica = vacunaInfo?.esAplicacionUnica ?? false
-        ..intervaloDiasRecomendado = vacunaInfo?.intervaloDias
-        ..fechaProximaAplicacion = vacunaInfo?.proximaAplicacion(fechaAplicacion)
-        ..notas = null
+        ..intervaloDiasRecomendado = vacunaInfo?.dayInterval
+        ..nextApplicationDate = vacunaInfo?.proximaAplicacion(fechaAplicacion)
+        ..notes = null
         ..prioridad = Prioridad.media;
 
       await isarService.saveEvent(evento, animal);
@@ -59,16 +60,17 @@ class AnimalSaveHelper {
     final nuevas = actuales.difference(originales);
     for (final nombreVacuna in nuevas) {
       final vacunaInfo = CatalogoVacunas.buscarPorNombre(nombreVacuna);
-      final fechaAplicacion = formController.fechasVacunas[nombreVacuna] ?? DateTime.now();
+      final fechaAplicacion =
+          formController.fechasVacunas[nombreVacuna] ?? DateTime.now();
 
-      final evento = EventoSanitario()
+      final evento = MedicalEventRecord()
         ..tipo = TipoEvento.vacuna
-        ..fecha = fechaAplicacion
-        ..nombreProducto = nombreVacuna
+        ..date = fechaAplicacion
+        ..productName = nombreVacuna
         ..esAplicacionUnica = vacunaInfo?.esAplicacionUnica ?? false
-        ..intervaloDiasRecomendado = vacunaInfo?.intervaloDias
-        ..fechaProximaAplicacion = vacunaInfo?.proximaAplicacion(fechaAplicacion)
-        ..notas = null
+        ..intervaloDiasRecomendado = vacunaInfo?.dayInterval
+        ..nextApplicationDate = vacunaInfo?.proximaAplicacion(fechaAplicacion)
+        ..notes = null
         ..prioridad = Prioridad.media;
 
       await isarService.saveEvent(evento, animal);
@@ -77,9 +79,10 @@ class AnimalSaveHelper {
     // Removed vaccines
     final eliminadas = originales.difference(actuales);
     if (eliminadas.isNotEmpty) {
-      final eventos = await isarService.getEventsByAnimal(animal.id);
-      for (final evento in eventos) {
-        if (evento.tipo == TipoEvento.vacuna && eliminadas.contains(evento.nombreProducto)) {
+      final events = await isarService.getEventsByAnimal(animal.id);
+      for (final evento in events) {
+        if (evento.tipo == TipoEvento.vacuna &&
+            eliminadas.contains(evento.productName)) {
           await isarService.deleteHealthEvent(evento.id);
         }
       }
@@ -103,11 +106,11 @@ class AnimalSaveHelper {
     for (final record in formController.medicalEvents) {
       if (record.isarId != null) continue; // Already exists in DB
 
-      final evento = EventoSanitario()
+      final evento = MedicalEventRecord()
         ..tipo = record.eventType
-        ..fecha = record.date
-        ..nombreProducto = record.product
-        ..notas = record.notes
+        ..date = record.date
+        ..productName = record.product
+        ..notes = record.notes
         ..prioridad = Prioridad.media;
 
       await isarService.saveEvent(evento, animal);
@@ -131,13 +134,13 @@ class AnimalSaveHelper {
     for (final record in formController.birthRecords) {
       if (record.isarId != null) continue;
 
-      final registro = RegistroProduccion()
+      final registro = ProductionRecord()
         ..tipo = ProductionType.birth
-        ..fecha = record.date
+        ..date = record.date
         ..idCria = record.offspringId
         ..pesoKg = record.weightKg
         ..sexoCria = record.offspringSex
-        ..notas = record.notes;
+        ..notes = record.notes;
 
       await isarService.saveProductionRecord(registro, animal);
     }
@@ -160,11 +163,11 @@ class AnimalSaveHelper {
     for (final record in formController.weightRecords) {
       if (record.isarId != null) continue;
 
-      final registro = RegistroProduccion()
+      final registro = ProductionRecord()
         ..tipo = ProductionType.weight
-        ..fecha = record.date
+        ..date = record.date
         ..pesoKg = record.weightKg
-        ..notas = record.notes;
+        ..notes = record.notes;
 
       await isarService.saveProductionRecord(registro, animal);
     }
@@ -187,11 +190,11 @@ class AnimalSaveHelper {
     for (final record in formController.milkRecords) {
       if (record.isarId != null) continue;
 
-      final registro = RegistroProduccion()
+      final registro = ProductionRecord()
         ..tipo = ProductionType.milk
-        ..fecha = record.date
+        ..date = record.date
         ..litrosPorDia = record.litersPerDay
-        ..notas = record.notes;
+        ..notes = record.notes;
 
       await isarService.saveProductionRecord(registro, animal);
     }
@@ -200,14 +203,18 @@ class AnimalSaveHelper {
   Future<void> updateCalculatedFields(Animal animal) async {
     final registros = await isarService.getProductionByAnimal(animal.id);
 
-    final pesajes = registros.where((r) => r.tipo == ProductionType.weight).toList();
-    final produccionLeche = registros.where((r) => r.tipo == ProductionType.milk).toList();
+    final pesajes = registros
+        .where((r) => r.tipo == ProductionType.weight)
+        .toList();
+    final produccionLeche = registros
+        .where((r) => r.tipo == ProductionType.milk)
+        .toList();
 
     if (pesajes.isNotEmpty) {
-      pesajes.sort((a, b) => b.fecha.compareTo(a.fecha));
+      pesajes.sort((a, b) => b.date.compareTo(a.date));
       final ultimoPesaje = pesajes.first;
-      animal.pesoActual = ultimoPesaje.pesoKg;
-      animal.fechaUltimoPesaje = ultimoPesaje.fecha;
+      animal.currentWeight = ultimoPesaje.pesoKg;
+      animal.lastWeighDate = ultimoPesaje.date;
     }
 
     if (produccionLeche.isNotEmpty) {
@@ -215,15 +222,17 @@ class AnimalSaveHelper {
       for (final registro in produccionLeche) {
         totalLeche += registro.litrosPorDia ?? 0;
       }
-      animal.produccionLecheTotal = totalLeche;
-      animal.promedioLecheDiario = totalLeche / produccionLeche.length;
+      animal.totalMilkYield = totalLeche;
+      animal.dailyMilkYield = totalLeche / produccionLeche.length;
     }
 
-    final partos = registros.where((r) => r.tipo == ProductionType.birth).toList();
+    final partos = registros
+        .where((r) => r.tipo == ProductionType.birth)
+        .toList();
     if (partos.isNotEmpty) {
-      animal.numeroPartos = partos.length;
-      partos.sort((a, b) => b.fecha.compareTo(a.fecha));
-      animal.fechaUltimoParto = partos.first.fecha;
+      animal.calvingCount = partos.length;
+      partos.sort((a, b) => b.date.compareTo(a.date));
+      animal.lastCalvingDate = partos.first.date;
     }
 
     await isarService.saveAnimal(animal);

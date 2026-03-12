@@ -1,4 +1,3 @@
-
 // lib/presentation/widgets/home/quick_actions_section.dart
 import 'package:flutter/material.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';

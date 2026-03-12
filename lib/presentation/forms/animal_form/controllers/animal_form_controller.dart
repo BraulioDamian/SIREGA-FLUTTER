@@ -1,65 +1,59 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:sirega_app/nucleo/modelos/animal_model.dart';
-import 'package:sirega_app/nucleo/modelos/enums.dart';
-import 'package:sirega_app/nucleo/modelos/form_dtos.dart';
-import 'package:sirega_app/nucleo/modelos/catalogo_vacunas.dart';
-import 'package:sirega_app/nucleo/modelos/siniga_model.dart';
+import 'package:sirega_app/core/models/animal_model.dart';
+import 'package:sirega_app/core/models/enums.dart';
+import 'package:sirega_app/core/models/form_dtos.dart';
+import 'package:sirega_app/core/models/vaccines_catalog.dart';
+import 'package:sirega_app/core/models/siniga_model.dart';
 import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
 import 'package:sirega_app/presentation/widgets/shared/json_data_loader.dart';
 
 // Modelos locales para el formulario
 class RazaBovina {
-  final String nombre;
+  final String name;
   final String origen;
   final String tipo;
 
   const RazaBovina({
-    required this.nombre,
+    required this.name,
     required this.origen,
     required this.tipo,
   });
 
   factory RazaBovina.fromJson(Map<String, dynamic> json) {
     return RazaBovina(
-      nombre: json['nombre'],
+      name: json['name'],
       origen: json['origen'],
       tipo: json['tipo'],
     );
   }
 
   @override
-  String toString() => nombre;
+  String toString() => name;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is RazaBovina &&
           runtimeType == other.runtimeType &&
-          nombre == other.nombre;
+          name == other.name;
 
   @override
-  int get hashCode => nombre.hashCode;
+  int get hashCode => name.hashCode;
 }
 
 class EstadoMexico {
   final String clave;
-  final String nombre;
+  final String name;
 
-  const EstadoMexico({
-    required this.clave,
-    required this.nombre,
-  });
+  const EstadoMexico({required this.clave, required this.name});
 
   factory EstadoMexico.fromJson(Map<String, dynamic> json) {
-    return EstadoMexico(
-      clave: json['clave'],
-      nombre: json['nombre'],
-    );
+    return EstadoMexico(clave: json['clave'], name: json['name']);
   }
 
   @override
-  String toString() => nombre;
+  String toString() => name;
 
   @override
   bool operator ==(Object other) =>
@@ -78,9 +72,9 @@ class AnimalFormController extends ChangeNotifier {
   // Modo del formulario
   final bool isEditMode;
   final Animal? animalOriginal;
-  
+
   // Controllers de texto
-  late final TextEditingController nombreController;
+  late final TextEditingController nameController;
   late final TextEditingController especieController;
   late final TextEditingController estadoController;
   late final TextEditingController numeroController;
@@ -98,9 +92,9 @@ class AnimalFormController extends ChangeNotifier {
   // Controllers adicionales para edición completa
   late final TextEditingController idAreteVisualController;
   late final TextEditingController numeroHerradoController;
-  late final TextEditingController colorPelajeController;
+  late final TextEditingController coatColorController;
   late final TextEditingController senasParticularesController;
-  late final TextEditingController pesoNacimientoController;
+  late final TextEditingController birthWeightController;
   late final TextEditingController pesoActualController;
   late final TextEditingController zonaActualController;
   late final TextEditingController descripcionSaludController;
@@ -115,12 +109,12 @@ class AnimalFormController extends ChangeNotifier {
   final FocusNode estadoSaludFocus = FocusNode();
   final FocusNode estadoAnimalFocus = FocusNode();
   final FocusNode estadoReproductivoFocus = FocusNode();
-  
+
   // Control de navegación automática
   bool _autoNavigationEnabled = true;
   bool _isEditingEstado = false;
   bool _isEditingNumero = false;
-  
+
   // Estados seleccionados
   RazaBovina? _razaSeleccionada;
   EstadoMexico? _estadoSeleccionado;
@@ -155,29 +149,29 @@ class AnimalFormController extends ChangeNotifier {
 
   final List<MilkRecord> _milkRecords = [];
   final Set<int> _originalMilkIds = {};
-  
+
   // Validación SINIGA
   SinigaId? _sinigaId;
   bool _sinigaIsValid = false;
   String? _sinigaValidationMessage;
-  
+
   // Validación NFC
   String? _nfcId; // ID completo del arete (puede incluir SINIGA)
   String? _pureNfcId; // Solo el ID del chip NFC
-  
+
   // Listas de datos
   List<RazaBovina> _razas = [];
   List<EstadoMexico> _estados = [];
-  
+
   // Estado de carga
   bool _isLoading = false;
   bool _initialLoadComplete = false;
-  
+
   // Getters
   RazaBovina? get razaSeleccionada => _razaSeleccionada;
   EstadoMexico? get estadoSeleccionado => _estadoSeleccionado;
-  Sexo get sexo => _sexo;
-  DateTime? get fechaNacimiento => _fechaNacimiento;
+  Sexo get sex => _sexo;
+  DateTime? get birthDate => _fechaNacimiento;
   File? get imageFile => _imageFile;
   bool get sinigaIsValid => _sinigaIsValid;
   String? get sinigaValidationMessage => _sinigaValidationMessage;
@@ -190,11 +184,11 @@ class AnimalFormController extends ChangeNotifier {
 
   // Getters adicionales para campos extendidos
   EstadoAnimal get estadoAnimal => _estadoAnimal;
-  EstadoSalud get estadoSalud => _estadoSalud;
-  EstadoReproductivo? get estadoReproductivo => _estadoReproductivo;
-  bool get gestante => _gestante;
+  EstadoSalud get healthStatus => _estadoSalud;
+  EstadoReproductivo? get reproductiveStatus => _estadoReproductivo;
+  bool get isPregnant => _gestante;
 
-  // Getters para vacunas y eventos médicos
+  // Getters para vacunas y events médicos
   List<String> get vacunasAplicadas => _vacunasAplicadas;
   List<String> get vacunasPersonalizadas => _vacunasPersonalizadas;
   Map<String, DateTime> get fechasVacunas => _fechasVacunas;
@@ -209,66 +203,65 @@ class AnimalFormController extends ChangeNotifier {
   Set<int> get originalWeightIds => _originalWeightIds;
   List<MilkRecord> get milkRecords => _milkRecords;
   Set<int> get originalMilkIds => _originalMilkIds;
-  
+
   // Validación general del formulario
-  bool get isFormValid => 
-      _sinigaIsValid && 
-      _nfcId != null && 
-      _nfcId!.isNotEmpty;
-  
-  AnimalFormController({
-    this.isEditMode = false,
-    this.animalOriginal,
-  }) {
+  bool get isFormValid =>
+      _sinigaIsValid && _nfcId != null && _nfcId!.isNotEmpty;
+
+  AnimalFormController({this.isEditMode = false, this.animalOriginal}) {
     _initializeControllers();
     _loadData();
     _setupListeners();
   }
-  
+
   void _initializeControllers() {
     // Inicializar con valores por defecto o del animal existente
-    nombreController = TextEditingController(
-      text: animalOriginal?.nombre ?? ''
-    );
+    nameController = TextEditingController(text: animalOriginal?.name ?? '');
     especieController = TextEditingController(text: '00');
     estadoController = TextEditingController();
     numeroController = TextEditingController();
     fechaController = TextEditingController();
     nfcController = TextEditingController(
-      text: animalOriginal?.idAreteNFC ?? ''
+      text: animalOriginal?.rfidTagId ?? '',
     );
 
     razaDisplayController = TextEditingController();
-    sexoDisplayController = TextEditingController(text: Sexo.hembra.displayName);
+    sexoDisplayController = TextEditingController(
+      text: Sexo.hembra.displayName,
+    );
     estadoDisplayController = TextEditingController();
-    estadoSaludDisplayController = TextEditingController(text: EstadoSalud.sano.displayName);
-    estadoAnimalDisplayController = TextEditingController(text: EstadoAnimal.activo.displayName);
+    estadoSaludDisplayController = TextEditingController(
+      text: EstadoSalud.sano.displayName,
+    );
+    estadoAnimalDisplayController = TextEditingController(
+      text: EstadoAnimal.activo.displayName,
+    );
     estadoReproductivoDisplayController = TextEditingController();
 
     // Inicializar controllers adicionales
     idAreteVisualController = TextEditingController(
-      text: animalOriginal?.idAreteVisual ?? ''
+      text: animalOriginal?.visualTagId ?? '',
     );
     numeroHerradoController = TextEditingController(
-      text: animalOriginal?.numeroHerrado ?? ''
+      text: animalOriginal?.brandNumber ?? '',
     );
-    colorPelajeController = TextEditingController(
-      text: animalOriginal?.colorPelaje ?? ''
+    coatColorController = TextEditingController(
+      text: animalOriginal?.coatColor ?? '',
     );
     senasParticularesController = TextEditingController(
-      text: animalOriginal?.senasParticulares ?? ''
+      text: animalOriginal?.distinctiveMarks ?? '',
     );
-    pesoNacimientoController = TextEditingController(
-      text: animalOriginal?.pesoNacimiento?.toString() ?? ''
+    birthWeightController = TextEditingController(
+      text: animalOriginal?.birthWeight?.toString() ?? '',
     );
     pesoActualController = TextEditingController(
-      text: animalOriginal?.pesoActual?.toString() ?? ''
+      text: animalOriginal?.currentWeight?.toString() ?? '',
     );
     zonaActualController = TextEditingController(
-      text: animalOriginal?.zonaActual ?? ''
+      text: animalOriginal?.currentLocation ?? '',
     );
     descripcionSaludController = TextEditingController(
-      text: animalOriginal?.descripcionSalud ?? ''
+      text: animalOriginal?.healthDescription ?? '',
     );
 
     // Si es modo edición, cargar los datos del animal
@@ -276,7 +269,7 @@ class AnimalFormController extends ChangeNotifier {
       _loadAnimalData();
     }
   }
-  
+
   void _loadAnimalData() {
     if (animalOriginal == null) return;
 
@@ -293,42 +286,45 @@ class AnimalFormController extends ChangeNotifier {
     }
 
     // Cargar datos básicos
-    _sexo = animalOriginal!.sexo;
+    _sexo = animalOriginal!.sex;
     sexoDisplayController.text = _sexo.displayName;
-    _fechaNacimiento = animalOriginal!.fechaNacimiento;
-    _nfcId = animalOriginal!.idAreteNFC;
+    _fechaNacimiento = animalOriginal!.birthDate;
+    _nfcId = animalOriginal!.rfidTagId;
 
     if (_fechaNacimiento != null) {
-      fechaController.text = '${_fechaNacimiento!.day.toString().padLeft(2, '0')}-'
-                            '${_fechaNacimiento!.month.toString().padLeft(2, '0')}-'
-                            '${_fechaNacimiento!.year}';
+      fechaController.text =
+          '${_fechaNacimiento!.day.toString().padLeft(2, '0')}-'
+          '${_fechaNacimiento!.month.toString().padLeft(2, '0')}-'
+          '${_fechaNacimiento!.year}';
     }
 
     // Cargar datos extendidos
     _estadoAnimal = animalOriginal!.estado;
-    _estadoSalud = animalOriginal!.estadoSalud;
-    _estadoReproductivo = animalOriginal!.estadoReproductivo;
-    _gestante = animalOriginal!.gestante;
+    _estadoSalud = animalOriginal!.healthStatus;
+    _estadoReproductivo = animalOriginal!.reproductiveStatus;
+    _gestante = animalOriginal!.isPregnant;
 
     estadoSaludDisplayController.text = _estadoSalud.displayName;
     estadoAnimalDisplayController.text = _estadoAnimal.displayName;
     if (_estadoReproductivo != null) {
-      estadoReproductivoDisplayController.text = _estadoReproductivo!.displayName;
+      estadoReproductivoDisplayController.text =
+          _estadoReproductivo!.displayName;
     }
 
     // Cargar foto de perfil
-    if (animalOriginal!.fotoPerfilUrl != null && animalOriginal!.fotoPerfilUrl!.isNotEmpty) {
-      final file = File(animalOriginal!.fotoPerfilUrl!);
+    if (animalOriginal!.profilePhotoUrl != null &&
+        animalOriginal!.profilePhotoUrl!.isNotEmpty) {
+      final file = File(animalOriginal!.profilePhotoUrl!);
       if (file.existsSync()) {
         _imageFile = file;
       }
     }
   }
-  
+
   Future<void> _loadData() async {
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       // Cargar razas y estados en paralelo
       final results = await Future.wait([
@@ -341,22 +337,22 @@ class AnimalFormController extends ChangeNotifier {
           fromJson: EstadoMexico.fromJson,
         ),
       ]);
-      
+
       _razas = results[0] as List<RazaBovina>;
       _estados = results[1] as List<EstadoMexico>;
-      
-      // Si es modo edición, buscar la raza seleccionada
+
+      // Si es modo edición, buscar la breed seleccionada
       if (isEditMode && animalOriginal != null) {
         _razaSeleccionada = _razas.firstWhere(
-          (r) => r.nombre == animalOriginal!.raza,
+          (r) => r.name == animalOriginal!.breed,
           orElse: () => _razas.first,
         );
-        razaDisplayController.text = _razaSeleccionada?.nombre ?? '';
+        razaDisplayController.text = _razaSeleccionada?.name ?? '';
 
         // Cargar datos relacionados desde Isar (IsarLinks)
         await _loadLinkedData();
       }
-      
+
       // Auto-seleccionar estado si ya hay un código
       if (estadoController.text.length == 2) {
         _autoSeleccionarEstado();
@@ -371,30 +367,33 @@ class AnimalFormController extends ChangeNotifier {
   }
 
   /// Carga los datos relacionados del animal desde IsarLinks
-  /// (vacunas, eventos médicos, pesajes, producción de leche, partos)
+  /// (vacunas, events médicos, pesajes, producción de leche, partos)
   Future<void> _loadLinkedData() async {
     final animal = animalOriginal!;
 
     // Load health events (vaccines + medical events)
-    await animal.eventos.load();
-    for (final evento in animal.eventos) {
+    await animal.events.load();
+    for (final evento in animal.events) {
       if (evento.tipo == TipoEvento.vacuna) {
-        final nombre = evento.nombreProducto ?? 'Vacuna sin nombre';
-        if (!_vacunasAplicadas.contains(nombre)) {
-          _vacunasAplicadas.add(nombre);
+        final name = evento.productName ?? 'Vacuna sin name';
+        if (!_vacunasAplicadas.contains(name)) {
+          _vacunasAplicadas.add(name);
         }
-        _fechasVacunas[nombre] = evento.fecha;
-        if (!_esVacunaEstandar(nombre) && !_vacunasPersonalizadas.contains(nombre)) {
-          _vacunasPersonalizadas.add(nombre);
+        _fechasVacunas[name] = evento.date;
+        if (!_esVacunaEstandar(name) &&
+            !_vacunasPersonalizadas.contains(name)) {
+          _vacunasPersonalizadas.add(name);
         }
       } else {
-        _medicalEvents.add(MedicalEventRecord(
-          isarId: evento.id,
-          eventType: evento.tipo,
-          date: evento.fecha,
-          product: evento.nombreProducto ?? '',
-          notes: evento.notas,
-        ));
+        _medicalEvents.add(
+          MedicalEventRecord(
+            isarId: evento.id,
+            eventType: evento.tipo,
+            date: evento.date,
+            product: evento.productName ?? '',
+            notes: evento.notes,
+          ),
+        );
       }
     }
 
@@ -403,34 +402,40 @@ class AnimalFormController extends ChangeNotifier {
     _fechasVacunasOriginales.addAll(_fechasVacunas);
 
     // Load production records (weights, milk, births)
-    await animal.producciones.load();
-    for (final registro in animal.producciones) {
+    await animal.productions.load();
+    for (final registro in animal.productions) {
       switch (registro.tipo) {
         case ProductionType.weight:
-          _weightRecords.add(WeightRecord(
-            isarId: registro.id,
-            date: registro.fecha,
-            weightKg: registro.pesoKg ?? 0.0,
-            notes: registro.notas,
-          ));
+          _weightRecords.add(
+            WeightRecord(
+              isarId: registro.id,
+              date: registro.date,
+              weightKg: registro.pesoKg ?? 0.0,
+              notes: registro.notes,
+            ),
+          );
           break;
         case ProductionType.milk:
-          _milkRecords.add(MilkRecord(
-            isarId: registro.id,
-            date: registro.fecha,
-            litersPerDay: registro.litrosPorDia ?? 0.0,
-            notes: registro.notas,
-          ));
+          _milkRecords.add(
+            MilkRecord(
+              isarId: registro.id,
+              date: registro.date,
+              litersPerDay: registro.litrosPorDia ?? 0.0,
+              notes: registro.notes,
+            ),
+          );
           break;
         case ProductionType.birth:
-          _birthRecords.add(BirthRecord(
-            isarId: registro.id,
-            date: registro.fecha,
-            offspringId: registro.idCria,
-            offspringSex: registro.sexoCria,
-            weightKg: registro.pesoKg,
-            notes: registro.notas,
-          ));
+          _birthRecords.add(
+            BirthRecord(
+              isarId: registro.id,
+              date: registro.date,
+              offspringId: registro.idCria,
+              offspringSex: registro.sexoCria,
+              weightKg: registro.pesoKg,
+              notes: registro.notes,
+            ),
+          );
           break;
       }
     }
@@ -450,18 +455,18 @@ class AnimalFormController extends ChangeNotifier {
     );
   }
 
-  bool _esVacunaEstandar(String nombre) {
-    return CatalogoVacunas.buscarPorNombre(nombre) != null;
+  bool _esVacunaEstandar(String name) {
+    return CatalogoVacunas.buscarPorNombre(name) != null;
   }
 
   void _setupListeners() {
     // Listener para estado SINIGA con validación
     estadoController.addListener(_onEstadoChanged);
     numeroController.addListener(_onNumeroChanged);
-    
+
     // Listener para navegación con número nacional
     numeroController.addListener(_onNumeroChangedForFocus);
-    
+
     // Control de foco para estado
     estadoFocus.addListener(() {
       if (estadoFocus.hasFocus) {
@@ -471,7 +476,7 @@ class AnimalFormController extends ChangeNotifier {
         _isEditingEstado = false;
       }
     });
-    
+
     // Control de foco para número
     numeroFocus.addListener(() {
       if (numeroFocus.hasFocus) {
@@ -481,10 +486,10 @@ class AnimalFormController extends ChangeNotifier {
       }
     });
   }
-  
+
   void _onEstadoChanged() {
     final texto = estadoController.text;
-    
+
     // Validación de estado (01-32)
     if (texto.isNotEmpty) {
       final numero = int.tryParse(texto) ?? 0;
@@ -496,13 +501,13 @@ class AnimalFormController extends ChangeNotifier {
         );
       }
     }
-    
+
     _validarSiniga();
     _autoSeleccionarEstado();
-    
+
     // Auto-navegación solo si estamos editando y tenemos 2 dígitos
-    if (_isEditingEstado && 
-        _autoNavigationEnabled && 
+    if (_isEditingEstado &&
+        _autoNavigationEnabled &&
         estadoController.text.length == 2 &&
         estadoFocus.hasFocus) {
       // Delay para permitir que se procese el texto
@@ -513,15 +518,15 @@ class AnimalFormController extends ChangeNotifier {
       });
     }
   }
-  
+
   void _onNumeroChanged() {
     _validarSiniga();
   }
-  
+
   void _onNumeroChangedForFocus() {
     // Auto-desenfoque cuando se completan los 8 dígitos
-    if (_isEditingNumero && 
-        numeroController.text.length == 8 && 
+    if (_isEditingNumero &&
+        numeroController.text.length == 8 &&
         numeroFocus.hasFocus) {
       Future.delayed(const Duration(milliseconds: 100), () {
         if (numeroFocus.hasFocus) {
@@ -530,15 +535,15 @@ class AnimalFormController extends ChangeNotifier {
       });
     }
   }
-  
+
   void _autoSeleccionarEstado() {
     if (estadoController.text.length == 2) {
       final codigo = estadoController.text.padLeft(2, '0');
       final estado = _estados.where((e) => e.clave == codigo).firstOrNull;
-      
+
       if (estado != null && _estadoSeleccionado?.clave != codigo) {
         _estadoSeleccionado = estado;
-        estadoDisplayController.text = '${estado.clave} - ${estado.nombre}';
+        estadoDisplayController.text = '${estado.clave} - ${estado.name}';
         notifyListeners();
       } else if (estado == null) {
         _estadoSeleccionado = null;
@@ -546,38 +551,43 @@ class AnimalFormController extends ChangeNotifier {
         notifyListeners();
       }
     } else {
-      if (_estadoSeleccionado != null || estadoDisplayController.text.isNotEmpty) {
+      if (_estadoSeleccionado != null ||
+          estadoDisplayController.text.isNotEmpty) {
         _estadoSeleccionado = null;
         estadoDisplayController.clear();
         notifyListeners();
       }
     }
   }
-  
+
   void _validarSiniga() {
     final especie = especieController.text;
     final estado = estadoController.text;
     final numero = numeroController.text;
-    
+
     if (especie.length != 2 || estado.length != 2 || numero.length != 8) {
       _updateValidation(null, false, 'Formato incompleto');
       return;
     }
-    
+
     // Validación adicional del estado
     final estadoNum = int.tryParse(estado) ?? 0;
     if (estadoNum < 1 || estadoNum > 32) {
-      _updateValidation(null, false, '❌ Código de estado inválido. Debe ser entre 01 y 32');
+      _updateValidation(
+        null,
+        false,
+        '❌ Código de estado inválido. Debe ser entre 01 y 32',
+      );
       return;
     }
-    
+
     try {
       final rawId = '$especie$estado$numero';
       final siniga = SinigaId.fromString(rawId);
-      
+
       String? mensaje;
       bool isValid = true;
-      
+
       if (especie != '00') {
         mensaje = '❌ Código de especie inválido. Debe ser "00" para bovinos';
         isValid = false;
@@ -591,62 +601,65 @@ class AnimalFormController extends ChangeNotifier {
         final nombreEstado = _obtenerNombreEstado(estado);
         mensaje = '✅ ID SINIGA válido para bovino de $nombreEstado';
       }
-      
+
       _updateValidation(siniga, isValid, mensaje);
     } catch (e) {
       _updateValidation(null, false, '❌ Error en formato SINIGA');
     }
   }
-  
+
   void _updateValidation(SinigaId? siniga, bool isValid, String mensaje) {
     _sinigaId = siniga;
     _sinigaIsValid = isValid;
     _sinigaValidationMessage = mensaje;
     notifyListeners();
   }
-  
+
   bool _esEstadoValido(String codigo) {
     return _estados.any((estado) => estado.clave == codigo);
   }
-  
+
   String _obtenerNombreEstado(String codigo) {
-    final estado = _estados.where((estado) => estado.clave == codigo).firstOrNull;
-    return estado?.nombre ?? 'Desconocido';
+    final estado = _estados
+        .where((estado) => estado.clave == codigo)
+        .firstOrNull;
+    return estado?.name ?? 'Desconocido';
   }
-  
+
   // Métodos públicos para actualizar el estado
-  
-  void setRaza(RazaBovina? raza) {
-    _razaSeleccionada = raza;
-    razaDisplayController.text = raza?.nombre ?? '';
+
+  void setRaza(RazaBovina? breed) {
+    _razaSeleccionada = breed;
+    razaDisplayController.text = breed?.name ?? '';
     notifyListeners();
   }
-  
-  void setSexo(Sexo sexo) {
-    _sexo = sexo;
-    sexoDisplayController.text = sexo.displayName;
+
+  void setSexo(Sexo sex) {
+    _sexo = sex;
+    sexoDisplayController.text = sex.displayName;
     notifyListeners();
   }
-  
-  void setFechaNacimiento(DateTime? fecha) {
-    _fechaNacimiento = fecha;
-    if (fecha != null) {
-      fechaController.text = '${fecha.day.toString().padLeft(2, '0')}-'
-                            '${fecha.month.toString().padLeft(2, '0')}-'
-                            '${fecha.year}';
+
+  void setFechaNacimiento(DateTime? date) {
+    _fechaNacimiento = date;
+    if (date != null) {
+      fechaController.text =
+          '${date.day.toString().padLeft(2, '0')}-'
+          '${date.month.toString().padLeft(2, '0')}-'
+          '${date.year}';
     } else {
       fechaController.clear();
     }
     notifyListeners();
   }
-  
+
   void setEstadoSeleccionado(EstadoMexico estado) {
     _estadoSeleccionado = estado;
     estadoController.text = estado.clave;
-    estadoDisplayController.text = '${estado.clave} - ${estado.nombre}';
+    estadoDisplayController.text = '${estado.clave} - ${estado.name}';
     notifyListeners();
   }
-  
+
   void setNfcId(String? nfcId) {
     _nfcId = nfcId;
     nfcController.text = nfcId ?? '';
@@ -660,7 +673,7 @@ class AnimalFormController extends ChangeNotifier {
     nfcController.text = _nfcId ?? '';
     notifyListeners();
   }
-  
+
   void setImageFile(File? file) {
     _imageFile = file;
     notifyListeners();
@@ -687,8 +700,8 @@ class AnimalFormController extends ChangeNotifier {
   bool requiereDescripcionSalud(EstadoSalud? estado) {
     if (estado == null) return false;
     return estado == EstadoSalud.enfermo ||
-           estado == EstadoSalud.critico ||
-           estado == EstadoSalud.enTratamiento;
+        estado == EstadoSalud.critico ||
+        estado == EstadoSalud.enTratamiento;
   }
 
   void setEstadoReproductivo(EstadoReproductivo? estado) {
@@ -707,36 +720,36 @@ class AnimalFormController extends ChangeNotifier {
   }
 
   // Métodos para manejo de vacunas
-  void agregarVacuna(String nombre) {
-    if (!_vacunasAplicadas.contains(nombre)) {
-      _vacunasAplicadas.add(nombre);
+  void agregarVacuna(String name) {
+    if (!_vacunasAplicadas.contains(name)) {
+      _vacunasAplicadas.add(name);
       notifyListeners();
     }
   }
 
-  void removerVacuna(String nombre) {
-    _vacunasAplicadas.remove(nombre);
-    _fechasVacunas.remove(nombre);
+  void removerVacuna(String name) {
+    _vacunasAplicadas.remove(name);
+    _fechasVacunas.remove(name);
     notifyListeners();
   }
 
-  void setFechaVacuna(String nombre, DateTime fecha) {
-    _fechasVacunas[nombre] = fecha;
+  void setFechaVacuna(String name, DateTime date) {
+    _fechasVacunas[name] = date;
     notifyListeners();
   }
 
-  void agregarVacunaPersonalizada(String nombre) {
-    if (!_vacunasPersonalizadas.contains(nombre)) {
-      _vacunasPersonalizadas.add(nombre);
+  void agregarVacunaPersonalizada(String name) {
+    if (!_vacunasPersonalizadas.contains(name)) {
+      _vacunasPersonalizadas.add(name);
       notifyListeners();
     }
   }
 
-  void eliminarVacunaPersonalizada(String nombre) {
-    _vacunasPersonalizadas.remove(nombre);
+  void eliminarVacunaPersonalizada(String name) {
+    _vacunasPersonalizadas.remove(name);
     // También remover de vacunas aplicadas si estaba seleccionada
-    if (_vacunasAplicadas.contains(nombre)) {
-      removerVacuna(nombre);
+    if (_vacunasAplicadas.contains(name)) {
+      removerVacuna(name);
     }
     notifyListeners();
   }
@@ -793,8 +806,6 @@ class AnimalFormController extends ChangeNotifier {
     }
   }
 
-
-  
   // Método para construir el objeto Animal
   Animal buildAnimal() {
     final animal = animalOriginal ?? Animal();
@@ -802,37 +813,51 @@ class AnimalFormController extends ChangeNotifier {
     final extractedNfcId = _pureNfcId ?? _extractPureNfcId(_nfcId);
 
     return animal
-      ..nombre = nombreController.text.trim().isNotEmpty
-          ? nombreController.text.trim()
-          : 'Sin nombre'
-      ..raza = _razaSeleccionada?.nombre ?? 'Sin especificar'
-      ..sexo = _sexo
-      ..fechaNacimiento = _fechaNacimiento ?? DateTime.now()
-      ..idAreteNFC = _nfcId // ID completo del arete
-      ..nfcChipId = extractedNfcId // Solo el ID del chip NFC
+      ..name = nameController.text.trim().isNotEmpty
+          ? nameController.text.trim()
+          : 'Sin name'
+      ..breed = _razaSeleccionada?.name ?? 'Sin especificar'
+      ..sex = _sexo
+      ..birthDate = _fechaNacimiento ?? DateTime.now()
+      ..rfidTagId =
+          _nfcId // ID completo del arete
+      ..nfcChipId =
+          extractedNfcId // Solo el ID del chip NFC
       ..siniigaId = _sinigaId
-      ..fotoPerfilUrl = _imageFile?.path ?? animalOriginal?.fotoPerfilUrl
+      ..profilePhotoUrl = _imageFile?.path ?? animalOriginal?.profilePhotoUrl
       // Campos adicionales
-      ..idAreteVisual = idAreteVisualController.text.isEmpty ? null : idAreteVisualController.text
-      ..numeroHerrado = numeroHerradoController.text.isEmpty ? null : numeroHerradoController.text
-      ..colorPelaje = colorPelajeController.text.isEmpty ? null : colorPelajeController.text
-      ..senasParticulares = senasParticularesController.text.isEmpty ? null : senasParticularesController.text
-      ..pesoNacimiento = double.tryParse(pesoNacimientoController.text)
-      ..pesoActual = double.tryParse(pesoActualController.text)
-      ..zonaActual = zonaActualController.text.isEmpty ? null : zonaActualController.text
+      ..visualTagId = idAreteVisualController.text.isEmpty
+          ? null
+          : idAreteVisualController.text
+      ..brandNumber = numeroHerradoController.text.isEmpty
+          ? null
+          : numeroHerradoController.text
+      ..coatColor = coatColorController.text.isEmpty
+          ? null
+          : coatColorController.text
+      ..distinctiveMarks = senasParticularesController.text.isEmpty
+          ? null
+          : senasParticularesController.text
+      ..birthWeight = double.tryParse(birthWeightController.text)
+      ..currentWeight = double.tryParse(pesoActualController.text)
+      ..currentLocation = zonaActualController.text.isEmpty
+          ? null
+          : zonaActualController.text
       ..estado = _estadoAnimal
-      ..estadoSalud = _estadoSalud
-      ..descripcionSalud = descripcionSaludController.text.isEmpty ? null : descripcionSaludController.text
-      ..estadoReproductivo = _estadoReproductivo
-      ..gestante = _gestante;
+      ..healthStatus = _estadoSalud
+      ..healthDescription = descripcionSaludController.text.isEmpty
+          ? null
+          : descripcionSaludController.text
+      ..reproductiveStatus = _estadoReproductivo
+      ..isPregnant = _gestante;
   }
-  
+
   /// Extrae solo el ID del chip NFC de la cadena completa
   /// Si el formato es "SINIGA-NFCID", devuelve solo la parte del NFC
   /// Si no tiene el formato esperado, devuelve la cadena completa
   String? _extractPureNfcId(String? fullId) {
     if (fullId == null || fullId.isEmpty) return null;
-    
+
     // Si contiene un guión, tomar la parte después del último guión
     if (fullId.contains('-')) {
       final parts = fullId.split('-');
@@ -841,14 +866,14 @@ class AnimalFormController extends ChangeNotifier {
         return nfcPart;
       }
     }
-    
+
     // Si no tiene guión o formato esperado, devolver la cadena completa
     return fullId;
   }
-  
+
   @override
   void dispose() {
-    nombreController.dispose();
+    nameController.dispose();
     especieController.dispose();
     estadoController.dispose();
     numeroController.removeListener(_onNumeroChangedForFocus);
@@ -866,9 +891,9 @@ class AnimalFormController extends ChangeNotifier {
     // Dispose de controllers adicionales
     idAreteVisualController.dispose();
     numeroHerradoController.dispose();
-    colorPelajeController.dispose();
+    coatColorController.dispose();
     senasParticularesController.dispose();
-    pesoNacimientoController.dispose();
+    birthWeightController.dispose();
     pesoActualController.dispose();
     zonaActualController.dispose();
     descripcionSaludController.dispose();

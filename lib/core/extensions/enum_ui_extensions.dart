@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
-import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/core/models/enums.dart';
 
 // ─── EstadoSalud ────────────────────────────────────────
 
@@ -33,7 +33,8 @@ extension EstadoSaludUI on EstadoSalud {
   };
 
   String get message => switch (this) {
-    EstadoSalud.sano => 'El animal se encuentra en perfectas condiciones de salud',
+    EstadoSalud.sano =>
+      'El animal se encuentra en perfectas condiciones de salud',
     EstadoSalud.enfermo => 'Requiere atención médica y seguimiento constante',
     EstadoSalud.critico => 'Estado crítico - Atención veterinaria urgente',
     EstadoSalud.convaleciente => 'En proceso de recuperación y mejora',
@@ -94,7 +95,7 @@ extension EstadoReproductivoUI on EstadoReproductivo {
   String get displayName => switch (this) {
     EstadoReproductivo.virgen => 'Virgen',
     EstadoReproductivo.servida => 'Servida',
-    EstadoReproductivo.gestante => 'Gestante',
+    EstadoReproductivo.isPregnant => 'Gestante',
     EstadoReproductivo.lactante => 'Lactante',
     EstadoReproductivo.seca => 'Seca',
     EstadoReproductivo.descarte => 'Descarte',
@@ -105,7 +106,7 @@ extension EstadoReproductivoUI on EstadoReproductivo {
   IconData get icon => switch (this) {
     EstadoReproductivo.virgen => Icons.spa_outlined,
     EstadoReproductivo.servida => Icons.favorite_outline,
-    EstadoReproductivo.gestante => Icons.pregnant_woman,
+    EstadoReproductivo.isPregnant => Icons.pregnant_woman,
     EstadoReproductivo.lactante => Icons.water_drop_outlined,
     EstadoReproductivo.seca => Icons.wb_sunny_outlined,
     EstadoReproductivo.descarte => Icons.cancel_outlined,
@@ -116,7 +117,7 @@ extension EstadoReproductivoUI on EstadoReproductivo {
   Color get color => switch (this) {
     EstadoReproductivo.virgen => AppColors.info,
     EstadoReproductivo.servida => Colors.pink,
-    EstadoReproductivo.gestante => Colors.purple,
+    EstadoReproductivo.isPregnant => Colors.purple,
     EstadoReproductivo.lactante => Colors.teal,
     EstadoReproductivo.seca => Colors.orange,
     EstadoReproductivo.descarte => AppColors.error,

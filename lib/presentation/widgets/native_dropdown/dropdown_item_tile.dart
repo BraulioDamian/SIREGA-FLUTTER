@@ -34,10 +34,7 @@ class DropdownItemTile extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             text,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 15,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
           ),
         ],
       ),

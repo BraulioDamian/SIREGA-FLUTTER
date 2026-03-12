@@ -18,8 +18,10 @@ class NativeDropdown<T> extends StatefulWidget {
   final bool enabled;
   final String? Function(String?)? validator;
   final T? initialSelection;
+
   /// Altura máxima del menú desplegable.
   final double maxMenuHeight;
+
   /// Alignment usado en Scrollable.ensureVisible (0 = top). Default: 0.02 para subir un poco más.
   final double scrollAlignment;
 
@@ -38,15 +40,15 @@ class NativeDropdown<T> extends StatefulWidget {
     this.enabled = true,
     this.validator,
     this.initialSelection,
-  this.maxMenuHeight = 320,
-  this.scrollAlignment = 0.02,
+    this.maxMenuHeight = 320,
+    this.scrollAlignment = 0.02,
   });
 
   @override
   State<NativeDropdown<T>> createState() => _NativeDropdownState<T>();
 }
 
-class _NativeDropdownState<T> extends State<NativeDropdown<T>> 
+class _NativeDropdownState<T> extends State<NativeDropdown<T>>
     with SingleTickerProviderStateMixin {
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
@@ -62,22 +64,24 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _expandAnimation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeOutCubic,
       reverseCurve: Curves.easeInCubic,
     );
-    
+
     if (widget.initialSelection != null) {
-      widget.controller.text = widget.displayStringForOption(widget.initialSelection as T);
+      widget.controller.text = widget.displayStringForOption(
+        widget.initialSelection as T,
+      );
     }
-    
+
     widget.focusNode.addListener(_onFocusChanged);
   }
 
@@ -134,18 +138,18 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
         setState(() {
           _isOpen = true;
         });
-  _attachScrollListener();
+        _attachScrollListener();
       }
     });
   }
 
   void _hideOverlay() {
     if (!_isOpen || _isDisposed) return;
-    
+
     if (_animationController.isAnimating) {
       _animationController.stop();
     }
-    
+
     _animationController.reverse().then((_) {
       if (!_isDisposed && _overlayEntry != null) {
         _overlayEntry?.remove();
@@ -157,8 +161,8 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
         }
       }
     });
-  _detachScrollListener();
-    
+    _detachScrollListener();
+
     widget.focusNode.unfocus();
   }
 
@@ -172,21 +176,26 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
         _isOpen = false;
       });
     }
-  _detachScrollListener();
+    _detachScrollListener();
   }
 
   OverlayEntry _createOverlay() {
-    final renderBox = _fieldKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return OverlayEntry(builder: (_) => const SizedBox.shrink());
-  final size = renderBox.size;
-  final fieldOffset = renderBox.localToGlobal(Offset.zero);
-  final screenSize = MediaQuery.of(context).size;
-  final spaceAbove = fieldOffset.dy;
-  final spaceBelow = screenSize.height - (fieldOffset.dy + size.height);
-  // Altura deseada (puede ser menor que maxMenuHeight según ítems)
-  final desiredHeight = math.min(widget.items.length * 52.0, widget.maxMenuHeight).toDouble();
-  final openUp = spaceBelow < desiredHeight && spaceAbove > spaceBelow;
-  final effectiveHeight = desiredHeight;
+    final renderBox =
+        _fieldKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) {
+      return OverlayEntry(builder: (_) => const SizedBox.shrink());
+    }
+    final size = renderBox.size;
+    final fieldOffset = renderBox.localToGlobal(Offset.zero);
+    final screenSize = MediaQuery.of(context).size;
+    final spaceAbove = fieldOffset.dy;
+    final spaceBelow = screenSize.height - (fieldOffset.dy + size.height);
+    // Altura deseada (puede ser menor que maxMenuHeight según ítems)
+    final desiredHeight = math
+        .min(widget.items.length * 52.0, widget.maxMenuHeight)
+        .toDouble();
+    final openUp = spaceBelow < desiredHeight && spaceAbove > spaceBelow;
+    final effectiveHeight = desiredHeight;
 
     return OverlayEntry(
       builder: (context) => Stack(
@@ -195,7 +204,9 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
           CompositedTransformFollower(
             link: _layerLink,
             showWhenUnlinked: false,
-            offset: openUp ? Offset(0.0, -effectiveHeight.toDouble()) : Offset(0.0, size.height),
+            offset: openUp
+                ? Offset(0.0, -effectiveHeight.toDouble())
+                : Offset(0.0, size.height),
             child: AnimatedBuilder(
               animation: _expandAnimation,
               builder: (context, child) {
@@ -220,7 +231,9 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
                           bottom: Radius.circular(openUp ? 0 : 8),
                         ),
                         border: Border.all(
-                          color: Theme.of(context).primaryColor.withAlpha((255 * 0.2).round()),
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withAlpha((255 * 0.2).round()),
                           width: 1,
                         ),
                       ),
@@ -234,7 +247,9 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
                             )
                           : ClipRect(
                               child: ListView.builder(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
                                 shrinkWrap: true,
                                 itemCount: widget.items.length,
                                 itemBuilder: (context, index) {
@@ -243,33 +258,46 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
                                   }
                                   final item = widget.items[index];
                                   return SlideTransition(
-                                    position: Tween<Offset>(
-                                      begin: Offset(0, -0.1 * (index + 1).clamp(0, 5)),
-                                      end: Offset.zero,
-                                    ).animate(
-                                      CurvedAnimation(
-                                        parent: _animationController,
-                                        curve: Interval(
-                                          (index * 0.05).clamp(0.0, 0.5),
-                                          ((index * 0.05) + 0.5).clamp(0.5, 1.0),
-                                          curve: Curves.easeOut,
+                                    position:
+                                        Tween<Offset>(
+                                          begin: Offset(
+                                            0,
+                                            -0.1 * (index + 1).clamp(0, 5),
+                                          ),
+                                          end: Offset.zero,
+                                        ).animate(
+                                          CurvedAnimation(
+                                            parent: _animationController,
+                                            curve: Interval(
+                                              (index * 0.05).clamp(0.0, 0.5),
+                                              ((index * 0.05) + 0.5).clamp(
+                                                0.5,
+                                                1.0,
+                                              ),
+                                              curve: Curves.easeOut,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
                                     child: InkWell(
                                       onTap: () {
                                         widget.onSelected(item);
-                                        widget.controller.text = widget.displayStringForOption(item);
+                                        widget.controller.text = widget
+                                            .displayStringForOption(item);
                                         _hideOverlay();
                                       },
                                       child: widget.itemBuilder != null
                                           ? widget.itemBuilder!(context, item)
                                           : Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 16,
-                                                vertical: 12,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                    vertical: 12,
+                                                  ),
+                                              child: Text(
+                                                widget.displayStringForOption(
+                                                  item,
+                                                ),
                                               ),
-                                              child: Text(widget.displayStringForOption(item)),
                                             ),
                                     ),
                                   );
@@ -290,7 +318,8 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final helperStyle = theme.inputDecorationTheme.helperStyle ?? theme.textTheme.bodySmall;
+    final helperStyle =
+        theme.inputDecorationTheme.helperStyle ?? theme.textTheme.bodySmall;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -324,14 +353,14 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
                     )
                   : OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                      borderSide: BorderSide(
+                        color: Colors.grey.shade300,
+                        width: 1,
+                      ),
                     ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: theme.primaryColor,
-                  width: 2,
-                ),
+                borderSide: BorderSide(color: theme.primaryColor, width: 2),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -341,7 +370,9 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: Colors.red, width: 2),
               ),
-              prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+              prefixIcon: widget.prefixIcon != null
+                  ? Icon(widget.prefixIcon)
+                  : null,
               suffixIcon: IconButton(
                 onPressed: widget.enabled ? _toggleDropdown : null,
                 icon: AnimatedRotation(
@@ -366,7 +397,9 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
             padding: const EdgeInsets.only(left: 16.0, top: 4.0),
             child: Text(
               widget.helperText!,
-              style: helperStyle?.copyWith(color: widget.focusNode.hasFocus ? theme.primaryColor : null),
+              style: helperStyle?.copyWith(
+                color: widget.focusNode.hasFocus ? theme.primaryColor : null,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -387,10 +420,10 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
   void _attachScrollListener() {
     if (_scrollAttached || !mounted) return;
     final scrollableState = Scrollable.of(context);
-  _scrollPosition = scrollableState.position;
-  _openScrollOffset = _scrollPosition!.pixels;
-  _scrollPosition!.addListener(_onScrollChange);
-  _scrollAttached = true;
+    _scrollPosition = scrollableState.position;
+    _openScrollOffset = _scrollPosition!.pixels;
+    _scrollPosition!.addListener(_onScrollChange);
+    _scrollAttached = true;
   }
 
   void _detachScrollListener() {
@@ -403,11 +436,12 @@ class _NativeDropdownState<T> extends State<NativeDropdown<T>>
   }
 
   void _onScrollChange() {
-    if (!_isOpen || _scrollPosition == null || _openScrollOffset == null) return;
+    if (!_isOpen || _scrollPosition == null || _openScrollOffset == null) {
+      return;
+    }
     // Cierra si hubo desplazamiento perceptible (>4 px)
     if ((_scrollPosition!.pixels - _openScrollOffset!).abs() > 4) {
       _hideOverlay();
     }
   }
 }
-

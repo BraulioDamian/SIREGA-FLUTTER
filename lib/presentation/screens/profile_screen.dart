@@ -1,9 +1,9 @@
 // lib/presentation/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sirega_app/nucleo/servicios/auth_service.dart';
-import 'package:sirega_app/nucleo/servicios/firebase_sync_service.dart';
-import 'package:sirega_app/modulos/0_autenticacion/presentation/bloc/auth_bloc.dart';
+import 'package:sirega_app/core/services/auth_service.dart';
+import 'package:sirega_app/core/services/firebase_sync_service.dart';
+import 'package:sirega_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -14,7 +14,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
   Future<void> _confirmLogout(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -147,12 +146,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 height: 100,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(Icons.person,
-                                      size: 50, color: Colors.white);
+                                  return const Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Colors.white,
+                                  );
                                 },
                               ),
                             )
-                          : const Icon(Icons.person, size: 50, color: Colors.white),
+                          : const Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Colors.white,
+                            ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -235,8 +241,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              trailing: const Icon(Icons.arrow_forward_ios,
-                  size: 16, color: AppColors.error),
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: AppColors.error,
+              ),
               onTap: () => _confirmLogout(context),
             ),
           ),

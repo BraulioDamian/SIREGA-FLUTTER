@@ -75,8 +75,9 @@ class _NativeSearchableDropdownState<T extends Object>
     );
 
     if (widget.initialSelection != null) {
-      widget.controller.text =
-          widget.displayStringForOption(widget.initialSelection as T);
+      widget.controller.text = widget.displayStringForOption(
+        widget.initialSelection as T,
+      );
     }
 
     _filteredItems = List<T>.from(widget.items);
@@ -98,12 +99,14 @@ class _NativeSearchableDropdownState<T extends Object>
         if (searchTerm.isEmpty) {
           _filteredItems = List<T>.from(widget.items);
         } else {
-          _filteredItems = List<T>.from(widget.items.where((item) {
-            return widget
-                .displayStringForOption(item)
-                .toLowerCase()
-                .contains(searchTerm);
-          }));
+          _filteredItems = List<T>.from(
+            widget.items.where((item) {
+              return widget
+                  .displayStringForOption(item)
+                  .toLowerCase()
+                  .contains(searchTerm);
+            }),
+          );
         }
       });
 
@@ -256,16 +259,18 @@ class _NativeSearchableDropdownState<T extends Object>
         screenSize.height - keyboardHeight - (fieldOffset.dy + size.height);
 
     final double perItemBase = itemsCopy.length == 1 ? 90.0 : 52.0;
-    final desiredHeight =
-        math.min(itemsCopy.length * perItemBase, widget.maxMenuHeight).toDouble();
+    final desiredHeight = math
+        .min(itemsCopy.length * perItemBase, widget.maxMenuHeight)
+        .toDouble();
 
     bool openUp =
         spaceBelowAvailable < desiredHeight && spaceAbove > spaceBelowAvailable;
     if (spaceBelowAvailable < 120 && spaceAbove > spaceBelowAvailable + 40) {
       openUp = true;
     }
-    final availableHeight =
-        openUp ? math.max(0, spaceAbove - 8) : math.max(0, spaceBelowAvailable - 8);
+    final availableHeight = openUp
+        ? math.max(0, spaceAbove - 8)
+        : math.max(0, spaceBelowAvailable - 8);
     double effectiveHeight = math
         .min(desiredHeight, availableHeight)
         .clamp(0, widget.maxMenuHeight)
@@ -300,8 +305,7 @@ class _NativeSearchableDropdownState<T extends Object>
                     animationDuration: Duration.zero,
                     child: Container(
                       constraints: BoxConstraints(
-                        maxHeight:
-                            effectiveHeight * _expandAnimation.value,
+                        maxHeight: effectiveHeight * _expandAnimation.value,
                         maxWidth: size.width,
                       ),
                       decoration: BoxDecoration(
@@ -311,9 +315,9 @@ class _NativeSearchableDropdownState<T extends Object>
                           bottom: Radius.circular(openUp ? 0 : 8),
                         ),
                         border: Border.all(
-                          color: Theme.of(context)
-                              .primaryColor
-                              .withAlpha((255 * 0.2).round()),
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withAlpha((255 * 0.2).round()),
                           width: 1,
                         ),
                       ),
@@ -342,17 +346,11 @@ class _NativeSearchableDropdownState<T extends Object>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.search_off,
-              color: Colors.grey.shade400,
-              size: 32,
-            ),
+            Icon(Icons.search_off, color: Colors.grey.shade400, size: 32),
             const SizedBox(height: 8),
             Text(
               'No se encontraron resultados',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -374,25 +372,25 @@ class _NativeSearchableDropdownState<T extends Object>
 
           final item = items[index];
           return SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset(0, -0.1 * (index + 1).clamp(0, 5)),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(
-                parent: _animationController,
-                curve: Interval(
-                  (index * 0.1).clamp(0.0, 0.5),
-                  ((index * 0.1) + 0.5).clamp(0.5, 1.0),
-                  curve: Curves.easeOut,
+            position:
+                Tween<Offset>(
+                  begin: Offset(0, -0.1 * (index + 1).clamp(0, 5)),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: _animationController,
+                    curve: Interval(
+                      (index * 0.1).clamp(0.0, 0.5),
+                      ((index * 0.1) + 0.5).clamp(0.5, 1.0),
+                      curve: Curves.easeOut,
+                    ),
+                  ),
                 ),
-              ),
-            ),
             child: InkWell(
               onTap: () {
                 if (!mounted || _isDisposed) return;
                 widget.onSelected(item);
-                widget.controller.text =
-                    widget.displayStringForOption(item);
+                widget.controller.text = widget.displayStringForOption(item);
                 _hideOverlay();
                 widget.focusNode.unfocus();
               },
@@ -403,9 +401,7 @@ class _NativeSearchableDropdownState<T extends Object>
                         horizontal: 16,
                         vertical: 12,
                       ),
-                      child: Text(
-                        widget.displayStringForOption(item),
-                      ),
+                      child: Text(widget.displayStringForOption(item)),
                     ),
             ),
           );
@@ -435,12 +431,10 @@ class _NativeSearchableDropdownState<T extends Object>
             decoration: InputDecoration(
               labelText: widget.labelText,
               filled: true,
-              fillColor:
-                  widget.enabled ? Colors.white : Colors.grey.shade100,
+              fillColor: widget.enabled ? Colors.white : Colors.grey.shade100,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: Colors.grey.shade300, width: 1),
+                borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
               ),
               enabledBorder: _isOpen
                   ? OutlineInputBorder(
@@ -453,24 +447,21 @@ class _NativeSearchableDropdownState<T extends Object>
                   : OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                          color: Colors.grey.shade300, width: 1),
+                        color: Colors.grey.shade300,
+                        width: 1,
+                      ),
                     ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: theme.primaryColor,
-                  width: 2,
-                ),
+                borderSide: BorderSide(color: theme.primaryColor, width: 2),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    const BorderSide(color: Colors.red, width: 1),
+                borderSide: const BorderSide(color: Colors.red, width: 1),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    const BorderSide(color: Colors.red, width: 2),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
               ),
               prefixIcon: widget.prefixIcon != null
                   ? AnimatedRotation(
@@ -504,9 +495,8 @@ class _NativeSearchableDropdownState<T extends Object>
             child: Text(
               widget.helperText!,
               style: helperStyle?.copyWith(
-                  color: widget.focusNode.hasFocus
-                      ? theme.primaryColor
-                      : null),
+                color: widget.focusNode.hasFocus ? theme.primaryColor : null,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),

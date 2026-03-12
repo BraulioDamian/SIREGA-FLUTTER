@@ -1,8 +1,8 @@
 // lib/debug/sync_debug_screen_simple.dart
 import 'package:flutter/material.dart';
-import 'package:sirega_app/nucleo/servicios/firebase_sync_service.dart';
-import 'package:sirega_app/nucleo/servicios/auth_service.dart';
-import 'package:sirega_app/nucleo/servicios/isar_service.dart';
+import 'package:sirega_app/core/services/firebase_sync_service.dart';
+import 'package:sirega_app/core/services/auth_service.dart';
+import 'package:sirega_app/core/services/isar_service.dart';
 
 /// Pantalla simple de debug para sincronización con Firebase
 class SyncDebugScreenSimple extends StatefulWidget {
@@ -63,19 +63,23 @@ class _SyncDebugScreenSimpleState extends State<SyncDebugScreenSimple> {
 
         if (siniga == null) {
           withoutSiniga++;
-          report.writeln('❌ ${animal.nombre} - SIN siniigaId');
+          report.writeln('❌ ${animal.name} - SIN siniigaId');
         } else {
-          final hasEspecie = siniga.especie != null && siniga.especie!.isNotEmpty;
-          final hasEstado = siniga.estadoClave != null && siniga.estadoClave!.isNotEmpty;
-          final hasNumero = siniga.numeroNacional != null && siniga.numeroNacional!.isNotEmpty;
+          final hasEspecie =
+              siniga.especie != null && siniga.especie!.isNotEmpty;
+          final hasEstado =
+              siniga.estadoClave != null && siniga.estadoClave!.isNotEmpty;
+          final hasNumero =
+              siniga.numeroNacional != null &&
+              siniga.numeroNacional!.isNotEmpty;
 
           if (hasEspecie && hasEstado && hasNumero) {
             withSiniga++;
-            report.writeln('✅ ${animal.nombre}');
+            report.writeln('✅ ${animal.name}');
             report.writeln('   ID SINIGA: ${siniga.fullId}');
           } else {
             withPartialSiniga++;
-            report.writeln('⚠️  ${animal.nombre} - SINIGA parcial');
+            report.writeln('⚠️  ${animal.name} - SINIGA parcial');
           }
         }
       }
@@ -152,8 +156,10 @@ class _SyncDebugScreenSimpleState extends State<SyncDebugScreenSimple> {
                   children: [
                     const Text(
                       '👤 Usuario Actual',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const Divider(),
                     Text('UID: ${user?.uid ?? "No autenticado"}'),
@@ -175,8 +181,10 @@ class _SyncDebugScreenSimpleState extends State<SyncDebugScreenSimple> {
                   children: [
                     const Text(
                       '📊 Estado de Sincronización',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const Divider(),
                     Text(
@@ -207,8 +215,8 @@ class _SyncDebugScreenSimpleState extends State<SyncDebugScreenSimple> {
                   color: _message.contains('✅')
                       ? Colors.green[100]
                       : _message.contains('🔄')
-                          ? Colors.blue[100]
-                          : Colors.red[100],
+                      ? Colors.blue[100]
+                      : Colors.red[100],
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -331,7 +339,9 @@ class _SyncDebugScreenSimpleState extends State<SyncDebugScreenSimple> {
                     '5. Busca: users/{tu-uid}/cattle',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const Text('6. Verifica que siniigaId aparezca en los animales'),
+                  const Text(
+                    '6. Verifica que siniigaId aparezca en los animales',
+                  ),
                 ],
               ),
             ),
@@ -346,8 +356,9 @@ class _SyncDebugScreenSimpleState extends State<SyncDebugScreenSimple> {
                   // Copiar URL al portapapeles
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content:
-                          Text('Ve a la URL en tu navegador para ver Firestore'),
+                      content: Text(
+                        'Ve a la URL en tu navegador para ver Firestore',
+                      ),
                       duration: Duration(seconds: 2),
                     ),
                   );

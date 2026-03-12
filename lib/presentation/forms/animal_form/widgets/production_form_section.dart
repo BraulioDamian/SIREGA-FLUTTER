@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:sirega_app/nucleo/modelos/form_dtos.dart';
+import 'package:sirega_app/core/models/form_dtos.dart';
 import '../controllers/animal_form_controller.dart';
 
 /// Sección del formulario para datos de producción y peso
@@ -22,117 +22,160 @@ class ProductionFormSection extends StatelessWidget {
                 children: [
                   // Sección de Peso
                   Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildWeightHeader(context, isMobile),
-                        SizedBox(height: isMobile ? 8 : 12),
-                        _buildWeightDescription(context, isMobile),
-                        SizedBox(height: isMobile ? 12 : 16),
+                    elevation: 2,
+                    child: Padding(
+                      padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildWeightHeader(context, isMobile),
+                          SizedBox(height: isMobile ? 8 : 12),
+                          _buildWeightDescription(context, isMobile),
+                          SizedBox(height: isMobile ? 12 : 16),
 
-                        // Peso al Nacer
-                        TextFormField(
-                          controller: controller.pesoNacimientoController,
-                          decoration: _inputDecoration('Peso al Nacer (kg)', Icons.scale, context: context),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-                          ],
-                        ),
-
-                        SizedBox(height: isMobile ? 12 : 16),
-
-                        // Lista de pesajes registrados
-                        if (controller.weightRecords.isEmpty)
-                          _buildEmptyState(isMobile, 'Sin pesajes registrados', Icons.monitor_weight)
-                        else
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: 400),
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: controller.weightRecords.length,
-                              itemBuilder: (context, index) {
-                                final pesaje = controller.weightRecords[index];
-                                return _buildPesajeCard(context, controller, pesaje, index, isMobile);
-                              },
+                          // Peso al Nacer
+                          TextFormField(
+                            controller: controller.birthWeightController,
+                            decoration: _inputDecoration(
+                              'Peso al Nacer (kg)',
+                              Icons.scale,
+                              context: context,
                             ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d*\.?\d{0,2}'),
+                              ),
+                            ],
                           ),
 
-                        SizedBox(height: isMobile ? 12 : 16),
+                          SizedBox(height: isMobile ? 12 : 16),
 
-                        // Botón para agregar pesaje
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () => _mostrarDialogoAgregarPesaje(context, controller),
-                            icon: const Icon(Icons.add),
-                            label: const Text('Registrar Pesaje'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                          // Lista de pesajes registrados
+                          if (controller.weightRecords.isEmpty)
+                            _buildEmptyState(
+                              isMobile,
+                              'Sin pesajes registrados',
+                              Icons.monitor_weight,
+                            )
+                          else
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxHeight: 400),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: controller.weightRecords.length,
+                                itemBuilder: (context, index) {
+                                  final pesaje =
+                                      controller.weightRecords[index];
+                                  return _buildPesajeCard(
+                                    context,
+                                    controller,
+                                    pesaje,
+                                    index,
+                                    isMobile,
+                                  );
+                                },
+                              ),
+                            ),
+
+                          SizedBox(height: isMobile ? 12 : 16),
+
+                          // Botón para agregar pesaje
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () => _mostrarDialogoAgregarPesaje(
+                                context,
+                                controller,
+                              ),
+                              icon: const Icon(Icons.add),
+                              label: const Text('Registrar Pesaje'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Sección de Producción de Leche
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildMilkHeader(context, isMobile),
-                        SizedBox(height: isMobile ? 8 : 12),
-                        _buildMilkDescription(context, isMobile),
-                        SizedBox(height: isMobile ? 12 : 16),
+                  // Sección de Producción de Leche
+                  Card(
+                    elevation: 2,
+                    child: Padding(
+                      padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildMilkHeader(context, isMobile),
+                          SizedBox(height: isMobile ? 8 : 12),
+                          _buildMilkDescription(context, isMobile),
+                          SizedBox(height: isMobile ? 12 : 16),
 
-                        // Lista de registros de producción de leche
-                        if (controller.milkRecords.isEmpty)
-                          _buildEmptyState(isMobile, 'Sin producción de leche registrada', Icons.opacity)
-                        else
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: 400),
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: controller.milkRecords.length,
-                              itemBuilder: (context, index) {
-                                final produccion = controller.milkRecords[index];
-                                return _buildProduccionLecheCard(context, controller, produccion, index, isMobile);
-                              },
+                          // Lista de registros de producción de leche
+                          if (controller.milkRecords.isEmpty)
+                            _buildEmptyState(
+                              isMobile,
+                              'Sin producción de leche registrada',
+                              Icons.opacity,
+                            )
+                          else
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxHeight: 400),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: controller.milkRecords.length,
+                                itemBuilder: (context, index) {
+                                  final produccion =
+                                      controller.milkRecords[index];
+                                  return _buildProduccionLecheCard(
+                                    context,
+                                    controller,
+                                    produccion,
+                                    index,
+                                    isMobile,
+                                  );
+                                },
+                              ),
+                            ),
+
+                          SizedBox(height: isMobile ? 12 : 16),
+
+                          // Botón para agregar producción de leche
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () =>
+                                  _mostrarDialogoAgregarProduccionLeche(
+                                    context,
+                                    controller,
+                                  ),
+                              icon: const Icon(Icons.add),
+                              label: const Text(
+                                'Registrar Producción de Leche',
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                              ),
                             ),
                           ),
-
-                        SizedBox(height: isMobile ? 12 : 16),
-
-                        // Botón para agregar producción de leche
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () => _mostrarDialogoAgregarProduccionLeche(context, controller),
-                            icon: const Icon(Icons.add),
-                            label: const Text('Registrar Producción de Leche'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             );
           },
         );
@@ -217,11 +260,7 @@ class ProductionFormSection extends StatelessWidget {
       child: Center(
         child: Column(
           children: [
-            Icon(
-              icon,
-              size: isMobile ? 40 : 48,
-              color: Colors.grey.shade400,
-            ),
+            Icon(icon, size: isMobile ? 40 : 48, color: Colors.grey.shade400),
             SizedBox(height: isMobile ? 8 : 12),
             Text(
               message,
@@ -243,9 +282,9 @@ class ProductionFormSection extends StatelessWidget {
     int index,
     bool isMobile,
   ) {
-    final fecha = pesaje.date;
+    final date = pesaje.date;
     final peso = pesaje.weightKg;
-    final notas = pesaje.notes;
+    final notes = pesaje.notes;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -272,7 +311,11 @@ class ProductionFormSection extends StatelessWidget {
                 color: Colors.green.withAlpha(26),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.monitor_weight, color: Colors.green, size: 24),
+              child: const Icon(
+                Icons.monitor_weight,
+                color: Colors.green,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -290,10 +333,14 @@ class ProductionFormSection extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 12, color: Colors.grey.shade500),
+                      Icon(
+                        Icons.calendar_today,
+                        size: 12,
+                        color: Colors.grey.shade500,
+                      ),
                       const SizedBox(width: 4),
                       Text(
-                        'Fecha: ${_formatDate(fecha)}',
+                        'Fecha: ${_formatDate(date)}',
                         style: TextStyle(
                           fontSize: isMobile ? 11 : 12,
                           color: Colors.grey.shade600,
@@ -301,10 +348,10 @@ class ProductionFormSection extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (notas != null && notas.isNotEmpty) ...[
+                  if (notes != null && notes.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Text(
-                      notas,
+                      notes,
                       style: TextStyle(
                         fontSize: isMobile ? 11 : 12,
                         color: Colors.grey.shade600,
@@ -336,9 +383,9 @@ class ProductionFormSection extends StatelessWidget {
     int index,
     bool isMobile,
   ) {
-    final fecha = produccion.date;
+    final date = produccion.date;
     final litros = produccion.litersPerDay;
-    final notas = produccion.notes;
+    final notes = produccion.notes;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -383,10 +430,14 @@ class ProductionFormSection extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 12, color: Colors.grey.shade500),
+                      Icon(
+                        Icons.calendar_today,
+                        size: 12,
+                        color: Colors.grey.shade500,
+                      ),
                       const SizedBox(width: 4),
                       Text(
-                        'Fecha: ${_formatDate(fecha)}',
+                        'Fecha: ${_formatDate(date)}',
                         style: TextStyle(
                           fontSize: isMobile ? 11 : 12,
                           color: Colors.grey.shade600,
@@ -394,10 +445,10 @@ class ProductionFormSection extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (notas != null && notas.isNotEmpty) ...[
+                  if (notes != null && notes.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Text(
-                      notas,
+                      notes,
                       style: TextStyle(
                         fontSize: isMobile ? 11 : 12,
                         color: Colors.grey.shade600,
@@ -439,10 +490,7 @@ class ProductionFormSection extends StatelessWidget {
               Icon(Icons.monitor_weight, color: Colors.green),
               SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  'Registrar Pesaje',
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: Text('Registrar Pesaje', style: TextStyle(fontSize: 18)),
               ),
             ],
           ),
@@ -456,15 +504,15 @@ class ProductionFormSection extends StatelessWidget {
                   subtitle: Text(_formatDate(fechaSeleccionada)),
                   leading: const Icon(Icons.calendar_today),
                   onTap: () async {
-                    final fecha = await showDatePicker(
+                    final date = await showDatePicker(
                       context: context,
                       initialDate: fechaSeleccionada,
                       firstDate: DateTime(2020),
                       lastDate: DateTime.now(),
                       locale: const Locale('es', 'ES'),
                     );
-                    if (fecha != null) {
-                      setState(() => fechaSeleccionada = fecha);
+                    if (date != null) {
+                      setState(() => fechaSeleccionada = date);
                     }
                   },
                   shape: RoundedRectangleBorder(
@@ -482,7 +530,9 @@ class ProductionFormSection extends StatelessWidget {
                     hintText: 'Ej: 450.5',
                     border: OutlineInputBorder(),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   autofocus: true,
                 ),
                 const SizedBox(height: 16),
@@ -510,13 +560,15 @@ class ProductionFormSection extends StatelessWidget {
               onPressed: () {
                 final peso = double.tryParse(pesoController.text.trim());
                 if (peso != null && peso > 0) {
-                  controller.addWeightRecord(WeightRecord(
-                    date: fechaSeleccionada,
-                    weightKg: peso,
-                    notes: notasController.text.trim().isEmpty
-                        ? null
-                        : notasController.text.trim(),
-                  ));
+                  controller.addWeightRecord(
+                    WeightRecord(
+                      date: fechaSeleccionada,
+                      weightKg: peso,
+                      notes: notasController.text.trim().isEmpty
+                          ? null
+                          : notasController.text.trim(),
+                    ),
+                  );
                   Navigator.pop(context);
                 }
               },
@@ -562,15 +614,15 @@ class ProductionFormSection extends StatelessWidget {
                   subtitle: Text(_formatDate(fechaSeleccionada)),
                   leading: const Icon(Icons.calendar_today),
                   onTap: () async {
-                    final fecha = await showDatePicker(
+                    final date = await showDatePicker(
                       context: context,
                       initialDate: fechaSeleccionada,
                       firstDate: DateTime(2020),
                       lastDate: DateTime.now(),
                       locale: const Locale('es', 'ES'),
                     );
-                    if (fecha != null) {
-                      setState(() => fechaSeleccionada = fecha);
+                    if (date != null) {
+                      setState(() => fechaSeleccionada = date);
                     }
                   },
                   shape: RoundedRectangleBorder(
@@ -589,7 +641,9 @@ class ProductionFormSection extends StatelessWidget {
                     border: OutlineInputBorder(),
                     suffixText: 'L/día',
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   autofocus: true,
                 ),
                 const SizedBox(height: 16),
@@ -617,13 +671,15 @@ class ProductionFormSection extends StatelessWidget {
               onPressed: () {
                 final litros = double.tryParse(litrosController.text.trim());
                 if (litros != null && litros > 0) {
-                  controller.addMilkRecord(MilkRecord(
-                    date: fechaSeleccionada,
-                    litersPerDay: litros,
-                    notes: notasController.text.trim().isEmpty
-                        ? null
-                        : notasController.text.trim(),
-                  ));
+                  controller.addMilkRecord(
+                    MilkRecord(
+                      date: fechaSeleccionada,
+                      litersPerDay: litros,
+                      notes: notasController.text.trim().isEmpty
+                          ? null
+                          : notasController.text.trim(),
+                    ),
+                  );
                   Navigator.pop(context);
                 }
               },
@@ -639,7 +695,11 @@ class ProductionFormSection extends StatelessWidget {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  InputDecoration _inputDecoration(String label, IconData icon, {BuildContext? context}) {
+  InputDecoration _inputDecoration(
+    String label,
+    IconData icon, {
+    BuildContext? context,
+  }) {
     return InputDecoration(
       labelText: label,
       prefixIcon: Icon(icon),

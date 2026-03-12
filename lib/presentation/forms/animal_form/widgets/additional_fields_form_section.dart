@@ -15,18 +15,30 @@ class AdditionalFieldsFormSection extends StatelessWidget {
           children: [
             TextFormField(
               controller: controller.numeroHerradoController,
-              decoration: _inputDecoration('Número de Herrado', Icons.format_list_numbered, context),
+              decoration: _inputDecoration(
+                'Número de Herrado',
+                Icons.format_list_numbered,
+                context,
+              ),
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: controller.colorPelajeController,
-              decoration: _inputDecoration('Color del Pelaje', Icons.palette, context),
+              controller: controller.coatColorController,
+              decoration: _inputDecoration(
+                'Color del Pelaje',
+                Icons.palette,
+                context,
+              ),
               textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: controller.senasParticularesController,
-              decoration: _inputDecoration('Señas Particulares', Icons.description, context),
+              decoration: _inputDecoration(
+                'Señas Particulares',
+                Icons.description,
+                context,
+              ),
               maxLines: 3,
               textCapitalization: TextCapitalization.sentences,
             ),
@@ -36,7 +48,11 @@ class AdditionalFieldsFormSection extends StatelessWidget {
     );
   }
 
-  InputDecoration _inputDecoration(String label, IconData icon, BuildContext context) {
+  InputDecoration _inputDecoration(
+    String label,
+    IconData icon,
+    BuildContext context,
+  ) {
     return InputDecoration(
       labelText: label,
       prefixIcon: Icon(icon),
@@ -52,10 +68,7 @@ class AdditionalFieldsFormSection extends StatelessWidget {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: Theme.of(context).primaryColor,
-          width: 2,
-        ),
+        borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

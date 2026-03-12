@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sirega_app/nucleo/modelos/enums.dart';
-import 'package:sirega_app/nucleo/modelos/form_dtos.dart';
+import 'package:sirega_app/core/models/enums.dart';
+import 'package:sirega_app/core/models/form_dtos.dart';
 import '../controllers/animal_form_controller.dart';
 
-/// Sección del formulario para registrar eventos médicos
+/// Sección del formulario para registrar events médicos
 /// (desparasitaciones, tratamientos, diagnósticos)
 class MedicalEventsFormSection extends StatelessWidget {
   const MedicalEventsFormSection({super.key});
@@ -20,45 +20,43 @@ class MedicalEventsFormSection extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Lista de eventos médicos
-                    if (controller.medicalEvents.isEmpty)
-                      _buildEmptyState(isMobile)
-                    else
-                      ...controller.medicalEvents.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final evento = entry.value;
-                        return _buildEventoCard(
-                          context,
-                          controller,
-                          evento,
-                          index,
-                          isMobile,
-                        );
-                      }),
+                // Lista de events médicos
+                if (controller.medicalEvents.isEmpty)
+                  _buildEmptyState(isMobile)
+                else
+                  ...controller.medicalEvents.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final evento = entry.value;
+                    return _buildEventoCard(
+                      context,
+                      controller,
+                      evento,
+                      index,
+                      isMobile,
+                    );
+                  }),
 
-                    SizedBox(height: isMobile ? 12 : 16),
+                SizedBox(height: isMobile ? 12 : 16),
 
-                    // Botón para agregar evento
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showAddEventDialog(context, controller),
-                        icon: const Icon(Icons.add),
-                        label: const Text('Agregar Evento Médico'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                      ),
+                // Botón para agregar evento
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _showAddEventDialog(context, controller),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Agregar Evento Médico'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                  ],
-                );
+                  ),
+                ),
+              ],
+            );
           },
         );
       },
     );
   }
-
-
 
   Widget _buildEmptyState(bool isMobile) {
     return Container(
@@ -78,7 +76,7 @@ class MedicalEventsFormSection extends StatelessWidget {
             ),
             SizedBox(height: isMobile ? 8 : 12),
             Text(
-              'Sin eventos médicos registrados',
+              'Sin events médicos registrados',
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontSize: isMobile ? 13 : 14,
@@ -153,7 +151,11 @@ class MedicalEventsFormSection extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 12, color: Colors.grey.shade500),
+                      Icon(
+                        Icons.calendar_today,
+                        size: 12,
+                        color: Colors.grey.shade500,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         _formatDate(evento.date),
@@ -231,12 +233,30 @@ class MedicalEventsFormSection extends StatelessWidget {
                     border: OutlineInputBorder(),
                   ),
                   items: const [
-                    DropdownMenuItem(value: TipoEvento.desparasitante, child: Text('Desparasitación')),
-                    DropdownMenuItem(value: TipoEvento.tratamiento, child: Text('Tratamiento')),
-                    DropdownMenuItem(value: TipoEvento.revisionVeterinaria, child: Text('Diagnóstico')),
-                    DropdownMenuItem(value: TipoEvento.castracion, child: Text('Castración')),
-                    DropdownMenuItem(value: TipoEvento.descorne, child: Text('Descorne')),
-                    DropdownMenuItem(value: TipoEvento.otro, child: Text('Otro')),
+                    DropdownMenuItem(
+                      value: TipoEvento.desparasitante,
+                      child: Text('Desparasitación'),
+                    ),
+                    DropdownMenuItem(
+                      value: TipoEvento.tratamiento,
+                      child: Text('Tratamiento'),
+                    ),
+                    DropdownMenuItem(
+                      value: TipoEvento.revisionVeterinaria,
+                      child: Text('Diagnóstico'),
+                    ),
+                    DropdownMenuItem(
+                      value: TipoEvento.castracion,
+                      child: Text('Castración'),
+                    ),
+                    DropdownMenuItem(
+                      value: TipoEvento.descorne,
+                      child: Text('Descorne'),
+                    ),
+                    DropdownMenuItem(
+                      value: TipoEvento.otro,
+                      child: Text('Otro'),
+                    ),
                   ],
                   onChanged: (value) {
                     if (value != null) {
@@ -264,15 +284,15 @@ class MedicalEventsFormSection extends StatelessWidget {
                   subtitle: Text(_formatDate(fechaSeleccionada)),
                   leading: const Icon(Icons.calendar_today),
                   onTap: () async {
-                    final fecha = await showDatePicker(
+                    final date = await showDatePicker(
                       context: context,
                       initialDate: fechaSeleccionada,
                       firstDate: DateTime(2020),
                       lastDate: DateTime.now(),
                       locale: const Locale('es', 'ES'),
                     );
-                    if (fecha != null) {
-                      setState(() => fechaSeleccionada = fecha);
+                    if (date != null) {
+                      setState(() => fechaSeleccionada = date);
                     }
                   },
                   shape: RoundedRectangleBorder(
@@ -306,19 +326,23 @@ class MedicalEventsFormSection extends StatelessWidget {
                 final producto = productoController.text.trim();
                 if (producto.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('El producto/medicamento es requerido')),
+                    const SnackBar(
+                      content: Text('El producto/medicamento es requerido'),
+                    ),
                   );
                   return;
                 }
 
-                controller.addMedicalEvent(MedicalEventRecord(
-                  eventType: tipoSeleccionado,
-                  date: fechaSeleccionada,
-                  product: producto,
-                  notes: notasController.text.trim().isEmpty
-                      ? null
-                      : notasController.text.trim(),
-                ));
+                controller.addMedicalEvent(
+                  MedicalEventRecord(
+                    eventType: tipoSeleccionado,
+                    date: fechaSeleccionada,
+                    product: producto,
+                    notes: notasController.text.trim().isEmpty
+                        ? null
+                        : notasController.text.trim(),
+                  ),
+                );
 
                 Navigator.pop(context);
               },

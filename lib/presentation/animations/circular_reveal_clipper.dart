@@ -42,9 +42,7 @@ class CircularRevealClipper extends CustomClipper<Path> {
   /// Calcula el radio máximo necesario para cubrir toda la pantalla
   double _calculateMaxRadius(Size size, Offset center) {
     // Calcular distancia a cada esquina
-    final topLeft = math.sqrt(
-      math.pow(center.dx, 2) + math.pow(center.dy, 2),
-    );
+    final topLeft = math.sqrt(math.pow(center.dx, 2) + math.pow(center.dy, 2));
     final topRight = math.sqrt(
       math.pow(size.width - center.dx, 2) + math.pow(center.dy, 2),
     );
@@ -52,7 +50,8 @@ class CircularRevealClipper extends CustomClipper<Path> {
       math.pow(center.dx, 2) + math.pow(size.height - center.dy, 2),
     );
     final bottomRight = math.sqrt(
-      math.pow(size.width - center.dx, 2) + math.pow(size.height - center.dy, 2),
+      math.pow(size.width - center.dx, 2) +
+          math.pow(size.height - center.dy, 2),
     );
 
     // Retornar la distancia más larga

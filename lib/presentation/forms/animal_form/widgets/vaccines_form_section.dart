@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sirega_app/nucleo/modelos/catalogo_vacunas.dart';
+import 'package:sirega_app/core/models/vaccines_catalog.dart';
 import '../controllers/animal_form_controller.dart';
 
 /// Sección del formulario para registrar vacunas del animal
@@ -39,8 +39,9 @@ class VaccinesFormSection extends StatelessWidget {
                 ),
                 SizedBox(height: isMobile ? 8 : 12),
 
-                ...CatalogoVacunas.periodicas.map((vacuna) =>
-                  _buildVaccineCheckbox(context, controller, vacuna),
+                ...CatalogoVacunas.periodicas.map(
+                  (vacuna) =>
+                      _buildVaccineCheckbox(context, controller, vacuna),
                 ),
 
                 const SizedBox(height: 16),
@@ -65,15 +66,17 @@ class VaccinesFormSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
 
-                ...CatalogoVacunas.unicas.map((vacuna) =>
-                  _buildVaccineCheckbox(context, controller, vacuna),
+                ...CatalogoVacunas.unicas.map(
+                  (vacuna) =>
+                      _buildVaccineCheckbox(context, controller, vacuna),
                 ),
 
                 SizedBox(height: isMobile ? 12 : 16),
 
                 // ── Vacunas personalizadas ──
                 OutlinedButton.icon(
-                  onPressed: () => _mostrarDialogoVacunaPersonalizada(context, controller),
+                  onPressed: () =>
+                      _mostrarDialogoVacunaPersonalizada(context, controller),
                   icon: const Icon(Icons.add),
                   label: const Text('Agregar otra vacuna'),
                   style: OutlinedButton.styleFrom(
@@ -83,9 +86,11 @@ class VaccinesFormSection extends StatelessWidget {
 
                 if (controller.vacunasPersonalizadas.isNotEmpty) ...[
                   SizedBox(height: isMobile ? 12 : 16),
-                  ...controller.vacunasPersonalizadas.map((nombre) {
+                  ...controller.vacunasPersonalizadas.map((name) {
                     return _buildVaccineCheckboxCustom(
-                      context, controller, nombre,
+                      context,
+                      controller,
+                      name,
                     );
                   }),
                 ],
@@ -102,7 +107,7 @@ class VaccinesFormSection extends StatelessWidget {
     AnimalFormController controller,
     VacunaInfo vacuna,
   ) {
-    final isChecked = controller.vacunasAplicadas.contains(vacuna.nombre);
+    final isChecked = controller.vacunasAplicadas.contains(vacuna.name);
     final esPeriodica = !vacuna.esAplicacionUnica;
     final color = vacuna.color;
 
@@ -118,19 +123,19 @@ class VaccinesFormSection extends StatelessWidget {
       ),
       child: InkWell(
         onTap: esPeriodica && isChecked
-            ? () => _mostrarDialogoFechaVacuna(context, controller, vacuna.nombre)
+            ? () => _mostrarDialogoFechaVacuna(context, controller, vacuna.name)
             : null,
         borderRadius: BorderRadius.circular(12),
         child: CheckboxListTile(
           value: isChecked,
           onChanged: (bool? value) {
             if (value == true) {
-              controller.agregarVacuna(vacuna.nombre);
+              controller.agregarVacuna(vacuna.name);
               if (esPeriodica) {
-                _mostrarDialogoFechaVacuna(context, controller, vacuna.nombre);
+                _mostrarDialogoFechaVacuna(context, controller, vacuna.name);
               }
             } else {
-              controller.removerVacuna(vacuna.nombre);
+              controller.removerVacuna(vacuna.name);
             }
           },
           title: Row(
@@ -142,9 +147,11 @@ class VaccinesFormSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      vacuna.nombre,
+                      vacuna.name,
                       style: TextStyle(
-                        fontWeight: isChecked ? FontWeight.w600 : FontWeight.normal,
+                        fontWeight: isChecked
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                         color: isChecked ? color : Colors.black87,
                       ),
                     ),
@@ -160,7 +167,13 @@ class VaccinesFormSection extends StatelessWidget {
               ),
             ],
           ),
-          subtitle: _buildSubtitle(controller, vacuna, isChecked, esPeriodica, color),
+          subtitle: _buildSubtitle(
+            controller,
+            vacuna,
+            isChecked,
+            esPeriodica,
+            color,
+          ),
           controlAffinity: ListTileControlAffinity.leading,
           activeColor: color,
           shape: RoundedRectangleBorder(
@@ -178,7 +191,7 @@ class VaccinesFormSection extends StatelessWidget {
     bool esPeriodica,
     Color color,
   ) {
-    final fechaAplicacion = controller.fechasVacunas[vacuna.nombre];
+    final fechaAplicacion = controller.fechasVacunas[vacuna.name];
 
     if (esPeriodica && fechaAplicacion != null) {
       final proxima = vacuna.proximaAplicacion(fechaAplicacion);
@@ -187,15 +200,23 @@ class VaccinesFormSection extends StatelessWidget {
         children: [
           Text(
             'Aplicada: ${_formatDate(fechaAplicacion)}',
-            style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           if (proxima != null)
             Text(
               'Próximo refuerzo: ${_formatDate(proxima)}',
               style: TextStyle(
                 fontSize: 12,
-                color: _estaVencida(proxima) ? Colors.red : Colors.grey.shade600,
-                fontWeight: _estaVencida(proxima) ? FontWeight.w700 : FontWeight.w500,
+                color: _estaVencida(proxima)
+                    ? Colors.red
+                    : Colors.grey.shade600,
+                fontWeight: _estaVencida(proxima)
+                    ? FontWeight.w700
+                    : FontWeight.w500,
               ),
             ),
         ],
@@ -204,15 +225,23 @@ class VaccinesFormSection extends StatelessWidget {
 
     if (esPeriodica && isChecked) {
       return Text(
-        'Toca para agregar fecha de última aplicación',
-        style: TextStyle(fontSize: 11, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
+        'Toca para agregar date de última aplicación',
+        style: TextStyle(
+          fontSize: 11,
+          color: Colors.grey.shade600,
+          fontStyle: FontStyle.italic,
+        ),
       );
     }
 
     if (vacuna.esAplicacionUnica && isChecked) {
       return Text(
         'Registrada ✓',
-        style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 12,
+          color: color,
+          fontWeight: FontWeight.w500,
+        ),
       );
     }
 
@@ -229,9 +258,9 @@ class VaccinesFormSection extends StatelessWidget {
   Widget _buildVaccineCheckboxCustom(
     BuildContext context,
     AnimalFormController controller,
-    String nombre,
+    String name,
   ) {
-    final isChecked = controller.vacunasAplicadas.contains(nombre);
+    final isChecked = controller.vacunasAplicadas.contains(name);
     const color = Colors.teal;
 
     return Container(
@@ -248,10 +277,10 @@ class VaccinesFormSection extends StatelessWidget {
         value: isChecked,
         onChanged: (bool? value) {
           if (value == true) {
-            controller.agregarVacuna(nombre);
-            _mostrarDialogoFechaVacuna(context, controller, nombre);
+            controller.agregarVacuna(name);
+            _mostrarDialogoFechaVacuna(context, controller, name);
           } else {
-            controller.removerVacuna(nombre);
+            controller.removerVacuna(name);
           }
         },
         title: Row(
@@ -260,7 +289,7 @@ class VaccinesFormSection extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                nombre,
+                name,
                 style: TextStyle(
                   fontWeight: isChecked ? FontWeight.w600 : FontWeight.normal,
                   color: isChecked ? color : Colors.black87,
@@ -269,16 +298,20 @@ class VaccinesFormSection extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.delete_outline, size: 20),
-              onPressed: () => controller.eliminarVacunaPersonalizada(nombre),
+              onPressed: () => controller.eliminarVacunaPersonalizada(name),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
           ],
         ),
-        subtitle: controller.fechasVacunas[nombre] != null
+        subtitle: controller.fechasVacunas[name] != null
             ? Text(
-                'Aplicada: ${_formatDate(controller.fechasVacunas[nombre]!)}',
-                style: const TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500),
+                'Aplicada: ${_formatDate(controller.fechasVacunas[name]!)}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: color,
+                  fontWeight: FontWeight.w500,
+                ),
               )
             : null,
         controlAffinity: ListTileControlAffinity.leading,
@@ -288,7 +321,7 @@ class VaccinesFormSection extends StatelessWidget {
     );
   }
 
-  bool _estaVencida(DateTime fecha) => fecha.isBefore(DateTime.now());
+  bool _estaVencida(DateTime date) => date.isBefore(DateTime.now());
 
   void _mostrarDialogoFechaVacuna(
     BuildContext context,
@@ -304,9 +337,9 @@ class VaccinesFormSection extends StatelessWidget {
       helpText: 'Fecha de aplicación',
       cancelText: 'Omitir',
       confirmText: 'Guardar',
-    ).then((fecha) {
-      if (fecha != null) {
-        controller.setFechaVacuna(nombreVacuna, fecha);
+    ).then((date) {
+      if (date != null) {
+        controller.setFechaVacuna(nombreVacuna, date);
       }
     });
   }
@@ -346,12 +379,12 @@ class VaccinesFormSection extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              final nombre = textController.text.trim();
-              if (nombre.isNotEmpty) {
-                controller.agregarVacunaPersonalizada(nombre);
+              final name = textController.text.trim();
+              if (name.isNotEmpty) {
+                controller.agregarVacunaPersonalizada(name);
                 Navigator.pop(context);
-                controller.agregarVacuna(nombre);
-                _mostrarDialogoFechaVacuna(context, controller, nombre);
+                controller.agregarVacuna(name);
+                _mostrarDialogoFechaVacuna(context, controller, name);
               }
             },
             child: const Text('Agregar'),

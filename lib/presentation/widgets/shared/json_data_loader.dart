@@ -11,7 +11,9 @@ class JsonDataLoader {
     try {
       final String data = await rootBundle.loadString(path);
       final List<dynamic> jsonList = json.decode(data);
-      return jsonList.map((item) => fromJson(item as Map<String, dynamic>)).toList();
+      return jsonList
+          .map((item) => fromJson(item as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       throw Exception('Error cargando datos desde $path: $e');
     }

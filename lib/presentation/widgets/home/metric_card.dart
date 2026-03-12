@@ -55,9 +55,14 @@ class MetricCard extends StatelessWidget {
               ),
               if (trend != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: trendUp ? AppColors.success.withValues(alpha: 0.1) : AppColors.error.withValues(alpha: 0.1),
+                    color: trendUp
+                        ? AppColors.success.withValues(alpha: 0.1)
+                        : AppColors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -74,7 +79,9 @@ class MetricCard extends StatelessWidget {
                           trend!,
                           style: TextStyle(
                             fontSize: 11,
-                            color: trendUp ? AppColors.success : AppColors.error,
+                            color: trendUp
+                                ? AppColors.success
+                                : AppColors.error,
                             fontWeight: FontWeight.bold,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -122,10 +129,7 @@ class MetricCard extends StatelessWidget {
           // Subtítulo (ajustado en una línea)
           Text(
             subtitle,
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.textHint,
-            ),
+            style: const TextStyle(fontSize: 11, color: AppColors.textHint),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

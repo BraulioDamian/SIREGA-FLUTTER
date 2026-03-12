@@ -17,7 +17,7 @@ class ImagePickerSection extends StatelessWidget {
             final screenWidth = constraints.maxWidth;
             final isMobile = screenWidth < 600;
             final isTablet = screenWidth >= 600 && screenWidth < 1024;
-            
+
             // Tamaño responsivo del contenedor
             double containerSize;
             if (isMobile) {
@@ -27,7 +27,7 @@ class ImagePickerSection extends StatelessWidget {
             } else {
               containerSize = 180;
             }
-            
+
             return Center(
               child: GestureDetector(
                 onTap: () => _showImageSourceOptions(context, controller),
@@ -38,7 +38,9 @@ class ImagePickerSection extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: AppColors.background,
                     border: Border.all(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                      color: Theme.of(
+                        context,
+                      ).primaryColor.withValues(alpha: 0.3),
                       width: 2,
                     ),
                     image: controller.imageFile != null
@@ -78,7 +80,10 @@ class ImagePickerSection extends StatelessWidget {
     );
   }
 
-  void _showImageSourceOptions(BuildContext context, AnimalFormController controller) {
+  void _showImageSourceOptions(
+    BuildContext context,
+    AnimalFormController controller,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -108,10 +113,7 @@ class ImagePickerSection extends StatelessWidget {
                   ),
                   const Text(
                     'Seleccionar imagen',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -176,7 +178,9 @@ class ImagePickerSection extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: (color ?? Theme.of(context).primaryColor).withValues(alpha: 0.1),
+                color: (color ?? Theme.of(context).primaryColor).withValues(
+                  alpha: 0.1,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -213,7 +217,7 @@ class ImagePickerSection extends StatelessWidget {
         maxHeight: 1024,
         imageQuality: 85,
       );
-      
+
       if (image != null) {
         controller.setImageFile(File(image.path));
       }

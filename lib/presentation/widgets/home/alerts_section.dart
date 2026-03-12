@@ -1,4 +1,3 @@
-
 // lib/presentation/widgets/home/alerts_section.dart
 import 'package:flutter/material.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
@@ -30,11 +29,17 @@ class AlertsSection extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -46,10 +51,7 @@ class AlertsSection extends StatelessWidget {
                 '${date.day}/${date.month}',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(
-                type,
-                style: TextStyle(fontSize: 11, color: color),
-              ),
+              Text(type, style: TextStyle(fontSize: 11, color: color)),
             ],
           ),
         ],

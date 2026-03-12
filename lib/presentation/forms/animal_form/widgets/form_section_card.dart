@@ -19,9 +19,7 @@ class FormSectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -32,7 +30,9 @@ class FormSectionCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    color: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -53,7 +53,10 @@ class FormSectionCard extends StatelessWidget {
                 ),
                 if (isRequired)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.warning.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
@@ -82,11 +85,7 @@ class FormInfoBanner extends StatelessWidget {
   final String message;
   final Color color;
 
-  const FormInfoBanner({
-    super.key,
-    required this.message,
-    required this.color,
-  });
+  const FormInfoBanner({super.key, required this.message, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -94,18 +93,12 @@ class FormInfoBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            color.withValues(alpha: 0.06),
-            color.withValues(alpha: 0.1),
-          ],
+          colors: [color.withValues(alpha: 0.06), color.withValues(alpha: 0.1)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.15),
-          width: 1.5,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.15), width: 1.5),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,11 +109,7 @@ class FormInfoBanner extends StatelessWidget {
               color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.info_rounded,
-              color: color,
-              size: 16,
-            ),
+            child: Icon(Icons.info_rounded, color: color, size: 16),
           ),
           const SizedBox(width: 12),
           Expanded(

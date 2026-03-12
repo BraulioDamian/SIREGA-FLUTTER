@@ -1,4 +1,3 @@
-
 // lib/presentation/widgets/home/sync_status_card.dart
 import 'package:flutter/material.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
@@ -10,7 +9,6 @@ class SyncStatusCard extends StatelessWidget {
   final AnimationController syncAnimationController;
   final VoidCallback onSyncPressed;
   final String Function(DateTime) formatearTiempo;
-
 
   const SyncStatusCard({
     super.key,
@@ -28,10 +26,14 @@ class SyncStatusCard extends StatelessWidget {
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: sincronizando ? AppColors.info.withValues(alpha: 0.1) : AppColors.success.withValues(alpha: 0.1),
+        color: sincronizando
+            ? AppColors.info.withValues(alpha: 0.1)
+            : AppColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: sincronizando ? AppColors.info.withValues(alpha: 0.3) : AppColors.success.withValues(alpha: 0.3),
+          color: sincronizando
+              ? AppColors.info.withValues(alpha: 0.3)
+              : AppColors.success.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -46,8 +48,9 @@ class SyncStatusCard extends StatelessWidget {
               registrosPendientesSync > 0
                   ? Icons.sync_problem
                   : Icons.check_circle,
-              color:
-                  registrosPendientesSync > 0 ? AppColors.warning : AppColors.success,
+              color: registrosPendientesSync > 0
+                  ? AppColors.warning
+                  : AppColors.success,
             ),
           const SizedBox(width: 12),
           Expanded(
@@ -58,14 +61,17 @@ class SyncStatusCard extends StatelessWidget {
                   sincronizando
                       ? 'Sincronizando...'
                       : registrosPendientesSync > 0
-                          ? '$registrosPendientesSync registros pendientes'
-                          : 'Todo sincronizado',
+                      ? '$registrosPendientesSync registros pendientes'
+                      : 'Todo sincronizado',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 if (ultimaSync != null)
                   Text(
                     'Última sync: ${formatearTiempo(ultimaSync!)}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
               ],
             ),

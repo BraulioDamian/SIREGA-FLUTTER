@@ -1,4 +1,3 @@
-
 // lib/presentation/widgets/home/home_app_bar.dart
 import 'package:flutter/material.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
@@ -32,7 +31,7 @@ class HomeAppBar extends StatelessWidget {
         autofocus: true,
         style: const TextStyle(color: AppColors.surface),
         decoration: InputDecoration(
-          hintText: 'Buscar por nombre, arete o ID...',
+          hintText: 'Buscar por name, arete o ID...',
           hintStyle: TextStyle(color: AppColors.surface.withValues(alpha: 0.7)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
@@ -40,15 +39,22 @@ class HomeAppBar extends StatelessWidget {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: AppColors.surface.withValues(alpha: 0.5)),
+            borderSide: BorderSide(
+              color: AppColors.surface.withValues(alpha: 0.5),
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
             borderSide: const BorderSide(color: AppColors.surface),
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-          suffixIcon: Icon(Icons.search, color: AppColors.surface.withValues(alpha: 0.7)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 0,
+          ),
+          suffixIcon: Icon(
+            Icons.search,
+            color: AppColors.surface.withValues(alpha: 0.7),
+          ),
         ),
         onSubmitted: onSearchSubmitted,
       ),
@@ -68,8 +74,10 @@ class HomeAppBar extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         title: isSearching
             ? _buildSearchField()
-            : const Text('SIREGA',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            : const Text(
+                'SIREGA',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
         background: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -136,8 +144,10 @@ class HomeAppBar extends StatelessWidget {
         Stack(
           children: [
             IconButton(
-              icon: const Icon(Icons.notifications_outlined,
-                  color: AppColors.surface),
+              icon: const Icon(
+                Icons.notifications_outlined,
+                color: AppColors.surface,
+              ),
               onPressed: onShowNotifications,
             ),
             if (alertasSanitarias > 0)
@@ -207,7 +217,10 @@ class HomeAppBar extends StatelessWidget {
                 children: [
                   Icon(Icons.logout, size: 20, color: AppColors.error),
                   SizedBox(width: 12),
-                  Text('Cerrar Sesión', style: TextStyle(color: AppColors.error)),
+                  Text(
+                    'Cerrar Sesión',
+                    style: TextStyle(color: AppColors.error),
+                  ),
                 ],
               ),
             ),

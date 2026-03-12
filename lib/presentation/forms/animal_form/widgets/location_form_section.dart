@@ -12,10 +12,7 @@ class LocationFormSection extends StatelessWidget {
 
     return TextFormField(
       controller: controller.zonaActualController,
-      decoration: _inputDecoration(
-        'Zona / Potrero Actual',
-        Icons.location_on,
-      ),
+      decoration: _inputDecoration('Zona / Potrero Actual', Icons.location_on),
       textCapitalization: TextCapitalization.words,
     );
   }
@@ -24,9 +21,7 @@ class LocationFormSection extends StatelessWidget {
     return InputDecoration(
       labelText: label,
       prefixIcon: Icon(icon),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       filled: true,
       fillColor: Colors.white,
     );

@@ -20,7 +20,7 @@ class QuickStatsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 80,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -73,11 +73,7 @@ class QuickStatsBar extends StatelessWidget {
   }
 
   Widget _buildDivider() {
-    return Container(
-      width: 1,
-      height: 40,
-      color: AppColors.divider,
-    );
+    return Container(width: 1, height: 40, color: AppColors.divider);
   }
 }
 

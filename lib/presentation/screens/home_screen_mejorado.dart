@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:sirega_app/nucleo/servicios/firebase_sync_service.dart';
-import 'package:sirega_app/nucleo/servicios/isar_service.dart';
-import 'package:sirega_app/nucleo/servicios/auth_service.dart';
-import 'package:sirega_app/modulos/3_registro_evento/presentation/pantallas/seleccionar_tipo_evento_screen.dart';
-import 'package:sirega_app/presentation/screens/agregar_animal/agregar_animal_screen.dart';
+import 'package:sirega_app/core/services/firebase_sync_service.dart';
+import 'package:sirega_app/core/services/isar_service.dart';
+import 'package:sirega_app/core/services/auth_service.dart';
+import 'package:sirega_app/features/event_registration/presentation/screens/select_event_type_screen.dart';
+import 'package:sirega_app/presentation/screens/agregar_animal/add_animal_screen.dart';
 import 'package:sirega_app/debug/sync_debug_screen_simple.dart';
 import 'package:sirega_app/presentation/screens/profile_screen.dart';
 import 'package:sirega_app/presentation/animations/circular_reveal_clipper.dart';
 
-import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/core/models/enums.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
 import 'dart:async';
 
@@ -20,9 +20,9 @@ import 'dart:async';
 import 'package:sirega_app/presentation/widgets/home/quick_stats_bar.dart';
 import 'package:sirega_app/presentation/widgets/home/primary_action_card.dart';
 import 'package:sirega_app/presentation/widgets/home/sync_status_card.dart';
-import 'package:sirega_app/modulos/1_lista_ganado/presentation/pantallas/cattle_list_screen.dart';
-import 'package:sirega_app/modulos/4_escaneo_nfc/presentation/screens/escaneo_nfc_screen.dart';
-import 'package:sirega_app/modulos/5_reporte_aereo/presentation/pantallas/aerial_report_screen.dart';
+import 'package:sirega_app/features/cattle_list/presentation/screens/cattle_list_screen.dart';
+import 'package:sirega_app/features/nfc_scanning/presentation/screens/nfc_scan_screen.dart';
+import 'package:sirega_app/features/aerial_report/presentation/screens/aerial_report_screen.dart';
 
 class HomeScreenMejorado extends StatefulWidget {
   const HomeScreenMejorado({super.key});
@@ -102,9 +102,9 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
 
           // Calcular alertas sanitarias reales basadas en el estado de salud
           alertasSanitarias = animales.where((animal) {
-            return animal.estadoSalud == EstadoSalud.critico ||
-                animal.estadoSalud == EstadoSalud.enfermo ||
-                animal.estadoSalud == EstadoSalud.enTratamiento;
+            return animal.healthStatus == EstadoSalud.critico ||
+                animal.healthStatus == EstadoSalud.enfermo ||
+                animal.healthStatus == EstadoSalud.enTratamiento;
           }).length;
 
           registrosPendientesSync = pendientes;
@@ -172,7 +172,7 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
   void _scanNFC() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const EscaneoNfcScreen()),
+      MaterialPageRoute(builder: (context) => const NfcScanScreen()),
     );
   }
 
@@ -180,16 +180,14 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
     Navigator.push(
       context,
       //MaterialPageRoute(builder: (context) => const RegisterAnimalScreen()),
-      MaterialPageRoute(builder: (context) => const AgregarAnimalScreen()),
+      MaterialPageRoute(builder: (context) => const AddAnimalScreen()),
     ).then((_) => _cargarDatos());
   }
 
   void _registrarEvento() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const SeleccionarTipoEventoScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const SelectEventTypeScreen()),
     );
   }
 
