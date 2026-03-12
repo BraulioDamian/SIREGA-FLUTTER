@@ -121,7 +121,7 @@ class _HealthTabState extends State<HealthTab> {
     final isarService = RepositoryProvider.of<IsarService>(context);
 
     return FutureBuilder<List<EventoSanitario>>(
-      future: isarService.obtenerEventosPorAnimal(animal.id),
+      future: isarService.getEventsByAnimal(animal.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -170,7 +170,7 @@ class _HealthTabState extends State<HealthTab> {
     final isarService = RepositoryProvider.of<IsarService>(context);
 
     return FutureBuilder<List<EventoSanitario>>(
-      future: isarService.obtenerEventosPorAnimal(animal.id),
+      future: isarService.getEventsByAnimal(animal.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -319,7 +319,7 @@ class _HealthTabState extends State<HealthTab> {
     final isarService = RepositoryProvider.of<IsarService>(context);
 
     return FutureBuilder<List<EventoSanitario>>(
-      future: isarService.obtenerEventosPorAnimal(animal.id),
+      future: isarService.getEventsByAnimal(animal.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -413,7 +413,7 @@ class _HealthTabState extends State<HealthTab> {
     final isarService = RepositoryProvider.of<IsarService>(context);
 
     return FutureBuilder<List<EventoSanitario>>(
-      future: isarService.obtenerEventosPorAnimal(animal.id),
+      future: isarService.getEventsByAnimal(animal.id),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const SizedBox.shrink();

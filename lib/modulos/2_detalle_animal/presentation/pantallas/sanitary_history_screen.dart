@@ -59,7 +59,7 @@ class _SanitaryHistoryScreenState extends State<SanitaryHistoryScreen>
       initialIndex: initialIndex >= 0 ? initialIndex : 0,
     );
     _dataFuture = RepositoryProvider.of<IsarService>(context)
-        .obtenerEventosPorAnimal(widget.animalId);
+        .getEventsByAnimal(widget.animalId);
   }
 
   @override
@@ -167,7 +167,7 @@ class _SanitaryHistoryScreenState extends State<SanitaryHistoryScreen>
                   onRefresh: () {
                     setState(() {
                       _dataFuture = RepositoryProvider.of<IsarService>(context)
-                          .obtenerEventosPorAnimal(widget.animalId);
+                          .getEventsByAnimal(widget.animalId);
                     });
                   },
                 ),

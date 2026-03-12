@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/nucleo/modelos/form_dtos.dart';
 import 'package:sirega_app/nucleo/modelos/catalogo_vacunas.dart';
 import 'package:sirega_app/nucleo/modelos/siniga_model.dart';
 import 'package:sirega_app/core/extensions/enum_ui_extensions.dart';
@@ -142,25 +143,18 @@ class AnimalFormController extends ChangeNotifier {
   final Set<String> _vacunasOriginales = {};
   final Map<String, DateTime> _fechasVacunasOriginales = {};
 
-  // Datos de eventos médicos
-  final List<Map<String, dynamic>> _eventosMedicos = [];
-  int _eventosMedicosOriginalesCount = 0;
-  final Set<int> _idsOriginalesEventosMedicos = {};
+  // Typed production & medical records
+  final List<MedicalEventRecord> _medicalEvents = [];
+  final Set<int> _originalMedicalEventIds = {};
 
-  // Datos de partos/crías
-  final List<Map<String, dynamic>> _registrosPartos = [];
-  int _registrosPartosOriginalesCount = 0;
-  final Set<int> _idsOriginalesPartos = {};
+  final List<BirthRecord> _birthRecords = [];
+  final Set<int> _originalBirthIds = {};
 
-  // Datos de pesajes
-  final List<Map<String, dynamic>> _registrosPesajes = [];
-  int _registrosPesajesOriginalesCount = 0;
-  final Set<int> _idsOriginalesPesajes = {};
+  final List<WeightRecord> _weightRecords = [];
+  final Set<int> _originalWeightIds = {};
 
-  // Datos de producción de leche
-  final List<Map<String, dynamic>> _registrosProduccionLeche = [];
-  int _registrosProduccionLecheOriginalesCount = 0;
-  final Set<int> _idsOriginalesProduccionLeche = {};
+  final List<MilkRecord> _milkRecords = [];
+  final Set<int> _originalMilkIds = {};
   
   // Validación SINIGA
   SinigaId? _sinigaId;
@@ -177,7 +171,6 @@ class AnimalFormController extends ChangeNotifier {
   
   // Estado de carga
   bool _isLoading = false;
-  final bool _isSaving = false;
   bool _initialLoadComplete = false;
   
   // Getters
@@ -193,7 +186,6 @@ class AnimalFormController extends ChangeNotifier {
   List<RazaBovina> get razas => _razas;
   List<EstadoMexico> get estados => _estados;
   bool get isLoading => _isLoading;
-  bool get isSaving => _isSaving;
   bool get initialLoadComplete => _initialLoadComplete;
 
   // Getters adicionales para campos extendidos
@@ -208,26 +200,21 @@ class AnimalFormController extends ChangeNotifier {
   Map<String, DateTime> get fechasVacunas => _fechasVacunas;
   Set<String> get vacunasOriginales => _vacunasOriginales;
   Map<String, DateTime> get fechasVacunasOriginales => _fechasVacunasOriginales;
-  List<Map<String, dynamic>> get eventosMedicos => _eventosMedicos;
-  int get eventosMedicosOriginalesCount => _eventosMedicosOriginalesCount;
-  Set<int> get idsOriginalesEventosMedicos => _idsOriginalesEventosMedicos;
-  List<Map<String, dynamic>> get registrosPartos => _registrosPartos;
-  int get registrosPartosOriginalesCount => _registrosPartosOriginalesCount;
-  Set<int> get idsOriginalesPartos => _idsOriginalesPartos;
-  List<Map<String, dynamic>> get registrosPesajes => _registrosPesajes;
-  int get registrosPesajesOriginalesCount => _registrosPesajesOriginalesCount;
-  Set<int> get idsOriginalesPesajes => _idsOriginalesPesajes;
-  List<Map<String, dynamic>> get registrosProduccionLeche => _registrosProduccionLeche;
-  int get registrosProduccionLecheOriginalesCount => _registrosProduccionLecheOriginalesCount;
-  Set<int> get idsOriginalesProduccionLeche => _idsOriginalesProduccionLeche;
+  // Getters for typed record lists
+  List<MedicalEventRecord> get medicalEvents => _medicalEvents;
+  Set<int> get originalMedicalEventIds => _originalMedicalEventIds;
+  List<BirthRecord> get birthRecords => _birthRecords;
+  Set<int> get originalBirthIds => _originalBirthIds;
+  List<WeightRecord> get weightRecords => _weightRecords;
+  Set<int> get originalWeightIds => _originalWeightIds;
+  List<MilkRecord> get milkRecords => _milkRecords;
+  Set<int> get originalMilkIds => _originalMilkIds;
   
   // Validación general del formulario
   bool get isFormValid => 
       _sinigaIsValid && 
       _nfcId != null && 
       _nfcId!.isNotEmpty;
-  
-  bool get canSave => isFormValid && !_isSaving;
   
   AnimalFormController({
     this.isEditMode = false,
@@ -388,7 +375,7 @@ class AnimalFormController extends ChangeNotifier {
   Future<void> _loadLinkedData() async {
     final animal = animalOriginal!;
 
-    // Cargar eventos sanitarios (vacunas + eventos médicos)
+    // Load health events (vaccines + medical events)
     await animal.eventos.load();
     for (final evento in animal.eventos) {
       if (evento.tipo == TipoEvento.vacuna) {
@@ -397,77 +384,69 @@ class AnimalFormController extends ChangeNotifier {
           _vacunasAplicadas.add(nombre);
         }
         _fechasVacunas[nombre] = evento.fecha;
-        // Si no es una vacuna estándar, agregarla como personalizada
         if (!_esVacunaEstandar(nombre) && !_vacunasPersonalizadas.contains(nombre)) {
           _vacunasPersonalizadas.add(nombre);
         }
       } else {
-        // Convertir TipoEvento a string del formulario
-        final tipoStr = _tipoEventoToFormString(evento.tipo);
-        _eventosMedicos.add({
-          'isarId': evento.id,
-          'tipo': tipoStr,
-          'fecha': evento.fecha,
-          'producto': evento.nombreProducto ?? '',
-          'notas': evento.notas,
-        });
+        _medicalEvents.add(MedicalEventRecord(
+          isarId: evento.id,
+          eventType: evento.tipo,
+          date: evento.fecha,
+          product: evento.nombreProducto ?? '',
+          notes: evento.notas,
+        ));
       }
     }
 
-    // Snapshot de vacunas originales para detectar cambios al guardar
+    // Snapshot originals for change detection on save
     _vacunasOriginales.addAll(_vacunasAplicadas);
     _fechasVacunasOriginales.addAll(_fechasVacunas);
-    _eventosMedicosOriginalesCount = _eventosMedicos.length;
 
-    // Cargar registros de producción (pesajes, leche, partos)
+    // Load production records (weights, milk, births)
     await animal.producciones.load();
     for (final registro in animal.producciones) {
       switch (registro.tipo) {
-        case 'Pesaje':
-          _registrosPesajes.add({
-            'isarId': registro.id,
-            'fecha': registro.fecha,
-            'peso': registro.pesoKg ?? 0.0,
-            'notas': registro.notas,
-          });
+        case ProductionType.weight:
+          _weightRecords.add(WeightRecord(
+            isarId: registro.id,
+            date: registro.fecha,
+            weightKg: registro.pesoKg ?? 0.0,
+            notes: registro.notas,
+          ));
           break;
-        case 'Producción de Leche':
-          _registrosProduccionLeche.add({
-            'isarId': registro.id,
-            'fecha': registro.fecha,
-            'litros': registro.litrosPorDia ?? 0.0,
-            'notas': registro.notas,
-          });
+        case ProductionType.milk:
+          _milkRecords.add(MilkRecord(
+            isarId: registro.id,
+            date: registro.fecha,
+            litersPerDay: registro.litrosPorDia ?? 0.0,
+            notes: registro.notas,
+          ));
           break;
-        case 'Parto':
-          _registrosPartos.add({
-            'isarId': registro.id,
-            'idCria': registro.idCria,
-            'fecha': registro.fecha,
-            'sexoCria': _parseSexoFromNotas(registro.notas),
-            'pesoKg': registro.pesoKg,
-            'notas': _limpiarNotasSexo(registro.notas),
-          });
+        case ProductionType.birth:
+          _birthRecords.add(BirthRecord(
+            isarId: registro.id,
+            date: registro.fecha,
+            offspringId: registro.idCria,
+            offspringSex: registro.sexoCria,
+            weightKg: registro.pesoKg,
+            notes: registro.notas,
+          ));
           break;
       }
     }
 
-    // Snapshot de conteos e IDs originales para detectar eliminaciones al guardar
-    _registrosPartosOriginalesCount = _registrosPartos.length;
-    _registrosPesajesOriginalesCount = _registrosPesajes.length;
-    _registrosProduccionLecheOriginalesCount = _registrosProduccionLeche.length;
-
-    _idsOriginalesEventosMedicos.addAll(
-      _eventosMedicos.where((e) => e['isarId'] != null).map((e) => e['isarId'] as int),
+    // Snapshot original IDs for deletion tracking
+    _originalMedicalEventIds.addAll(
+      _medicalEvents.where((e) => e.isarId != null).map((e) => e.isarId!),
     );
-    _idsOriginalesPesajes.addAll(
-      _registrosPesajes.where((e) => e['isarId'] != null).map((e) => e['isarId'] as int),
+    _originalWeightIds.addAll(
+      _weightRecords.where((e) => e.isarId != null).map((e) => e.isarId!),
     );
-    _idsOriginalesProduccionLeche.addAll(
-      _registrosProduccionLeche.where((e) => e['isarId'] != null).map((e) => e['isarId'] as int),
+    _originalMilkIds.addAll(
+      _milkRecords.where((e) => e.isarId != null).map((e) => e.isarId!),
     );
-    _idsOriginalesPartos.addAll(
-      _registrosPartos.where((e) => e['isarId'] != null).map((e) => e['isarId'] as int),
+    _originalBirthIds.addAll(
+      _birthRecords.where((e) => e.isarId != null).map((e) => e.isarId!),
     );
   }
 
@@ -475,38 +454,6 @@ class AnimalFormController extends ChangeNotifier {
     return CatalogoVacunas.buscarPorNombre(nombre) != null;
   }
 
-  String _tipoEventoToFormString(TipoEvento tipo) {
-    switch (tipo) {
-      case TipoEvento.desparasitante:
-        return 'desparasitacion';
-      case TipoEvento.tratamiento:
-        return 'tratamiento';
-      case TipoEvento.revisionVeterinaria:
-        return 'diagnostico';
-      case TipoEvento.castracion:
-        return 'cirugia';
-      default:
-        return 'tratamiento';
-    }
-  }
-
-  /// Extrae el sexo de la cría de las notas (formato: "Sexo: Macho. ...")
-  Sexo? _parseSexoFromNotas(String? notas) {
-    if (notas == null) return null;
-    if (notas.contains('Sexo: Macho')) return Sexo.macho;
-    if (notas.contains('Sexo: Hembra')) return Sexo.hembra;
-    return null;
-  }
-
-  /// Remueve el prefijo "Sexo: Macho/Hembra. " de las notas
-  String? _limpiarNotasSexo(String? notas) {
-    if (notas == null) return null;
-    final cleaned = notas
-        .replaceFirst(RegExp(r'^Sexo: (Macho|Hembra)\. '), '')
-        .replaceFirst(RegExp(r'^Sexo: (Macho|Hembra)$'), '');
-    return cleaned.isEmpty ? null : cleaned;
-  }
-  
   void _setupListeners() {
     // Listener para estado SINIGA con validación
     estadoController.addListener(_onEstadoChanged);
@@ -669,11 +616,6 @@ class AnimalFormController extends ChangeNotifier {
   
   // Métodos públicos para actualizar el estado
   
-  void setNombre(String nombre) {
-    nombreController.text = nombre;
-    notifyListeners();
-  }
-  
   void setRaza(RazaBovina? raza) {
     _razaSeleccionada = raza;
     razaDisplayController.text = raza?.nombre ?? '';
@@ -799,54 +741,54 @@ class AnimalFormController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Métodos para manejo de eventos médicos
-  void agregarEventoMedico(Map<String, dynamic> evento) {
-    _eventosMedicos.add(evento);
+  // Methods for medical events
+  void addMedicalEvent(MedicalEventRecord event) {
+    _medicalEvents.add(event);
     notifyListeners();
   }
 
-  void eliminarEventoMedico(int index) {
-    if (index >= 0 && index < _eventosMedicos.length) {
-      _eventosMedicos.removeAt(index);
+  void removeMedicalEvent(int index) {
+    if (index >= 0 && index < _medicalEvents.length) {
+      _medicalEvents.removeAt(index);
       notifyListeners();
     }
   }
 
-  // Métodos para manejo de partos/crías
-  void agregarRegistroParto(Map<String, dynamic> parto) {
-    _registrosPartos.add(parto);
+  // Methods for birth records
+  void addBirthRecord(BirthRecord record) {
+    _birthRecords.add(record);
     notifyListeners();
   }
 
-  void eliminarRegistroParto(int index) {
-    if (index >= 0 && index < _registrosPartos.length) {
-      _registrosPartos.removeAt(index);
+  void removeBirthRecord(int index) {
+    if (index >= 0 && index < _birthRecords.length) {
+      _birthRecords.removeAt(index);
       notifyListeners();
     }
   }
 
-  // Métodos para pesajes
-  void agregarRegistroPesaje(Map<String, dynamic> pesaje) {
-    _registrosPesajes.add(pesaje);
+  // Methods for weight records
+  void addWeightRecord(WeightRecord record) {
+    _weightRecords.add(record);
     notifyListeners();
   }
 
-  void eliminarRegistroPesaje(int index) {
-    if (index >= 0 && index < _registrosPesajes.length) {
-      _registrosPesajes.removeAt(index);
+  void removeWeightRecord(int index) {
+    if (index >= 0 && index < _weightRecords.length) {
+      _weightRecords.removeAt(index);
       notifyListeners();
     }
   }
 
-  // Métodos para producción de leche
-  void agregarRegistroProduccionLeche(Map<String, dynamic> produccion) {
-    _registrosProduccionLeche.add(produccion);
+  // Methods for milk records
+  void addMilkRecord(MilkRecord record) {
+    _milkRecords.add(record);
     notifyListeners();
   }
 
-  void eliminarRegistroProduccionLeche(int index) {
-    if (index >= 0 && index < _registrosProduccionLeche.length) {
-      _registrosProduccionLeche.removeAt(index);
+  void removeMilkRecord(int index) {
+    if (index >= 0 && index < _milkRecords.length) {
+      _milkRecords.removeAt(index);
       notifyListeners();
     }
   }
@@ -902,38 +844,6 @@ class AnimalFormController extends ChangeNotifier {
     
     // Si no tiene guión o formato esperado, devolver la cadena completa
     return fullId;
-  }
-  
-  // Método para resetear el formulario
-  void reset() {
-    nombreController.clear();
-    estadoController.clear();
-    numeroController.clear();
-    fechaController.clear();
-    nfcController.clear();
-
-    razaDisplayController.clear();
-    sexoDisplayController.clear();
-    estadoDisplayController.clear();
-
-    _razaSeleccionada = null;
-    _estadoSeleccionado = null;
-    _sexo = Sexo.hembra;
-    _fechaNacimiento = null;
-    _imageFile = null;
-    _sinigaId = null;
-    _sinigaIsValid = false;
-    _sinigaValidationMessage = null;
-    _nfcId = null;
-
-    // Limpiar vacunas, eventos y partos
-    _vacunasAplicadas.clear();
-    _vacunasPersonalizadas.clear();
-    _fechasVacunas.clear();
-    _eventosMedicos.clear();
-    _registrosPartos.clear();
-
-    notifyListeners();
   }
   
   @override

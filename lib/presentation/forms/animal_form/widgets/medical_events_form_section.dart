@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/nucleo/modelos/form_dtos.dart';
 import '../controllers/animal_form_controller.dart';
 
 /// Sección del formulario para registrar eventos médicos
@@ -19,10 +21,10 @@ class MedicalEventsFormSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Lista de eventos médicos
-                    if (controller.eventosMedicos.isEmpty)
+                    if (controller.medicalEvents.isEmpty)
                       _buildEmptyState(isMobile)
                     else
-                      ...controller.eventosMedicos.asMap().entries.map((entry) {
+                      ...controller.medicalEvents.asMap().entries.map((entry) {
                         final index = entry.key;
                         final evento = entry.value;
                         return _buildEventoCard(
@@ -40,7 +42,7 @@ class MedicalEventsFormSection extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: () => _mostrarDialogoAgregarEvento(context, controller),
+                        onPressed: () => _showAddEventDialog(context, controller),
                         icon: const Icon(Icons.add),
                         label: const Text('Agregar Evento Médico'),
                         style: ElevatedButton.styleFrom(
@@ -91,16 +93,11 @@ class MedicalEventsFormSection extends StatelessWidget {
   Widget _buildEventoCard(
     BuildContext context,
     AnimalFormController controller,
-    Map<String, dynamic> evento,
+    MedicalEventRecord evento,
     int index,
     bool isMobile,
   ) {
-    final tipo = evento['tipo'] as String;
-    final fecha = evento['fecha'] as DateTime;
-    final producto = evento['producto'] as String?;
-    final notas = evento['notas'] as String?;
-
-    final (color, icon) = _getTipoInfo(tipo);
+    final (color, icon) = _getTipoInfo(evento.eventType);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -138,7 +135,7 @@ class MedicalEventsFormSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _getTipoNombre(tipo),
+                    _getTipoNombre(evento.eventType),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: isMobile ? 14 : 15,
@@ -146,21 +143,20 @@ class MedicalEventsFormSection extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  if (producto != null)
-                    Text(
-                      producto,
-                      style: TextStyle(
-                        fontSize: isMobile ? 12 : 13,
-                        color: Colors.grey.shade700,
-                      ),
+                  Text(
+                    evento.product,
+                    style: TextStyle(
+                      fontSize: isMobile ? 12 : 13,
+                      color: Colors.grey.shade700,
                     ),
+                  ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Icon(Icons.calendar_today, size: 12, color: Colors.grey.shade500),
                       const SizedBox(width: 4),
                       Text(
-                        _formatDate(fecha),
+                        _formatDate(evento.date),
                         style: TextStyle(
                           fontSize: isMobile ? 11 : 12,
                           color: Colors.grey.shade600,
@@ -168,10 +164,10 @@ class MedicalEventsFormSection extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (notas != null && notas.isNotEmpty) ...[
+                  if (evento.notes != null && evento.notes!.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Text(
-                      notas,
+                      evento.notes!,
                       style: TextStyle(
                         fontSize: isMobile ? 11 : 12,
                         color: Colors.grey.shade600,
@@ -188,7 +184,7 @@ class MedicalEventsFormSection extends StatelessWidget {
             // Botón eliminar
             IconButton(
               icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
-              onPressed: () => controller.eliminarEventoMedico(index),
+              onPressed: () => controller.removeMedicalEvent(index),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -198,11 +194,11 @@ class MedicalEventsFormSection extends StatelessWidget {
     );
   }
 
-  void _mostrarDialogoAgregarEvento(
+  void _showAddEventDialog(
     BuildContext context,
     AnimalFormController controller,
   ) {
-    String tipoSeleccionado = 'desparasitacion';
+    TipoEvento tipoSeleccionado = TipoEvento.desparasitante;
     final productoController = TextEditingController();
     final notasController = TextEditingController();
     DateTime fechaSeleccionada = DateTime.now();
@@ -228,18 +224,19 @@ class MedicalEventsFormSection extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Tipo de evento
-                DropdownButtonFormField<String>(
+                DropdownButtonFormField<TipoEvento>(
                   initialValue: tipoSeleccionado,
                   decoration: const InputDecoration(
                     labelText: 'Tipo de Evento',
                     border: OutlineInputBorder(),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 'desparasitacion', child: Text('Desparasitación')),
-                    DropdownMenuItem(value: 'tratamiento', child: Text('Tratamiento')),
-                    DropdownMenuItem(value: 'diagnostico', child: Text('Diagnóstico')),
-                    DropdownMenuItem(value: 'cirugia', child: Text('Cirugía')),
-                    DropdownMenuItem(value: 'otro', child: Text('Otro')),
+                    DropdownMenuItem(value: TipoEvento.desparasitante, child: Text('Desparasitación')),
+                    DropdownMenuItem(value: TipoEvento.tratamiento, child: Text('Tratamiento')),
+                    DropdownMenuItem(value: TipoEvento.revisionVeterinaria, child: Text('Diagnóstico')),
+                    DropdownMenuItem(value: TipoEvento.castracion, child: Text('Castración')),
+                    DropdownMenuItem(value: TipoEvento.descorne, child: Text('Descorne')),
+                    DropdownMenuItem(value: TipoEvento.otro, child: Text('Otro')),
                   ],
                   onChanged: (value) {
                     if (value != null) {
@@ -314,12 +311,14 @@ class MedicalEventsFormSection extends StatelessWidget {
                   return;
                 }
 
-                controller.agregarEventoMedico({
-                  'tipo': tipoSeleccionado,
-                  'fecha': fechaSeleccionada,
-                  'producto': producto,
-                  'notas': notasController.text.trim(),
-                });
+                controller.addMedicalEvent(MedicalEventRecord(
+                  eventType: tipoSeleccionado,
+                  date: fechaSeleccionada,
+                  product: producto,
+                  notes: notasController.text.trim().isEmpty
+                      ? null
+                      : notasController.text.trim(),
+                ));
 
                 Navigator.pop(context);
               },
@@ -331,31 +330,34 @@ class MedicalEventsFormSection extends StatelessWidget {
     );
   }
 
-  (Color, IconData) _getTipoInfo(String tipo) {
+  (Color, IconData) _getTipoInfo(TipoEvento tipo) {
     switch (tipo) {
-      case 'desparasitacion':
+      case TipoEvento.desparasitante:
         return (Colors.green, Icons.bug_report);
-      case 'tratamiento':
+      case TipoEvento.tratamiento:
         return (Colors.orange, Icons.medication);
-      case 'diagnostico':
+      case TipoEvento.revisionVeterinaria:
         return (Colors.blue, Icons.health_and_safety);
-      case 'cirugia':
+      case TipoEvento.castracion:
+      case TipoEvento.descorne:
         return (Colors.red, Icons.healing);
       default:
         return (Colors.grey, Icons.medical_services);
     }
   }
 
-  String _getTipoNombre(String tipo) {
+  String _getTipoNombre(TipoEvento tipo) {
     switch (tipo) {
-      case 'desparasitacion':
+      case TipoEvento.desparasitante:
         return 'Desparasitación';
-      case 'tratamiento':
+      case TipoEvento.tratamiento:
         return 'Tratamiento';
-      case 'diagnostico':
+      case TipoEvento.revisionVeterinaria:
         return 'Diagnóstico';
-      case 'cirugia':
-        return 'Cirugía';
+      case TipoEvento.castracion:
+        return 'Castración';
+      case TipoEvento.descorne:
+        return 'Descorne';
       default:
         return 'Evento Médico';
     }

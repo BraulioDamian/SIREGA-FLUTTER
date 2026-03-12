@@ -36,9 +36,9 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
   ) async {
     emit(CattleDetailLoading());
     try {
-      final animal = await isarService.obtenerAnimalPorId(event.animalId);
+      final animal = await isarService.getAnimalById(event.animalId);
       if (animal != null) {
-        final eventos = await isarService.obtenerEventosPorAnimal(
+        final eventos = await isarService.getEventsByAnimal(
           event.animalId,
         );
         emit(CattleDetailLoaded(animal: animal, eventos: eventos));
@@ -58,7 +58,7 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
       final animalToUpdate = event.animal;
       animalToUpdate.estado =
           EstadoAnimal.muerto; // O el estado que corresponda
-      await isarService.guardarAnimal(animalToUpdate);
+      await isarService.saveAnimal(animalToUpdate);
       emit(AnimalDeactivationSuccess());
     } catch (e) {
       emit(ShowInfoSnackbar('Error al eliminar: ${e.toString()}'));
@@ -102,10 +102,10 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
     try {
       final animalToUpdate = event.animal;
       animalToUpdate.fotoPerfilUrl = event.photoFile.path;
-      await isarService.guardarAnimal(animalToUpdate);
+      await isarService.saveAnimal(animalToUpdate);
 
       // Recargar la UI con los nuevos datos
-      final eventos = await isarService.obtenerEventosPorAnimal(
+      final eventos = await isarService.getEventsByAnimal(
         animalToUpdate.id,
       );
       emit(CattleDetailLoaded(animal: animalToUpdate, eventos: eventos));
@@ -141,9 +141,9 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
     Emitter<CattleDetailState> emit,
   ) async {
     try {
-      await isarService.guardarAnimal(event.animal);
+      await isarService.saveAnimal(event.animal);
       // Recargar los datos del animal
-      final eventos = await isarService.obtenerEventosPorAnimal(
+      final eventos = await isarService.getEventsByAnimal(
         event.animal.id,
       );
       emit(CattleDetailLoaded(animal: event.animal, eventos: eventos));
@@ -159,7 +159,7 @@ class CattleDetailBloc extends Bloc<CattleDetailEvent, CattleDetailState> {
   ) async {
     try {
       // Eliminar físicamente de la base de datos
-      await isarService.eliminarAnimal(event.animalId);
+      await isarService.deleteAnimal(event.animalId);
       emit(AnimalDeactivationSuccess());
       emit(ShowInfoSnackbar('Animal eliminado permanentemente'));
     } catch (e) {

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
+import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/core/theme/app_colors.dart';
 
@@ -54,7 +55,7 @@ class _ProductionChartState extends State<ProductionChart>
 
   void _loadData() {
     final isarService = RepositoryProvider.of<IsarService>(context);
-    _dataFuture = isarService.obtenerProduccionPorAnimal(widget.animal.id);
+    _dataFuture = isarService.getProductionByAnimal(widget.animal.id);
   }
 
   @override
@@ -106,9 +107,9 @@ class _ProductionChartState extends State<ProductionChart>
         // Filtrar registros según el tipo de gráfico
         var registrosFiltrados = registros.where((r) {
           if (widget.type == ChartType.milk) {
-            return r.tipo == 'Producción de Leche' && r.litrosPorDia != null;
+            return r.tipo == ProductionType.milk && r.litrosPorDia != null;
           } else {
-            return r.tipo == 'Pesaje' && r.pesoKg != null;
+            return r.tipo == ProductionType.weight && r.pesoKg != null;
           }
         }).toList();
 
@@ -181,9 +182,9 @@ class _ProductionChartState extends State<ProductionChart>
         // Total de registros sin filtro para mostrar en chips
         final totalRegistros = registros.where((r) {
           if (widget.type == ChartType.milk) {
-            return r.tipo == 'Producción de Leche' && r.litrosPorDia != null && (r.litrosPorDia ?? 0) > 0;
+            return r.tipo == ProductionType.milk && r.litrosPorDia != null && (r.litrosPorDia ?? 0) > 0;
           } else {
-            return r.tipo == 'Pesaje' && r.pesoKg != null && (r.pesoKg ?? 0) > 0;
+            return r.tipo == ProductionType.weight && r.pesoKg != null && (r.pesoKg ?? 0) > 0;
           }
         }).length;
 

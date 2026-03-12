@@ -7,12 +7,18 @@ part 'produccion_model.g.dart';
 @collection
 class RegistroProduccion {
   Id id = Isar.autoIncrement;
-  // Parto | Pesaje | Producción de Leche
-  late String tipo;
+
+  @Enumerated(EnumType.name)
+  late ProductionType tipo;
+
   late DateTime fecha;
-  String? idCria; // para Parto
-  double? pesoKg; // para Pesaje
-  double? litrosPorDia; // para Producción de Leche
+  String? idCria; // para birth
+  double? pesoKg; // para weight
+  double? litrosPorDia; // para milk
+
+  @Enumerated(EnumType.name)
+  Sexo? sexoCria; // para birth (antes se codificaba en notas)
+
   String? notas;
   final animal = IsarLink<Animal>();
 

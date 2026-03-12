@@ -126,7 +126,7 @@ class ReproductionTab extends StatelessWidget {
     } else {
       final isarService = RepositoryProvider.of<IsarService>(context);
       return FutureBuilder<List<RegistroProduccion>>(
-        future: isarService.obtenerProduccionPorAnimal(animal.id),
+        future: isarService.getProductionByAnimal(animal.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
@@ -135,7 +135,7 @@ class ReproductionTab extends StatelessWidget {
             );
           }
           final registros = snapshot.data ?? [];
-          final partos = registros.where((r) => r.tipo == 'Parto').toList();
+          final partos = registros.where((r) => r.tipo == ProductionType.birth).toList();
           partos.sort((a, b) => b.fecha.compareTo(a.fecha));
 
           final ultimoParto = partos.isNotEmpty

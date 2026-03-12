@@ -83,7 +83,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   ..nombreProducto = nombreFinalProducto
                   ..dosis = double.tryParse(_dosisController.text)
                   ..notas = _notasController.text;
-                isarService.guardarEvento(nuevoEvento, widget.animal);
+                isarService.saveEvent(nuevoEvento, widget.animal);
                 Navigator.pop(context);
               },
             ),

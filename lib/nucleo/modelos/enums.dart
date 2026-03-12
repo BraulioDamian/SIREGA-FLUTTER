@@ -67,6 +67,12 @@ enum Prioridad {
   urgente 
 }
 
+enum ProductionType {
+  weight,  // Pesaje
+  milk,    // Produccion de Leche
+  birth,   // Parto
+}
+
 enum TipoOperacion {
   crear,
   actualizar,

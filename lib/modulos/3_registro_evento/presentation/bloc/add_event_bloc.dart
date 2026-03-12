@@ -49,7 +49,7 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
         ..prioridad = event.prioridad
         ..notas = event.notas;
       
-      await isarService.guardarEvento(nuevoEvento, event.animal);
+      await isarService.saveEvent(nuevoEvento, event.animal);
       emit(AddEventSuccess());
     } catch (e) {
       emit(AddEventError(e.toString()));

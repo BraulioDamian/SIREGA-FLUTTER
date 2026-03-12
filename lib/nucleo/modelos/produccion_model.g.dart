@@ -54,13 +54,20 @@ const RegistroProduccionSchema = CollectionSchema(
       name: r'serverId',
       type: IsarType.string,
     ),
-    r'tipo': PropertySchema(
+    r'sexoCria': PropertySchema(
       id: 7,
+      name: r'sexoCria',
+      type: IsarType.string,
+      enumMap: _RegistroProduccionsexoCriaEnumValueMap,
+    ),
+    r'tipo': PropertySchema(
+      id: 8,
       name: r'tipo',
       type: IsarType.string,
+      enumMap: _RegistroProducciontipoEnumValueMap,
     ),
     r'ultimaActualizacion': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'ultimaActualizacion',
       type: IsarType.dateTime,
     )
@@ -125,7 +132,13 @@ int _registroProduccionEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
-  bytesCount += 3 + object.tipo.length * 3;
+  {
+    final value = object.sexoCria;
+    if (value != null) {
+      bytesCount += 3 + value.name.length * 3;
+    }
+  }
+  bytesCount += 3 + object.tipo.name.length * 3;
   return bytesCount;
 }
 
@@ -142,8 +155,9 @@ void _registroProduccionSerialize(
   writer.writeString(offsets[4], object.notas);
   writer.writeDouble(offsets[5], object.pesoKg);
   writer.writeString(offsets[6], object.serverId);
-  writer.writeString(offsets[7], object.tipo);
-  writer.writeDateTime(offsets[8], object.ultimaActualizacion);
+  writer.writeString(offsets[7], object.sexoCria?.name);
+  writer.writeString(offsets[8], object.tipo.name);
+  writer.writeDateTime(offsets[9], object.ultimaActualizacion);
 }
 
 RegistroProduccion _registroProduccionDeserialize(
@@ -163,8 +177,12 @@ RegistroProduccion _registroProduccionDeserialize(
   object.notas = reader.readStringOrNull(offsets[4]);
   object.pesoKg = reader.readDoubleOrNull(offsets[5]);
   object.serverId = reader.readStringOrNull(offsets[6]);
-  object.tipo = reader.readString(offsets[7]);
-  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[8]);
+  object.sexoCria = _RegistroProduccionsexoCriaValueEnumMap[
+      reader.readStringOrNull(offsets[7])];
+  object.tipo = _RegistroProducciontipoValueEnumMap[
+          reader.readStringOrNull(offsets[8])] ??
+      ProductionType.weight;
+  object.ultimaActualizacion = reader.readDateTimeOrNull(offsets[9]);
   return object;
 }
 
@@ -192,8 +210,13 @@ P _registroProduccionDeserializeProp<P>(
     case 6:
       return (reader.readStringOrNull(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
+      return (_RegistroProduccionsexoCriaValueEnumMap[
+          reader.readStringOrNull(offset)]) as P;
     case 8:
+      return (_RegistroProducciontipoValueEnumMap[
+              reader.readStringOrNull(offset)] ??
+          ProductionType.weight) as P;
+    case 9:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -215,6 +238,26 @@ const _RegistroProduccionestadoSyncValueEnumMap = {
   r'error': EstadoSync.error,
   r'conflicto': EstadoSync.conflicto,
   r'cancelado': EstadoSync.cancelado,
+};
+const _RegistroProduccionsexoCriaEnumValueMap = {
+  r'macho': r'macho',
+  r'hembra': r'hembra',
+  r'castrado': r'castrado',
+};
+const _RegistroProduccionsexoCriaValueEnumMap = {
+  r'macho': Sexo.macho,
+  r'hembra': Sexo.hembra,
+  r'castrado': Sexo.castrado,
+};
+const _RegistroProducciontipoEnumValueMap = {
+  r'weight': r'weight',
+  r'milk': r'milk',
+  r'birth': r'birth',
+};
+const _RegistroProducciontipoValueEnumMap = {
+  r'weight': ProductionType.weight,
+  r'milk': ProductionType.milk,
+  r'birth': ProductionType.birth,
 };
 
 Id _registroProduccionGetId(RegistroProduccion object) {
@@ -1260,8 +1303,162 @@ extension RegistroProduccionQueryFilter
   }
 
   QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
-      tipoEqualTo(
+      sexoCriaIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'sexoCria',
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'sexoCria',
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaEqualTo(
+    Sexo? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sexoCria',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaGreaterThan(
+    Sexo? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'sexoCria',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaLessThan(
+    Sexo? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'sexoCria',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaBetween(
+    Sexo? lower,
+    Sexo? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'sexoCria',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaStartsWith(
     String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'sexoCria',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'sexoCria',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'sexoCria',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'sexoCria',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sexoCria',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      sexoCriaIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'sexoCria',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
+      tipoEqualTo(
+    ProductionType value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1275,7 +1472,7 @@ extension RegistroProduccionQueryFilter
 
   QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
       tipoGreaterThan(
-    String value, {
+    ProductionType value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -1291,7 +1488,7 @@ extension RegistroProduccionQueryFilter
 
   QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
       tipoLessThan(
-    String value, {
+    ProductionType value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -1307,8 +1504,8 @@ extension RegistroProduccionQueryFilter
 
   QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterFilterCondition>
       tipoBetween(
-    String lower,
-    String upper, {
+    ProductionType lower,
+    ProductionType upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -1591,6 +1788,20 @@ extension RegistroProduccionQuerySortBy
   }
 
   QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
+      sortBySexoCria() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sexoCria', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
+      sortBySexoCriaDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sexoCria', Sort.desc);
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
       sortByTipo() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'tipo', Sort.asc);
@@ -1734,6 +1945,20 @@ extension RegistroProduccionQuerySortThenBy
   }
 
   QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
+      thenBySexoCria() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sexoCria', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
+      thenBySexoCriaDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sexoCria', Sort.desc);
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QAfterSortBy>
       thenByTipo() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'tipo', Sort.asc);
@@ -1814,6 +2039,13 @@ extension RegistroProduccionQueryWhereDistinct
   }
 
   QueryBuilder<RegistroProduccion, RegistroProduccion, QDistinct>
+      distinctBySexoCria({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'sexoCria', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, RegistroProduccion, QDistinct>
       distinctByTipo({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'tipo', caseSensitive: caseSensitive);
@@ -1881,7 +2113,14 @@ extension RegistroProduccionQueryProperty
     });
   }
 
-  QueryBuilder<RegistroProduccion, String, QQueryOperations> tipoProperty() {
+  QueryBuilder<RegistroProduccion, Sexo?, QQueryOperations> sexoCriaProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'sexoCria');
+    });
+  }
+
+  QueryBuilder<RegistroProduccion, ProductionType, QQueryOperations>
+      tipoProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'tipo');
     });

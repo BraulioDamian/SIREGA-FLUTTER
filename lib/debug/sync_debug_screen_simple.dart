@@ -49,7 +49,7 @@ class _SyncDebugScreenSimpleState extends State<SyncDebugScreenSimple> {
 
     try {
       final isarService = IsarService();
-      final animals = await isarService.obtenerTodosLosAnimales();
+      final animals = await isarService.getAllAnimals();
 
       int withSiniga = 0;
       int withoutSiniga = 0;

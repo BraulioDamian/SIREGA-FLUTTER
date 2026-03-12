@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:sirega_app/nucleo/modelos/form_dtos.dart';
 import '../controllers/animal_form_controller.dart';
 
 /// Sección del formulario para datos de producción y peso
@@ -45,7 +46,7 @@ class ProductionFormSection extends StatelessWidget {
                         SizedBox(height: isMobile ? 12 : 16),
 
                         // Lista de pesajes registrados
-                        if (controller.registrosPesajes.isEmpty)
+                        if (controller.weightRecords.isEmpty)
                           _buildEmptyState(isMobile, 'Sin pesajes registrados', Icons.monitor_weight)
                         else
                           ConstrainedBox(
@@ -53,9 +54,9 @@ class ProductionFormSection extends StatelessWidget {
                             child: ListView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: controller.registrosPesajes.length,
+                              itemCount: controller.weightRecords.length,
                               itemBuilder: (context, index) {
-                                final pesaje = controller.registrosPesajes[index];
+                                final pesaje = controller.weightRecords[index];
                                 return _buildPesajeCard(context, controller, pesaje, index, isMobile);
                               },
                             ),
@@ -96,7 +97,7 @@ class ProductionFormSection extends StatelessWidget {
                         SizedBox(height: isMobile ? 12 : 16),
 
                         // Lista de registros de producción de leche
-                        if (controller.registrosProduccionLeche.isEmpty)
+                        if (controller.milkRecords.isEmpty)
                           _buildEmptyState(isMobile, 'Sin producción de leche registrada', Icons.opacity)
                         else
                           ConstrainedBox(
@@ -104,9 +105,9 @@ class ProductionFormSection extends StatelessWidget {
                             child: ListView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: controller.registrosProduccionLeche.length,
+                              itemCount: controller.milkRecords.length,
                               itemBuilder: (context, index) {
-                                final produccion = controller.registrosProduccionLeche[index];
+                                final produccion = controller.milkRecords[index];
                                 return _buildProduccionLecheCard(context, controller, produccion, index, isMobile);
                               },
                             ),
@@ -238,13 +239,13 @@ class ProductionFormSection extends StatelessWidget {
   Widget _buildPesajeCard(
     BuildContext context,
     AnimalFormController controller,
-    Map<String, dynamic> pesaje,
+    WeightRecord pesaje,
     int index,
     bool isMobile,
   ) {
-    final fecha = pesaje['fecha'] as DateTime;
-    final peso = pesaje['peso'] as double;
-    final notas = pesaje['notas'] as String?;
+    final fecha = pesaje.date;
+    final peso = pesaje.weightKg;
+    final notas = pesaje.notes;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -318,7 +319,7 @@ class ProductionFormSection extends StatelessWidget {
             ),
             IconButton(
               icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
-              onPressed: () => controller.eliminarRegistroPesaje(index),
+              onPressed: () => controller.removeWeightRecord(index),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -331,13 +332,13 @@ class ProductionFormSection extends StatelessWidget {
   Widget _buildProduccionLecheCard(
     BuildContext context,
     AnimalFormController controller,
-    Map<String, dynamic> produccion,
+    MilkRecord produccion,
     int index,
     bool isMobile,
   ) {
-    final fecha = produccion['fecha'] as DateTime;
-    final litros = produccion['litros'] as double;
-    final notas = produccion['notas'] as String?;
+    final fecha = produccion.date;
+    final litros = produccion.litersPerDay;
+    final notas = produccion.notes;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -411,7 +412,7 @@ class ProductionFormSection extends StatelessWidget {
             ),
             IconButton(
               icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
-              onPressed: () => controller.eliminarRegistroProduccionLeche(index),
+              onPressed: () => controller.removeMilkRecord(index),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -509,13 +510,13 @@ class ProductionFormSection extends StatelessWidget {
               onPressed: () {
                 final peso = double.tryParse(pesoController.text.trim());
                 if (peso != null && peso > 0) {
-                  controller.agregarRegistroPesaje({
-                    'fecha': fechaSeleccionada,
-                    'peso': peso,
-                    'notas': notasController.text.trim().isEmpty
+                  controller.addWeightRecord(WeightRecord(
+                    date: fechaSeleccionada,
+                    weightKg: peso,
+                    notes: notasController.text.trim().isEmpty
                         ? null
                         : notasController.text.trim(),
-                  });
+                  ));
                   Navigator.pop(context);
                 }
               },
@@ -616,13 +617,13 @@ class ProductionFormSection extends StatelessWidget {
               onPressed: () {
                 final litros = double.tryParse(litrosController.text.trim());
                 if (litros != null && litros > 0) {
-                  controller.agregarRegistroProduccionLeche({
-                    'fecha': fechaSeleccionada,
-                    'litros': litros,
-                    'notas': notasController.text.trim().isEmpty
+                  controller.addMilkRecord(MilkRecord(
+                    date: fechaSeleccionada,
+                    litersPerDay: litros,
+                    notes: notasController.text.trim().isEmpty
                         ? null
                         : notasController.text.trim(),
-                  });
+                  ));
                   Navigator.pop(context);
                 }
               },

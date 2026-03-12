@@ -7,6 +7,6 @@ class AnimalDatabaseService {
   AnimalDatabaseService(this._isarService);
 
   Future<Animal?> findAnimalByNfcId(String nfcId) {
-    return _isarService.obtenerAnimalPorNfc(nfcId);
+    return _isarService.getAnimalByNfc(nfcId);
   }
 }

@@ -91,7 +91,7 @@ class _HomeScreenMejoradoState extends State<HomeScreenMejorado>
   Future<void> _cargarDatos() async {
     if (isarService == null || _syncService == null) return;
     try {
-      final animales = await isarService!.obtenerTodosLosAnimales();
+      final animales = await isarService!.getAllAnimals();
       final pendientes = await _syncService!.getPendingCount();
       if (mounted) {
         setState(() {

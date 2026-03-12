@@ -500,14 +500,14 @@ class _EditarAnimalScreenState extends State<EditarAnimalScreen>
       final animalActualizado = _formController.buildAnimal();
 
       // PASO 1: Guardar el animal actualizado primero
-      await isarService.guardarAnimal(animalActualizado);
+      await isarService.saveAnimal(animalActualizado);
 
       // PASO 2: Guardar registros relacionados y actualizar campos calculados
       final saveHelper = AnimalSaveHelper(
         isarService: isarService,
         formController: _formController,
       );
-      await saveHelper.guardarRegistrosRelacionados(animalActualizado);
+      await saveHelper.saveRelatedRecords(animalActualizado);
 
       // Resetear flag de cambios antes de mostrar el diálogo
       if (mounted) {

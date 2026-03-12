@@ -390,7 +390,7 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
       final isarService = RepositoryProvider.of<IsarService>(context);
 
       // Verificar si ya existe un animal con ese NFC
-      final existente = await isarService.obtenerAnimalPorNfc(_formController.nfcId!);
+      final existente = await isarService.getAnimalByNfc(_formController.nfcId!);
       if (existente != null) {
         _mostrarMensaje('Ya existe un animal con ese chip NFC', esError: true);
         return;
@@ -400,14 +400,14 @@ class _AgregarAnimalScreenState extends State<AgregarAnimalScreen>
       final nuevoAnimal = _formController.buildAnimal();
 
       // Guardar en la base de datos
-      await isarService.guardarAnimal(nuevoAnimal);
+      await isarService.saveAnimal(nuevoAnimal);
 
       // Guardar registros relacionados y actualizar campos calculados
       final saveHelper = AnimalSaveHelper(
         isarService: isarService,
         formController: _formController,
       );
-      await saveHelper.guardarRegistrosRelacionados(nuevoAnimal);
+      await saveHelper.saveRelatedRecords(nuevoAnimal);
 
       if (mounted) {
         _mostrarMensaje('Animal registrado exitosamente', esError: false);

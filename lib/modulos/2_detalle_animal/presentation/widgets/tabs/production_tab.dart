@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sirega_app/nucleo/modelos/animal_model.dart';
 import 'package:sirega_app/nucleo/modelos/produccion_model.dart';
+import 'package:sirega_app/nucleo/modelos/enums.dart';
 import 'package:sirega_app/nucleo/servicios/isar_service.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animated_info_card.dart';
 import 'package:sirega_app/modulos/2_detalle_animal/presentation/widgets/animal_detail_helpers.dart';
@@ -28,12 +29,12 @@ class ProductionTab extends StatelessWidget {
     return [
       // Gráfico + estadísticas reales
       FutureBuilder<List<RegistroProduccion>>(
-        future: isarService.obtenerProduccionPorAnimal(animal.id),
+        future: isarService.getProductionByAnimal(animal.id),
         builder: (context, snapshot) {
           final registros = snapshot.data ?? [];
-          final pesajes = registros.where((r) => r.tipo == 'Pesaje' && r.pesoKg != null).toList()
+          final pesajes = registros.where((r) => r.tipo == ProductionType.weight && r.pesoKg != null).toList()
             ..sort((a, b) => a.fecha.compareTo(b.fecha));
-          final leche = registros.where((r) => r.tipo == 'Producción de Leche' && r.litrosPorDia != null).toList()
+          final leche = registros.where((r) => r.tipo == ProductionType.milk && r.litrosPorDia != null).toList()
             ..sort((a, b) => a.fecha.compareTo(b.fecha));
 
           // Calcular promedios y tendencias de pesaje
@@ -169,15 +170,15 @@ class ProductionTab extends StatelessWidget {
   Widget _buildHistorial(BuildContext context) {
     final isarService = RepositoryProvider.of<IsarService>(context);
     return FutureBuilder<List<RegistroProduccion>>(
-      future: isarService.obtenerProduccionPorAnimal(animal.id),
+      future: isarService.getProductionByAnimal(animal.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         final registros = snapshot.data ?? [];
-        final pesajes = registros.where((r) => r.tipo == 'Pesaje').toList()
+        final pesajes = registros.where((r) => r.tipo == ProductionType.weight).toList()
           ..sort((a, b) => b.fecha.compareTo(a.fecha));
-        final leche = registros.where((r) => r.tipo == 'Producción de Leche').toList()
+        final leche = registros.where((r) => r.tipo == ProductionType.milk).toList()
           ..sort((a, b) => b.fecha.compareTo(a.fecha));
 
         return Column(

@@ -23,8 +23,7 @@ Future<void> main() async {
 
   // 2. Inicializar Isar (base de datos local)
   await IsarService.init();
-  await IsarService.poblarDatosIniciales();
-  await IsarService.ejecutarMigraciones();
+  await IsarService.seedInitialData();
 
   // 3. Crear servicios
   final authService = AuthService();

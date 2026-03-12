@@ -575,7 +575,7 @@ class _EventDetailsSheet extends StatelessWidget {
   Future<void> _performDelete(BuildContext sheetContext) async {
     try {
       final isarService = RepositoryProvider.of<IsarService>(parentContext);
-      await isarService.eliminarEventoSanitario(evento.id);
+      await isarService.deleteHealthEvent(evento.id);
 
       if (sheetContext.mounted) {
         Navigator.pop(sheetContext); // Cerrar bottom sheet

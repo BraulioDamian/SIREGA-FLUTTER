@@ -50,7 +50,7 @@ class CattleListBloc extends Bloc<CattleListEvent, CattleListState> {
   Future<void> _onLoadCattle(LoadCattle event, Emitter<CattleListState> emit) async {
     emit(state.copyWith(loading: true, error: null));
     try {
-      final allAnimals = await isarService.obtenerTodosLosAnimales();
+      final allAnimals = await isarService.getAllAnimals();
       final activeAnimals = allAnimals.where((a) => a.estado == EstadoAnimal.activo).toList();
       final historicalAnimals = allAnimals.where((a) => a.estado != EstadoAnimal.activo).toList();
 
@@ -62,7 +62,7 @@ class CattleListBloc extends Bloc<CattleListEvent, CattleListState> {
 
   Future<void> _onAddCattle(AddCattle event, Emitter<CattleListState> emit) async {
     try {
-      await isarService.guardarAnimal(event.animal);
+      await isarService.saveAnimal(event.animal);
       // Recargar la lista después de agregar
       add(LoadCattle());
     } catch (e) {

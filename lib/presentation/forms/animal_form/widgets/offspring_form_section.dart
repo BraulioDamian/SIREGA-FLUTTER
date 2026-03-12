@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sirega_app/nucleo/modelos/enums.dart';
+import 'package:sirega_app/nucleo/modelos/form_dtos.dart';
 import '../controllers/animal_form_controller.dart';
 
 /// Sección del formulario para registrar partos y crías
@@ -20,10 +21,10 @@ class OffspringFormSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Lista de partos/crías
-                    if (controller.registrosPartos.isEmpty)
+                    if (controller.birthRecords.isEmpty)
                       _buildEmptyState(isMobile)
                     else
-                      ...controller.registrosPartos.asMap().entries.map((entry) {
+                      ...controller.birthRecords.asMap().entries.map((entry) {
                         final index = entry.key;
                         final parto = entry.value;
                         return _buildOffspringCard(
@@ -92,15 +93,15 @@ class OffspringFormSection extends StatelessWidget {
   Widget _buildOffspringCard(
     BuildContext context,
     AnimalFormController controller,
-    Map<String, dynamic> parto,
+    BirthRecord parto,
     int index,
     bool isMobile,
   ) {
-    final idCria = parto['idCria'] as String?;
-    final fecha = parto['fecha'] as DateTime;
-    final sexoCria = parto['sexoCria'] as Sexo?;
-    final pesoKg = parto['pesoKg'] as double?;
-    final notas = parto['notas'] as String?;
+    final idCria = parto.offspringId;
+    final fecha = parto.date;
+    final sexoCria = parto.offspringSex;
+    final pesoKg = parto.weightKg;
+    final notas = parto.notes;
 
     final color = sexoCria == Sexo.macho ? Colors.blue : Colors.pink;
     final icon = sexoCria == Sexo.macho ? Icons.male : Icons.female;
@@ -199,7 +200,7 @@ class OffspringFormSection extends StatelessWidget {
             // Botón eliminar
             IconButton(
               icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
-              onPressed: () => controller.eliminarRegistroParto(index),
+              onPressed: () => controller.removeBirthRecord(index),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -327,17 +328,17 @@ class OffspringFormSection extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                controller.agregarRegistroParto({
-                  'idCria': idCriaController.text.trim().isEmpty
+                controller.addBirthRecord(BirthRecord(
+                  date: fechaSeleccionada,
+                  offspringId: idCriaController.text.trim().isEmpty
                       ? null
                       : idCriaController.text.trim(),
-                  'fecha': fechaSeleccionada,
-                  'sexoCria': sexoSeleccionado,
-                  'pesoKg': double.tryParse(pesoController.text.trim()),
-                  'notas': notasController.text.trim().isEmpty
+                  offspringSex: sexoSeleccionado,
+                  weightKg: double.tryParse(pesoController.text.trim()),
+                  notes: notasController.text.trim().isEmpty
                       ? null
                       : notasController.text.trim(),
-                });
+                ));
 
                 Navigator.pop(context);
               },

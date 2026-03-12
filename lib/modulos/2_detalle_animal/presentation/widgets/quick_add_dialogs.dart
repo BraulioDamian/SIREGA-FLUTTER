@@ -37,7 +37,7 @@ class QuickAddDialogs {
               return;
             }
             final registro = RegistroProduccion()
-              ..tipo = 'Pesaje'
+              ..tipo = ProductionType.weight
               ..fecha = fechaSeleccionada
               ..pesoKg = peso
               ..notas = notasController.text.trim().isEmpty
@@ -45,12 +45,12 @@ class QuickAddDialogs {
                   : notasController.text.trim();
 
             final isarService = RepositoryProvider.of<IsarService>(ctx);
-            await isarService.guardarRegistroProduccion(registro, animal);
+            await isarService.saveProductionRecord(registro, animal);
 
             // Actualizar peso actual en el animal
             animal.pesoActual = peso;
             animal.fechaUltimoPesaje = fechaSeleccionada;
-            await isarService.guardarAnimal(animal);
+            await isarService.saveAnimal(animal);
 
             if (ctx.mounted) Navigator.pop(ctx);
             if (context.mounted) {
@@ -111,7 +111,7 @@ class QuickAddDialogs {
               return;
             }
             final registro = RegistroProduccion()
-              ..tipo = 'Producción de Leche'
+              ..tipo = ProductionType.milk
               ..fecha = fechaSeleccionada
               ..litrosPorDia = litros
               ..notas = notasController.text.trim().isEmpty
@@ -119,7 +119,7 @@ class QuickAddDialogs {
                   : notasController.text.trim();
 
             final isarService = RepositoryProvider.of<IsarService>(ctx);
-            await isarService.guardarRegistroProduccion(registro, animal);
+            await isarService.saveProductionRecord(registro, animal);
 
             if (ctx.mounted) Navigator.pop(ctx);
             if (context.mounted) {
@@ -218,25 +218,26 @@ class QuickAddDialogs {
                       }
                     });
 
-                    // 2. Crear registro de producción (parto) en la madre
+                    // 2. Crear registro de produccion (parto) en la madre
                     final registro = RegistroProduccion()
-                      ..tipo = 'Parto'
+                      ..tipo = ProductionType.birth
                       ..fecha = fechaSeleccionada
                       ..idCria = cria.id.toString()
                       ..pesoKg = pesoNac
-                      ..notas =
-                          'Sexo: ${sexoSeleccionado == Sexo.macho ? "Macho" : "Hembra"}. '
-                          'Nombre: $nombre'
-                          '${notasController.text.trim().isNotEmpty ? ". ${notasController.text.trim()}" : ""}';
+                      ..sexoCria = sexoSeleccionado
+                      ..notas = [
+                          'Nombre: $nombre',
+                          if (notasController.text.trim().isNotEmpty) notasController.text.trim(),
+                        ].join('. ');
 
-                    await isarService.guardarRegistroProduccion(
+                    await isarService.saveProductionRecord(
                         registro, animal);
 
                     // 3. Actualizar estadísticas de la madre
                     animal.numeroPartos += 1;
                     animal.numeroCrias += 1;
                     animal.fechaUltimoParto = fechaSeleccionada;
-                    await isarService.guardarAnimal(animal);
+                    await isarService.saveAnimal(animal);
 
                     if (ctx.mounted) Navigator.pop(ctx);
                     if (context.mounted) {
